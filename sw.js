@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ingilizce-pratik-v1';
+const CACHE_NAME = 'ingilizce-pratik-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -34,3 +34,4 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
+
