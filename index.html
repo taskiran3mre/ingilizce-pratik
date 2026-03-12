@@ -186,13 +186,16 @@
                 <div class="text-right text-sm"><span class="text-green-400 font-bold" id="scoreCorrect">0</span><span
                         class="text-gray-500 mx-1">/</span><span class="text-red-400 font-bold" id="scoreWrong">0</span>
                 </div>
+                <button id="langToggle" onclick="switchLang()"
+                    class="px-2 py-1 rounded-lg text-xs font-bold transition hover:opacity-80"
+                    style="border:1px solid #2a2a2a">ES</button>
                 <button onclick="openSettings()"
                     class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-gray-400 hover:text-white">⚙️</button>
             </div>
         </div>
         <!-- Progress -->
         <div class="mb-4">
-            <div class="flex justify-between text-xs text-gray-500 mb-1"><span>Oturum</span><span
+            <div class="flex justify-between text-xs text-gray-500 mb-1"><span id="sessionLabel">Oturum</span><span
                     id="progressText">0/0</span></div>
             <div class="rounded-full h-1.5" style="background:#1a1a1a">
                 <div id="progressBar" class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:0%">
@@ -204,7 +207,7 @@
         <!-- Practice -->
         <div id="practiceScreen">
             <div class="flex items-center justify-between mb-4 px-1" id="directionToggle">
-                <span class="text-xs text-gray-500">Çeviri Yönü:</span>
+                <span class="text-xs text-gray-500" id="dirText">Çeviri Yönü:</span>
                 <button onclick="toggleDirection()" id="dirToggleBtn"
                     class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
                     style="background:#1a1a1a;border:1px solid #2a2a2a;color:#e5e5e5">
@@ -229,7 +232,7 @@
             <div id="feedbackBox" class="hidden rounded-2xl p-4 mb-4 fade-in">
                 <p id="feedbackText" class="font-semibold text-base mb-2"></p>
                 <div id="correctAnswerBox" class="hidden mb-3">
-                    <p class="text-xs text-gray-400 mb-1">Doğru cevap:</p>
+                    <p class="text-xs text-gray-400 mb-1" id="correctAnswerLabel">Doğru cevap:</p>
                     <p class="font-medium" id="correctAnswerText"></p>
                 </div>
                 <div id="apiFeedback" class="hidden text-sm space-y-1.5 mt-3 pt-3"
@@ -238,21 +241,26 @@
                     <p id="apiTopic" class="text-gray-400"></p>
                     <p id="apiHint" class="text-gray-300"></p>
                 </div>
-                <div id="apiLoading" class="hidden text-sm text-gray-500 animate-pulse mt-2">🤖 Analiz ediliyor...</div>
+                <div id="apiLoading" class="hidden text-sm text-gray-500 animate-pulse mt-2">🤖 Analizando...</div>
                 <!-- AI Extras after correct/wrong -->
                 <div id="aiExtras" class="hidden mt-3 pt-3 space-y-2"
                     style="border-top:1px solid rgba(255,255,255,0.08)">
                     <button onclick="askTeachMe()" id="teachMeBtn"
                         class="hidden w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition"
-                        style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd">📖 Bu konuyu bana
-                        öğret</button>
+                        style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd"><span id="teachMeLabel">📖 Bu konuyu bana öğret</span></button>
                     <button onclick="askVariations()" id="variationsBtn"
                         class="hidden w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition"
-                        style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd">🔄 Bu cümleyi başka nasıl
-                        kurarım?</button>
+                        style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd"><span id="variationsLabel">🔄 Bu cümleyi başka nasıl kurarım?</span></button>
                 </div>
                 <div id="aiTeachBox" class="hidden ai-box mt-3 text-sm text-gray-300 leading-relaxed"></div>
                 <div id="aiVariationsBox" class="hidden ai-box mt-3 text-sm text-gray-300 leading-relaxed"></div>
+            </div>
+            <div id="softCheckBox" class="hidden rounded-2xl p-4 mb-4 fade-in"
+                style="background:#2a1f0a;border:1px solid #d97706">
+                <p class="font-semibold text-amber-400 text-base mb-2" id="softTitle">🌟 Neredeyse kusursuz!</p>
+                <p id="softCheckText" class="text-amber-200 text-sm mb-3"></p>
+                <button onclick="retrySoft()" class="w-full py-2.5 rounded-xl font-semibold text-sm" id="softRetryBtn"
+                    style="background:#d97706;color:white">🔄 Tekrar Dene</button>
             </div>
             <div class="mb-4"><input type="text" id="answerInput" placeholder="İngilizce çevirinizi yazın..."
                     class="w-full rounded-xl px-4 py-4 text-base font-medium transition-all"
@@ -261,27 +269,27 @@
             <div class="flex gap-3 mb-3" id="mainButtons">
                 <button onclick="checkAnswer()" id="checkBtn"
                     class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
-                    style="background:#3B82F6;color:white">Kontrol Et</button>
+                    style="background:#3B82F6;color:white"><span id="checkBtnLabel">Kontrol Et</span></button>
                 <button onclick="getHint()" id="hintBtn"
                     class="px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-gray-700"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">💡 İpucu</button>
+                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span id="hintBtnLabel">💡 İpucu</span></button>
                 <button onclick="skipQuestion()" id="skipBtn"
                     class="px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-gray-700"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">Atla</button>
+                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span id="skipBtnLabel">Atla</span></button>
             </div>
             <div class="flex gap-3 mb-3">
                 <button onclick="generateAISentence()" id="aiGenBtn"
                     class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-                    style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa">🤖 AI ile Yeni Cümle</button>
+                    style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa"><span id="aiGenLabel">🤖 AI ile Yeni Cümle</span></button>
                 <button onclick="practiceWeakPoint()" id="weakBtn"
                     class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-                    style="background:#1a0f0f;border:1px solid #5f1e1e;color:#f87171">🎯 Zayıf Noktam</button>
+                    style="background:#1a0f0f;border:1px solid #5f1e1e;color:#f87171"><span id="weakBtnLabel">🎯 Zayıf Noktam</span></button>
             </div>
             <div id="wrongButtons" class="hidden flex gap-3">
                 <button onclick="retryQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5">Tekrar Dene</button>
+                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5" id="retryBtn">Tekrar Dene</button>
                 <button onclick="nextQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm"
-                    style="background:#3B82F6;color:white">Sonraki →</button>
+                    style="background:#3B82F6;color:white" id="nextBtn">Sonraki →</button>
             </div>
             <div id="hintBox" class="hidden rounded-xl p-3 mt-2 text-sm"
                 style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span
@@ -290,7 +298,7 @@
         <!-- Review -->
         <div id="reviewScreen" class="hidden">
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
-                <h2 class="text-lg font-bold mb-1">⏰ Tekrar Zamanı</h2>
+                <h2 class="text-lg font-bold mb-1" id="reviewTitle">⏰ Tekrar Zamanı</h2>
                 <p class="text-sm text-gray-500" id="reviewCount"></p>
             </div>
             <div id="reviewModeArea"></div>
@@ -299,32 +307,32 @@
         <div id="statsScreen" class="hidden fade-in">
             <div class="grid grid-cols-2 gap-3 mb-5">
                 <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1">Toplam Soru</p>
+                    <p class="text-xs text-gray-500 mb-1" id="statTotalLabel">Toplam Soru</p>
                     <p class="text-2xl font-bold" id="statTotal">0</p>
                 </div>
                 <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1">Doğruluk</p>
+                    <p class="text-xs text-gray-500 mb-1" id="statAccLabel">Doğruluk</p>
                     <p class="text-2xl font-bold text-green-400" id="statAccuracy">0%</p>
                 </div>
                 <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1">Öğrenildi</p>
+                    <p class="text-xs text-gray-500 mb-1" id="statLearnedLabel">Öğrenildi</p>
                     <p class="text-2xl font-bold" id="statLearned">0</p>
                 </div>
                 <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1">Günlük Seri</p>
+                    <p class="text-xs text-gray-500 mb-1" id="statStreakLabel">Günlük Seri</p>
                     <p class="text-2xl font-bold text-orange-400" id="statStreak">🔥 0</p>
                 </div>
             </div>
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
-                <h3 class="font-bold mb-4">Konu Bazında Performans</h3>
+                <h3 class="font-bold mb-4" id="topicPerfLabel">Konu Bazında Performans</h3>
                 <div id="topicStats" class="space-y-3"></div>
             </div>
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
-                <h3 class="font-bold mb-1">⚠️ Zayıf Alan Raporu</h3>
-                <p class="text-xs text-gray-500 mb-4">En çok hata yaptığın konular</p>
+                <h3 class="font-bold mb-1" id="weakReportLabel">⚠️ Zayıf Alan Raporu</h3>
+                <p class="text-xs text-gray-500 mb-4" id="weakReportDesc">En çok hata yaptığın konular</p>
                 <div id="weakAreas" class="space-y-3"></div>
             </div>
-            <button onclick="confirmReset()"
+            <button onclick="confirmReset()" id="resetBtn"
                 class="w-full py-3 rounded-xl text-sm font-medium transition-all hover:bg-red-900"
                 style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f87171">🗑️ Tüm Veriyi Sıfırla</button>
         </div>
@@ -332,10 +340,10 @@
         <div id="verbScreen" class="hidden fade-in">
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
                 <div class="flex justify-between items-center mb-1">
-                    <h2 class="text-lg font-bold">📝 Düzensiz Fiiller</h2><span class="text-xs px-2 py-1 rounded-full"
+                    <h2 class="text-lg font-bold" id="verbTitle">📝 Düzensiz Fiiller</h2><span class="text-xs px-2 py-1 rounded-full"
                         style="background:#1a1a1a;color:#aaa" id="verbProgress">0/50</span>
                 </div>
-                <p class="text-sm text-gray-500">Günde 5 fiil, her gün tekrarla</p>
+                <p class="text-sm text-gray-500" id="verbSubtitle">Günde 5 fiil, her gün tekrarla</p>
             </div>
             <div id="verbDailyArea"></div>
         </div>
@@ -343,20 +351,46 @@
     <!-- Settings -->
     <div id="settingsOverlay" class="hidden fixed inset-0 z-50 flex items-end justify-end p-4"
         style="background:rgba(0,0,0,0.6)" onclick="if(event.target===this)closeSettings()">
-        <div class="settings-panel rounded-2xl p-5 w-full max-w-sm" style="background:#161616;border:1px solid #2a2a2a">
+        <div class="settings-panel rounded-2xl p-5 w-full max-w-sm"
+            style="background:#161616;border:1px solid #2a2a2a;max-height:90vh;overflow-y:auto">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-base">⚙️ Ayarlar</h3><button onclick="closeSettings()"
                     class="text-gray-500 hover:text-white">✕</button>
             </div>
-            <label class="block text-sm text-gray-400 mb-2">Gemini API Key</label>
-            <input type="password" id="apiKeyInput" placeholder="AIza..."
-                class="w-full rounded-xl px-3 py-2.5 text-sm mb-3"
-                style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-            <button onclick="saveApiKey()" class="w-full py-2.5 rounded-xl font-semibold text-sm"
+            <div class="rounded-xl p-3 mb-3" style="background:#0a1628;border:1px solid #1e3a5f">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-bold text-orange-400">⚡ Groq</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-400">1. Öncelik</span>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">Ultra hızlı • 14.400 istek/gün • Ücretsiz</p>
+                <input type="password" id="groqKeyInput" placeholder="gsk_..."
+                    class="w-full rounded-lg px-3 py-2 text-sm mb-2"
+                    style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <p class="text-xs text-gray-600">
+                    <a href="https://console.groq.com/keys" target="_blank" class="text-orange-400 underline">🔑 Key al
+                        (Groq)</a>
+                    • Kaydol → API Keys → Create
+                </p>
+            </div>
+            <div class="rounded-xl p-3 mb-3" style="background:#0a1a28;border:1px solid #1a3a4f">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-bold text-blue-400">🧠 Gemini</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-400">2. Yedek</span>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">Gemini 2.5 Flash • 500 istek/gün • Ücretsiz</p>
+                <input type="password" id="apiKeyInput" placeholder="AIza..."
+                    class="w-full rounded-lg px-3 py-2 text-sm mb-2"
+                    style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <p class="text-xs text-gray-600">
+                    <a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline">🔑 Key
+                        al (Gemini)</a>
+                    • Google hesabıyla giriş → Get API Key
+                </p>
+            </div>
+            <button onclick="saveApiKeys()" class="w-full py-2.5 rounded-xl font-semibold text-sm mb-2"
                 style="background:#3B82F6;color:white">Kaydet</button>
-            <p class="text-xs text-gray-600 mt-3 text-center">Ücretsiz: 1500 istek/gün • <a
-                    href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline">Key al</a>
-            </p>
+            <p class="text-xs text-gray-600 text-center">En az bir key girin. İkisini girerseniz Groq önce denenir,
+                başarısız olursa Gemini devralır.</p>
         </div>
     </div>
     <!-- Reset Modal -->
@@ -444,8 +478,7 @@
             { id: 67, topic: "Duygular & Fikirler", level: "B1", turkish: "Bence bu fikir çok mantıklı.", english: "I think this idea is very logical.", keywords: [{ tr: "fikir", en: "idea" }, { tr: "mantıklı", en: "logical" }] },
         ];
         const TOPICS = [...new Set(SENTENCES.map(s => s.topic))];
-        const TABS = ['all', ...TOPICS, 'review', 'stats', 'verbs'];
-        const TAB_LABELS = { all: 'Tümü', review: '⏰ Tekrar', stats: '📊 İstatistik', verbs: '📝 Fiiller' };
+        function getTabLabels() { return { all: t('tabAll'), review: t('tabReview'), stats: t('tabStats'), verbs: t('tabVerbs') }; }
 
         const VERBS = [
             { v1: "go", v2: "went", v3: "gone", tr: "gitmek", tr2: "gitti", tr3: "gitmiş" },
@@ -500,15 +533,146 @@
             { v1: "teach", v2: "taught", v3: "taught", tr: "öğretmek", tr2: "öğretti", tr3: "öğretmiş" },
         ];
 
+        // === SPANISH DATA ===
+        const SENTENCES_ES = [
+            { id: 1, topic: "Vida Diaria", level: "A1", spanish: "Tomo una ducha antes de desayunar cada mañana.", english: "I take a shower before having breakfast every morning.", keywords: [{ es: "desayunar", en: "breakfast" }, { es: "ducha", en: "shower" }] },
+            { id: 2, topic: "Vida Diaria", level: "A1", spanish: "Por las noches, generalmente leo un libro.", english: "I usually read a book in the evenings.", keywords: [{ es: "libro", en: "book" }, { es: "noche", en: "evening" }] },
+            { id: 3, topic: "Vida Diaria", level: "A2", spanish: "Necesito limpiar la cocina pero estoy muy cansado.", english: "I need to clean the kitchen but I am very tired.", keywords: [{ es: "cocina", en: "kitchen" }, { es: "limpiar", en: "to clean" }] },
+            { id: 4, topic: "Vida Diaria", level: "A2", spanish: "Paseo a mi perro en el parque todos los días.", english: "I walk my dog in the park every day.", keywords: [{ es: "parque", en: "park" }, { es: "pasear", en: "to walk" }] },
+            { id: 5, topic: "Vida Diaria", level: "B1", spanish: "Los fines de semana prefiero reunirme con mis amigos.", english: "I prefer to meet with my friends on weekends.", keywords: [{ es: "preferir", en: "to prefer" }, { es: "fin de semana", en: "weekend" }] },
+            { id: 6, topic: "Vida Diaria", level: "B1", spanish: "Anoche trabajé hasta muy tarde.", english: "I worked until late last night.", keywords: [{ es: "tarde", en: "late" }, { es: "anoche", en: "last night" }] },
+            { id: 7, topic: "Vida Diaria", level: "B2", spanish: "Quiero cambiar mis hábitos pero se está poniendo difícil.", english: "I want to change my habits but it is getting difficult.", keywords: [{ es: "hábito", en: "habit" }, { es: "cambiar", en: "to change" }] },
+            { id: 8, topic: "Vida Diaria", level: "A1", spanish: "No me gusta despertarme temprano por las mañanas.", english: "I do not like waking up early in the mornings.", keywords: [{ es: "temprano", en: "early" }, { es: "despertarse", en: "to wake up" }] },
+            { id: 9, topic: "Viajes", level: "A1", spanish: "¿Puede mostrarme el hotel más cercano, por favor?", english: "Can you show me the nearest hotel please?", keywords: [{ es: "hotel", en: "hotel" }, { es: "cercano", en: "nearest" }] },
+            { id: 10, topic: "Viajes", level: "A2", spanish: "¿Cuántas horas durará este vuelo?", english: "How many hours will this flight take?", keywords: [{ es: "vuelo", en: "flight" }, { es: "durar", en: "to take" }] },
+            { id: 11, topic: "Viajes", level: "A2", spanish: "Necesito cambiar mi reservación.", english: "I need to change my reservation.", keywords: [{ es: "reservación", en: "reservation" }, { es: "cambiar", en: "to change" }] },
+            { id: 12, topic: "Viajes", level: "B1", spanish: "He visitado muchos países pero Japón es mi favorito.", english: "I have visited many countries but Japan is my favorite.", keywords: [{ es: "visitar", en: "to visit" }, { es: "país", en: "country" }] },
+            { id: 13, topic: "Viajes", level: "B1", spanish: "El tren sale a las ocho de la mañana.", english: "The train departs at eight in the morning.", keywords: [{ es: "tren", en: "train" }, { es: "salir", en: "to depart" }] },
+            { id: 14, topic: "Viajes", level: "B2", spanish: "Me perdí porque no tenía un mapa.", english: "I got lost because I did not have a map.", keywords: [{ es: "perderse", en: "to get lost" }, { es: "mapa", en: "map" }] },
+            { id: 15, topic: "Trabajo", level: "A2", spanish: "Tengo una reunión importante mañana por la mañana.", english: "I have an important meeting tomorrow morning.", keywords: [{ es: "reunión", en: "meeting" }, { es: "importante", en: "important" }] },
+            { id: 16, topic: "Trabajo", level: "B1", spanish: "He aprendido mucho desde que me uní a la empresa.", english: "I have learned a lot since I joined the company.", keywords: [{ es: "empresa", en: "company" }, { es: "unirse", en: "to join" }] },
+            { id: 17, topic: "Trabajo", level: "B1", spanish: "Necesitamos entregar este proyecto a tiempo.", english: "We need to deliver this project on time.", keywords: [{ es: "proyecto", en: "project" }, { es: "entregar", en: "to deliver" }] },
+            { id: 18, topic: "Trabajo", level: "A2", spanish: "Mi salario se paga al final de cada mes.", english: "My salary is paid at the end of every month.", keywords: [{ es: "salario", en: "salary" }] },
+            { id: 19, topic: "Trabajo", level: "B1", spanish: "Mi jefe me pidió que preparara un informe.", english: "My boss asked me to prepare a report.", keywords: [{ es: "jefe", en: "boss" }, { es: "informe", en: "report" }] },
+            { id: 20, topic: "Trabajo", level: "A2", spanish: "Voy a la oficina en autobús todos los días.", english: "I go to the office by bus every day.", keywords: [{ es: "oficina", en: "office" }, { es: "autobús", en: "bus" }] },
+            { id: 21, topic: "Salud", level: "A1", spanish: "Me duele mucho la cabeza, necesito una aspirina.", english: "My head hurts a lot, I need aspirin.", keywords: [{ es: "dolor de cabeza", en: "headache" }, { es: "necesitar", en: "need" }] },
+            { id: 22, topic: "Salud", level: "A2", spanish: "Necesito hacer una cita con el doctor.", english: "I need to make an appointment with the doctor.", keywords: [{ es: "doctor", en: "doctor" }, { es: "cita", en: "appointment" }] },
+            { id: 23, topic: "Salud", level: "B1", spanish: "El ejercicio regular tiene muchos beneficios para la salud.", english: "Regular exercise has many benefits for health.", keywords: [{ es: "ejercicio", en: "exercise" }, { es: "regular", en: "regular" }] },
+            { id: 24, topic: "Salud", level: "B1", spanish: "El estrés puede debilitar el sistema inmunológico.", english: "Stress can weaken the immune system.", keywords: [{ es: "estrés", en: "stress" }, { es: "sistema inmunológico", en: "immune system" }] },
+            { id: 25, topic: "Salud", level: "A1", spanish: "Me duele mucho el brazo, me caí.", english: "My arm hurts a lot, I fell.", keywords: [{ es: "brazo", en: "arm" }, { es: "caer", en: "to fall" }] },
+            { id: 26, topic: "Salud", level: "A2", spanish: "Debes beber al menos dos litros de agua cada día.", english: "You should drink at least two liters of water every day.", keywords: [{ es: "agua", en: "water" }, { es: "beber", en: "to drink" }] },
+            { id: 27, topic: "Compras", level: "A1", spanish: "¿Cuánto cuesta esta camisa?", english: "How much is this shirt?", keywords: [{ es: "camisa", en: "shirt" }] },
+            { id: 28, topic: "Compras", level: "A2", spanish: "¿Tienen esto en una talla más grande?", english: "Do you have this in a larger size?", keywords: [{ es: "talla", en: "size" }, { es: "grande", en: "larger" }] },
+            { id: 29, topic: "Compras", level: "A2", spanish: "¿Cuál es su política de devolución?", english: "What is your return policy?", keywords: [{ es: "devolución", en: "return" }, { es: "política", en: "policy" }] },
+            { id: 30, topic: "Compras", level: "B1", spanish: "¿Puede aplicar un descuento para este producto?", english: "Can you apply a discount for this product?", keywords: [{ es: "descuento", en: "discount" }, { es: "producto", en: "product" }] },
+            { id: 31, topic: "Compras", level: "B1", spanish: "¿Puedo pagar con tarjeta de crédito?", english: "Can I pay with a credit card?", keywords: [{ es: "tarjeta de crédito", en: "credit card" }] },
+            { id: 32, topic: "Compras", level: "A1", spanish: "Quiero probarme estos zapatos.", english: "I want to try on these shoes.", keywords: [{ es: "zapatos", en: "shoes" }, { es: "probarse", en: "to try on" }] },
+            { id: 33, topic: "Tiempo y Fechas", level: "A1", spanish: "El clima está muy bonito hoy.", english: "The weather is very nice today.", keywords: [{ es: "clima", en: "weather" }, { es: "bonito", en: "nice" }] },
+            { id: 34, topic: "Tiempo y Fechas", level: "A2", spanish: "La reunión comenzará a las tres en punto.", english: "The meeting will start at three o'clock.", keywords: [{ es: "comenzar", en: "to start" }] },
+            { id: 35, topic: "Tiempo y Fechas", level: "A1", spanish: "¿Qué hora es? ¡Llegué tarde!", english: "What time is it? I am late!", keywords: [{ es: "llegar tarde", en: "to be late" }] },
+            { id: 36, topic: "Tiempo y Fechas", level: "A2", spanish: "Mi cumpleaños es el quince de marzo.", english: "My birthday is on March fifteenth.", keywords: [{ es: "cumpleaños", en: "birthday" }] },
+            { id: 37, topic: "Social y Tecnología", level: "A2", spanish: "Paso demasiado tiempo en las redes sociales cada día.", english: "I spend too much time on social media every day.", keywords: [{ es: "redes sociales", en: "social media" }, { es: "tiempo", en: "time" }] },
+            { id: 38, topic: "Social y Tecnología", level: "B1", spanish: "La batería de mi teléfono está a punto de agotarse.", english: "My phone is about to run out of battery.", keywords: [{ es: "batería", en: "battery" }, { es: "agotarse", en: "to run out" }] },
+            { id: 39, topic: "Social y Tecnología", level: "B1", spanish: "Descargué esta aplicación pero no sé cómo usarla.", english: "I downloaded this app but I do not know how to use it.", keywords: [{ es: "descargar", en: "to download" }, { es: "aplicación", en: "app" }] },
+            { id: 40, topic: "Social y Tecnología", level: "A2", spanish: "Te envié un mensaje, ¿lo viste?", english: "I sent you a message, did you see it?", keywords: [{ es: "mensaje", en: "message" }, { es: "ver", en: "to see" }] },
+            { id: 41, topic: "Comida", level: "A1", spanish: "¿Puedo ver el menú, por favor?", english: "Can I see the menu please?", keywords: [{ es: "menú", en: "menu" }] },
+            { id: 42, topic: "Comida", level: "A2", spanish: "No puedo comer comida picante.", english: "I cannot eat spicy food.", keywords: [{ es: "picante", en: "spicy" }, { es: "comida", en: "food" }] },
+            { id: 43, topic: "Comida", level: "B1", spanish: "¿Podemos pagar la cuenta por separado?", english: "Can we pay the bill separately?", keywords: [{ es: "cuenta", en: "bill" }, { es: "por separado", en: "separately" }] },
+            { id: 44, topic: "Comida", level: "A2", spanish: "¿Puedo tener un vaso de agua?", english: "Can I have a glass of water?", keywords: [{ es: "vaso", en: "glass" }, { es: "agua", en: "water" }] },
+            { id: 45, topic: "Sentimientos", level: "A2", spanish: "Estoy muy feliz hoy porque aprobé el examen.", english: "I am very happy today because I passed the exam.", keywords: [{ es: "feliz", en: "happy" }, { es: "examen", en: "exam" }] },
+            { id: 46, topic: "Sentimientos", level: "B1", spanish: "No estoy de acuerdo contigo en este asunto.", english: "I do not agree with you on this matter.", keywords: [{ es: "estar de acuerdo", en: "to agree" }, { es: "asunto", en: "matter" }] },
+            { id: 47, topic: "Sentimientos", level: "A1", spanish: "Lo siento mucho, llegué tarde.", english: "I am very sorry, I am late.", keywords: [{ es: "lo siento", en: "sorry" }] },
+            { id: 48, topic: "Sentimientos", level: "B1", spanish: "Creo que esta idea es muy lógica.", english: "I think this idea is very logical.", keywords: [{ es: "idea", en: "idea" }, { es: "lógico", en: "logical" }] },
+            { id: 49, topic: "Vida Diaria", level: "B1", spanish: "La semana pasada compré un teléfono nuevo.", english: "I bought a new phone last week.", keywords: [{ es: "comprar", en: "to buy" }, { es: "semana pasada", en: "last week" }] },
+            { id: 50, topic: "Viajes", level: "B2", spanish: "Me gustaría hacer una excursión por la ciudad.", english: "I would like to take a tour around the city.", keywords: [{ es: "excursión", en: "tour" }, { es: "ciudad", en: "city" }] },
+        ];
+        const TOPICS_ES = [...new Set(SENTENCES_ES.map(s => s.topic))];
+        const VERBS_ES = [
+            { v1: "go", v2: "went", v3: "gone", es: "ir", es2: "fue", es3: "ido" },
+            { v1: "come", v2: "came", v3: "come", es: "venir", es2: "vino", es3: "venido" },
+            { v1: "take", v2: "took", v3: "taken", es: "tomar", es2: "tomó", es3: "tomado" },
+            { v1: "make", v2: "made", v3: "made", es: "hacer", es2: "hizo", es3: "hecho" },
+            { v1: "see", v2: "saw", v3: "seen", es: "ver", es2: "vio", es3: "visto" },
+            { v1: "know", v2: "knew", v3: "known", es: "saber", es2: "supo", es3: "sabido" },
+            { v1: "get", v2: "got", v3: "gotten", es: "obtener", es2: "obtuvo", es3: "obtenido" },
+            { v1: "give", v2: "gave", v3: "given", es: "dar", es2: "dio", es3: "dado" },
+            { v1: "find", v2: "found", v3: "found", es: "encontrar", es2: "encontró", es3: "encontrado" },
+            { v1: "think", v2: "thought", v3: "thought", es: "pensar", es2: "pensó", es3: "pensado" },
+            { v1: "tell", v2: "told", v3: "told", es: "decir", es2: "dijo", es3: "dicho" },
+            { v1: "become", v2: "became", v3: "become", es: "volverse", es2: "se volvió", es3: "vuelto" },
+            { v1: "leave", v2: "left", v3: "left", es: "salir", es2: "salió", es3: "salido" },
+            { v1: "feel", v2: "felt", v3: "felt", es: "sentir", es2: "sintió", es3: "sentido" },
+            { v1: "put", v2: "put", v3: "put", es: "poner", es2: "puso", es3: "puesto" },
+            { v1: "bring", v2: "brought", v3: "brought", es: "traer", es2: "trajo", es3: "traído" },
+            { v1: "begin", v2: "began", v3: "begun", es: "empezar", es2: "empezó", es3: "empezado" },
+            { v1: "keep", v2: "kept", v3: "kept", es: "mantener", es2: "mantuvo", es3: "mantenido" },
+            { v1: "write", v2: "wrote", v3: "written", es: "escribir", es2: "escribió", es3: "escrito" },
+            { v1: "speak", v2: "spoke", v3: "spoken", es: "hablar", es2: "habló", es3: "hablado" },
+            { v1: "read", v2: "read", v3: "read", es: "leer", es2: "leyó", es3: "leído" },
+            { v1: "run", v2: "ran", v3: "run", es: "correr", es2: "corrió", es3: "corrido" },
+            { v1: "eat", v2: "ate", v3: "eaten", es: "comer", es2: "comió", es3: "comido" },
+            { v1: "buy", v2: "bought", v3: "bought", es: "comprar", es2: "compró", es3: "comprado" },
+            { v1: "send", v2: "sent", v3: "sent", es: "enviar", es2: "envió", es3: "enviado" },
+            { v1: "fall", v2: "fell", v3: "fallen", es: "caer", es2: "cayó", es3: "caído" },
+            { v1: "build", v2: "built", v3: "built", es: "construir", es2: "construyó", es3: "construido" },
+            { v1: "understand", v2: "understood", v3: "understood", es: "entender", es2: "entendió", es3: "entendido" },
+            { v1: "break", v2: "broke", v3: "broken", es: "romper", es2: "rompió", es3: "roto" },
+            { v1: "drive", v2: "drove", v3: "driven", es: "conducir", es2: "condujo", es3: "conducido" },
+            { v1: "lose", v2: "lost", v3: "lost", es: "perder", es2: "perdió", es3: "perdido" },
+            { v1: "teach", v2: "taught", v3: "taught", es: "enseñar", es2: "enseñó", es3: "enseñado" },
+            { v1: "grow", v2: "grew", v3: "grown", es: "crecer", es2: "creció", es3: "crecido" },
+            { v1: "pay", v2: "paid", v3: "paid", es: "pagar", es2: "pagó", es3: "pagado" },
+            { v1: "choose", v2: "chose", v3: "chosen", es: "elegir", es2: "eligió", es3: "elegido" },
+            { v1: "wear", v2: "wore", v3: "worn", es: "llevar", es2: "llevó", es3: "llevado" },
+            { v1: "catch", v2: "caught", v3: "caught", es: "atrapar", es2: "atrapó", es3: "atrapado" },
+            { v1: "throw", v2: "threw", v3: "thrown", es: "lanzar", es2: "lanzó", es3: "lanzado" },
+            { v1: "sit", v2: "sat", v3: "sat", es: "sentarse", es2: "se sentó", es3: "sentado" },
+            { v1: "spend", v2: "spent", v3: "spent", es: "gastar", es2: "gastó", es3: "gastado" },
+            { v1: "cut", v2: "cut", v3: "cut", es: "cortar", es2: "cortó", es3: "cortado" },
+            { v1: "draw", v2: "drew", v3: "drawn", es: "dibujar", es2: "dibujó", es3: "dibujado" },
+            { v1: "hear", v2: "heard", v3: "heard", es: "oír", es2: "oyó", es3: "oído" },
+            { v1: "meet", v2: "met", v3: "met", es: "conocer", es2: "conoció", es3: "conocido" },
+            { v1: "stand", v2: "stood", v3: "stood", es: "estar de pie", es2: "estuvo de pie", es3: "estado de pie" },
+        ];
+
+        // === LANGUAGE SYSTEM ===
+        const UI = {
+            tr: { appTitle: '🇬🇧 İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → 🇬🇧', dirLabelRev: '🇬🇧 → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
+            es: { appTitle: '🇬🇧 Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: 'Todos', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → 🇬🇧', dirLabelRev: '🇬🇧 → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
+        };
+        function getCurSentences() { return S.lang === 'es' ? SENTENCES_ES : SENTENCES; }
+        function getCurVerbs() { return S.lang === 'es' ? VERBS_ES : VERBS; }
+        function getCurTopics() { return [...new Set(getCurSentences().map(s => s.topic))]; }
+        function t(key) { return UI[S.lang]?.[key] || UI.tr[key] || key; }
+        function getNative(q) { return q[t('nativeField')] || q.turkish || q.spanish || ''; }
+        function getKw(kw) { return kw[t('kwField')] || kw.tr || kw.es || ''; }
+        function getVerbNative(v, n) { const f = S.lang === 'es' ? 'es' : 'tr'; return n ? v[f + n] : v[f]; }
+        function srsKey() { return S.lang === 'es' ? 'srs_es' : 'srs'; }
+        function gsKey() { return S.lang === 'es' ? 'gstats_es' : 'gstats'; }
+        function verbSrsKey() { return S.lang === 'es' ? 'verb_srs_es' : 'verb_srs'; }
+
         // === STATE ===
-        let S = { tab: 'all', q: null, queue: [], done: 0, ok: 0, nok: 0, answered: false, rQueue: [], rIdx: 0, rSel: [], filterTag: null, aiQ: null, verbIdx: 0, verbList: [], dir: 'tr2en' };
+        let S = { tab: 'all', q: null, queue: [], done: 0, ok: 0, nok: 0, answered: false, rQueue: [], rIdx: 0, rSel: [], filterTag: null, aiQ: null, verbIdx: 0, verbList: [], dir: 'tr2en', lang: localStorage.getItem('app_lang') || 'tr' };
+        function switchLang() { S.lang = S.lang === 'tr' ? 'es' : 'tr'; localStorage.setItem('app_lang', S.lang); S.dir = 'tr2en'; updateLangUI(); renderTabs(); selectTab('all'); }
+        function updateLangUI() {
+            const btn = document.getElementById('langToggle'); btn.textContent = S.lang === 'tr' ? 'ES' : 'TR'; btn.style.background = S.lang === 'es' ? '#1e3a1a' : '#1a1a1a'; btn.style.color = S.lang === 'es' ? '#4ade80' : '#e5e5e5';
+            document.querySelector('#app .text-xl').textContent = t('appTitle');
+            document.getElementById('dirLabel').textContent = S.lang === 'es' ? 'ES → 🇬🇧' : '🇹🇷 → 🇬🇧';
+            const mapping = { sessionLabel: 'session', dirText: 'dirText', correctAnswerLabel: 'correctAnswer', teachMeLabel: 'teach', variationsLabel: 'variations', softTitle: 'softTitle', softRetryBtn: 'softRetry', checkBtnLabel: 'checkBtn', hintBtnLabel: 'hint', skipBtnLabel: 'skip', aiGenLabel: 'aiGen', weakBtnLabel: 'weakPoint', retryBtn: 'retry', nextBtn: 'next', reviewTitle: 'reviewTitle', statTotalLabel: 'statTotalLabel', statAccLabel: 'statAccLabel', statLearnedLabel: 'statLearnedLabel', statStreakLabel: 'statStreakLabel', topicPerfLabel: 'topicPerfLabel', weakReportLabel: 'weakReportLabel', weakReportDesc: 'weakReportDesc', resetBtn: 'resetBtn', verbTitle: 'verbTitle', verbSubtitle: 'verbSubtitle' };
+            Object.entries(mapping).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
+            const inp = document.getElementById('answerInput'); if (inp) inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');
+        }
         const today = () => new Date().toISOString().split('T')[0];
         const LS = { get: (k, d) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d)), set: (k, v) => localStorage.setItem(k, JSON.stringify(v)) };
-        const getSRS = id => { const d = LS.get('srs', {}); return d[id] || { id, correctStreak: 0, wrongCount: 0, easeFactor: 2.5, interval: 1, nextReview: today(), errorTags: [] }; };
-        const saveSRS = e => { const d = LS.get('srs', {}); d[e.id] = e; LS.set('srs', d); };
-        const getGS = () => LS.get('gstats', { totalCorrect: 0, totalWrong: 0, lastActiveDate: '', streak: 0 });
-        const saveGS = s => LS.set('gstats', s);
-        const getApiKey = () => { try { return localStorage.getItem('gemini_api_key') || ''; } catch { return ''; } };
+        const getSRS = id => { const d = LS.get(srsKey(), {}); return d[id] || { id, correctStreak: 0, wrongCount: 0, easeFactor: 2.5, interval: 1, nextReview: today(), errorTags: [] }; };
+        const saveSRS = e => { const d = LS.get(srsKey(), {}); d[e.id] = e; LS.set(srsKey(), d); };
+        const getGS = () => LS.get(gsKey(), { totalCorrect: 0, totalWrong: 0, lastActiveDate: '', streak: 0 });
+        const saveGS = s => LS.set(gsKey(), s);
+        const getGeminiKey = () => { try { return localStorage.getItem('gemini_api_key') || ''; } catch { return ''; } };
+        const getGroqKey = () => { try { return localStorage.getItem('groq_api_key') || ''; } catch { return ''; } };
+        const getApiKey = () => getGroqKey() || getGeminiKey();
+        const getVerbSRS = v1 => { const d = LS.get(verbSrsKey(), {}); return d[v1] || { v1, streak: 0, wrong: 0, learned: false, nextReview: today() }; };
+        const saveVerbSRS = e => { const d = LS.get(verbSrsKey(), {}); d[e.v1] = e; LS.set(verbSrsKey(), d); };
         const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } };
         const CONTRACTIONS = { "can't": "cannot", "won't": "will not", "don't": "do not", "doesn't": "does not", "didn't": "did not", "isn't": "is not", "aren't": "are not", "wasn't": "was not", "weren't": "were not", "hasn't": "has not", "haven't": "have not", "hadn't": "had not", "wouldn't": "would not", "shouldn't": "should not", "couldn't": "could not", "i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is", "it's": "it is", "we're": "we are", "they're": "they are", "i've": "i have", "you've": "you have", "we've": "we have", "they've": "they have", "i'll": "i will", "you'll": "you will", "he'll": "he will", "she'll": "she will", "we'll": "we will", "they'll": "they will", "i'd": "i would", "you'd": "you would", "he'd": "he would", "she'd": "she would", "we'd": "we would", "they'd": "they would", "that's": "that is", "there's": "there is", "here's": "here is", "what's": "what is", "who's": "who is", "let's": "let us" };
         function norm(s) { let t = s.toLowerCase().trim().replace(/[.,!?;:'"\u2018\u2019\u201c\u201d]+/g, '').replace(/\s+/g, ' '); Object.entries(CONTRACTIONS).forEach(([c, e]) => { t = t.replace(new RegExp('\\b' + c.replace("'", "['’]?") + '\\b', 'gi'), e); }); const REV = {}; Object.entries(CONTRACTIONS).forEach(([c, e]) => { REV[e] = c; }); Object.entries(REV).forEach(([e, c]) => { t = t.replace(new RegExp('\\b' + e + '\\b', 'gi'), e); }); return t; }
@@ -517,60 +681,133 @@
         function updateStreakUI() { const gs = getGS(); const b = document.getElementById('streakBadge'), c = document.getElementById('streakCount'); if (gs.streak > 0) { b.classList.remove('hidden'); c.textContent = gs.streak + ' gün'; } else b.classList.add('hidden'); }
         function updateGlobalStats(ok) { const gs = getGS(); ok ? gs.totalCorrect = (gs.totalCorrect || 0) + 1 : gs.totalWrong = (gs.totalWrong || 0) + 1; saveGS(gs); }
         // TABS
-        function renderTabs() { document.getElementById('tabContainer').innerHTML = TABS.map(t => `<button class="tab-btn flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all" data-tab="${t}" onclick="selectTab('${t}')">${TAB_LABELS[t] || t}</button>`).join(''); }
+        function renderTabs() { const topics = getCurTopics(); const tabs = ['all', ...topics, 'review', 'stats', 'verbs']; const labels = getTabLabels(); document.getElementById('tabContainer').innerHTML = tabs.map(tb => `<button class="tab-btn flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all" data-tab="${tb}" onclick="selectTab('${tb}')">${labels[tb] || tb}</button>`).join(''); }
         function selectTab(t) { S.tab = t; S.aiQ = null; document.querySelectorAll('.tab-btn').forEach(b => { const a = b.dataset.tab === t; b.style.background = a ? '#3B82F6' : '#161616'; b.style.color = a ? 'white' : '#9ca3af'; b.style.border = a ? 'none' : '1px solid #2a2a2a'; }); hideAll(); if (t === 'review') showReview(); else if (t === 'stats') showStats(); else if (t === 'verbs') showVerbs(); else buildQueue(t); }
         function hideAll() { ['practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
         function showScreen(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
-        function toggleDirection() { S.dir = S.dir === 'tr2en' ? 'en2tr' : 'tr2en'; document.getElementById('dirLabel').textContent = S.dir === 'tr2en' ? '🇹🇷 → 🇬🇧' : '🇬🇧 → 🇹🇷'; document.getElementById('dirToggleBtn').style.background = S.dir === 'en2tr' ? '#1e2a3a' : '#1a1a1a'; document.getElementById('dirToggleBtn').style.borderColor = S.dir === 'en2tr' ? '#3B82F6' : '#2a2a2a'; if (S.tab !== 'review' && S.tab !== 'stats' && S.tab !== 'verbs') buildQueue(S.tab); }
+        function toggleDirection() { S.dir = S.dir === 'tr2en' ? 'en2tr' : 'tr2en'; document.getElementById('dirLabel').textContent = S.dir === 'tr2en' ? t('dirLabel') : t('dirLabelRev'); document.getElementById('dirToggleBtn').style.background = S.dir === 'en2tr' ? '#1e2a3a' : '#1a1a1a'; document.getElementById('dirToggleBtn').style.borderColor = S.dir === 'en2tr' ? '#3B82F6' : '#2a2a2a'; if (S.tab !== 'review' && S.tab !== 'stats' && S.tab !== 'verbs') buildQueue(S.tab); }
         // QUEUE
-        function buildQueue(tab) { let pool = tab === 'all' ? [...SENTENCES] : SENTENCES.filter(s => s.topic === tab); if (S.filterTag) { pool = SENTENCES.filter(s => getSRS(s.id).errorTags.includes(S.filterTag)); S.filterTag = null; } const td = today(); const due = pool.filter(s => getSRS(s.id).nextReview <= td); const rest = pool.filter(s => getSRS(s.id).nextReview > td); shuffle(rest); S.queue = [...due, ...rest]; S.done = 0; S.ok = 0; S.nok = 0; showScreen('practiceScreen'); nextQuestion(); }
+        function buildQueue(tab) { const SS = getCurSentences(); let pool = tab === 'all' ? [...SS] : SS.filter(s => s.topic === tab); if (S.filterTag) { pool = SS.filter(s => getSRS(s.id).errorTags.includes(S.filterTag)); S.filterTag = null; } const td = today(); const due = pool.filter(s => getSRS(s.id).nextReview <= td); const rest = pool.filter(s => getSRS(s.id).nextReview > td); shuffle(rest); S.queue = [...due, ...rest]; S.done = 0; S.ok = 0; S.nok = 0; showScreen('practiceScreen'); nextQuestion(); }
         function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); document.getElementById('questionCard').innerHTML = '<p class="text-center text-gray-400 py-8">Tüm sorular tamamlandı! 🎉</p>';['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
-        function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? 'İngilizce çevirinizi yazın...' : 'Türkçe çevirinizi yazın...';['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
-        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = q.topic; document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const showText = isReverse ? q.english : q.turkish; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const rx = new RegExp(kw.tr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kw.tr}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = kws ? '' : '<span class="text-blue-400 text-xs">🇬🇧 → 🇹🇷 Bu cümleyi Türkçeye çevirin</span>'; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${k.tr}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
+        function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox', 'softCheckBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
+        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = q.topic; document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
         function showAIQuestion(q) { S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
-        function handleCorrect() { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = 'Tebrikler! 🎉'; fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
-        function handleWrong(input) { S.nok++; if (S.q.id) updateSRS(S.q.id, false); updateGlobalStats(false); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = 'Yanlış ❌'; fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; ft.style.color = '#f87171'; const correctText = S.dir === 'en2tr' ? S.q.turkish : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').textContent = correctText; document.getElementById('answerInput').style.borderColor = '#dc2626'; document.getElementById('wrongButtons').classList.remove('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').classList.add('shake'); setTimeout(() => document.getElementById('answerInput').classList.remove('shake'), 500); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.remove('hidden'); document.getElementById('variationsBtn').classList.add('hidden'); } updateProgress(); callGeminiError(S.q, input); }
-        function handleAccepted(input) { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = 'Kabul! ✅ <span class="text-sm text-gray-400 font-normal">Farklı ama doğru bir çeviri</span>'; fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? S.q.turkish : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = 'Senin: <span class="text-green-400">' + input + '</span><br>Referans: ' + refText; document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
-        async function checkAnswer() { if (S.answered || !S.q) return; const input = document.getElementById('answerInput').value; if (!input.trim()) return; S.answered = true; S.done++; const isReverse = S.dir === 'en2tr'; const correctText = isReverse ? S.q.turkish : S.q.english; const exactOk = norm(correctText) === norm(input); if (exactOk) { handleCorrect(); return; } if (getApiKey()) { const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = '🤖 Cevap değerlendiriliyor...'; fb.style.background = '#161616'; fb.style.border = '1px solid #333'; ft.style.color = '#9ca3af';['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); const srcLang = isReverse ? 'İngilizce' : 'Türkçe'; const tgtLang = isReverse ? 'Türkçe' : 'İngilizce'; const srcText = isReverse ? S.q.english : S.q.turkish; const prompt = `Sen dil öğretmenisin. ${srcLang} cümle: "${srcText}"\nReferans ${tgtLang} çeviri: "${correctText}"\nÖğrencinin yazdığı: "${input}"\nÖğrencinin cümlesi anlamca doğru mu? Gramer ve kelime kullanımı kabul edilebilir mi?\nYALNIZCA JSON döndür: {"acceptable":true/false,"reason":"Türkçe kısa açıklama"}`; const txt = await geminiCall(prompt); if (txt) { try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); if (j.acceptable) { handleAccepted(input); return; } } catch { } } fb.classList.add('hidden'); handleWrong(input); } else { handleWrong(input); } }
+        function handleCorrect() { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('correct'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
+        function handleWrong(input) { S.nok++; if (S.q.id) updateSRS(S.q.id, false); updateGlobalStats(false); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('wrong'); fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; ft.style.color = '#f87171'; const correctText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').textContent = correctText; document.getElementById('answerInput').style.borderColor = '#dc2626'; document.getElementById('wrongButtons').classList.remove('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').classList.add('shake'); setTimeout(() => document.getElementById('answerInput').classList.remove('shake'), 500); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.remove('hidden'); document.getElementById('variationsBtn').classList.add('hidden'); } updateProgress(); callGeminiError(S.q, input); }
+        function handleAccepted(input) { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = t('accepted'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = 'Senin: <span class="text-green-400">' + input + '</span><br>Referans: ' + refText; document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
+        // SOFT CHECK
+        const SMALL_WORDS = new Set(['in', 'on', 'at', 'to', 'for', 'a', 'an', 'the', 'is', 'are', 'am', 'do', 'does', 'did', 'was', 'were', 'has', 'have', 'had', 'will', 'would', 'can', 'could', 'should', 'shall', 'may', 'might', 'must', 'been', 'being', 'of', 'by', 'with', 'from', 'up', 'out', 'off', 'it', 'its', 'not', 'no', 'so', 'very', 'than', 'then', 'just', 'also', 'too', 'but', 'and', 'or', 'nor', 'yet', 'if']);
+        function softCheck(input, correct) {
+            const iw = input.toLowerCase().replace(/[.,!?;:'"]+/g, '').split(/\s+/).filter(Boolean);
+            const cw = correct.toLowerCase().replace(/[.,!?;:'"]+/g, '').split(/\s+/).filter(Boolean);
+            // Find missing words (in correct but not in input)
+            const missing = []; const extra = [];
+            let ci = 0, ii = 0;
+            const cUsed = new Array(cw.length).fill(false);
+            const iUsed = new Array(iw.length).fill(false);
+            // Simple LCS-based diff
+            for (let c = 0; c < cw.length; c++) {
+                for (let i = ii; i < iw.length; i++) {
+                    if (cw[c] === iw[i] && !iUsed[i]) { cUsed[c] = true; iUsed[i] = true; ii = i + 1; break; }
+                }
+            }
+            for (let c = 0; c < cw.length; c++) { if (!cUsed[c]) missing.push(cw[c]); }
+            for (let i = 0; i < iw.length; i++) { if (!iUsed[i]) extra.push(iw[i]); }
+            const totalDiff = missing.length + extra.length;
+            if (totalDiff === 0 || totalDiff > 2) return null;
+            const allSmall = [...missing, ...extra].every(w => SMALL_WORDS.has(w));
+            if (!allSmall) return null;
+            // Build hint
+            const wordTypes = { 'a': 'article', 'an': 'article', 'the': 'article', 'in': 'edat', 'on': 'edat', 'at': 'edat', 'to': 'edat', 'for': 'edat', 'of': 'edat', 'by': 'edat', 'with': 'edat', 'from': 'edat', 'up': 'edat', 'out': 'edat', 'off': 'edat', 'is': 'yardımcı fiil', 'are': 'yardımcı fiil', 'am': 'yardımcı fiil', 'do': 'yardımcı fiil', 'does': 'yardımcı fiil', 'did': 'yardımcı fiil', 'was': 'yardımcı fiil', 'were': 'yardımcı fiil', 'has': 'yardımcı fiil', 'have': 'yardımcı fiil', 'had': 'yardımcı fiil', 'will': 'yardımcı fiil', 'would': 'yardımcı fiil', 'can': 'yardımcı fiil', 'could': 'yardımcı fiil', 'should': 'yardımcı fiil', 'must': 'yardımcı fiil', 'not': 'olumsuzluk', 'been': 'fiil', 'being': 'fiil' };
+            let hint = '';
+            if (missing.length > 0) { hint += missing.map(w => `<strong>"${w}"</strong> (${wordTypes[w] || 'kelime'}) eksik olabilir`).join(' ve '); }
+            if (extra.length > 0) { if (hint) hint += '. Ayrıca '; hint += extra.map(w => `<strong>"${w}"</strong> (${wordTypes[w] || 'kelime'}) fazla olabilir`).join(' ve '); }
+            return hint + '.';
+        }
+        function retrySoft() { S.answered = false; S.done--; document.getElementById('softCheckBox').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#d97706'; document.getElementById('answerInput').focus();['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.remove('hidden')); }
+        async function checkAnswer() {
+            if (S.answered || !S.q) return; const input = document.getElementById('answerInput').value; if (!input.trim()) return; S.answered = true; S.done++; const isReverse = S.dir === 'en2tr'; const correctText = isReverse ? getNative(S.q) : S.q.english; const exactOk = norm(correctText) === norm(input); if (exactOk) { handleCorrect(); return; }
+            // Soft Check - detect 1-2 small word differences locally
+            const softHint = softCheck(input, correctText);
+            if (softHint) { ['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').style.borderColor = '#d97706'; const box = document.getElementById('softCheckBox'); box.classList.remove('hidden'); document.getElementById('softCheckText').innerHTML = 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊<br>' + softHint; return; }
+            if (getApiKey()) {
+                const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = '🤖 Değerlendiriliyor...'; fb.style.background = '#161616'; fb.style.border = '1px solid #333'; ft.style.color = '#9ca3af';['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); const prompt = `Referans:"${correctText}" Öğrenci:"${input}"
+Anlamca doğru mu? SADECE "EVET" veya "HAYIR" yaz.`; const txt = await geminiCall(prompt); if (txt && txt.trim().toUpperCase().includes('EVET')) { handleAccepted(input); return; } fb.classList.add('hidden'); handleWrong(input);
+            } else { handleWrong(input); }
+        }
         function retryQuestion() { S.answered = false; resetUI(); renderQuestion(S.q, !!S.aiQ); }
         function skipQuestion() { S.done++; S.aiQ = null; updateProgress(); nextQuestion(); }
-        function getHint() { if (!S.q) return; const isReverse = S.dir === 'en2tr'; const hintSource = isReverse ? S.q.turkish : S.q.english; const w = hintSource.split(' '), n = Math.max(1, Math.floor(w.length / 3)); document.getElementById('hintText').textContent = w.slice(0, n).join(' ') + '...'; document.getElementById('hintBox').classList.remove('hidden'); }
-        // GEMINI
+        function getHint() { if (!S.q) return; const isReverse = S.dir === 'en2tr'; const hintSource = isReverse ? getNative(S.q) : S.q.english; const w = hintSource.split(' '), n = Math.max(1, Math.floor(w.length / 3)); document.getElementById('hintText').textContent = w.slice(0, n).join(' ') + '...'; document.getElementById('hintBox').classList.remove('hidden'); }
+        // AI API (Groq first, Gemini fallback)
         let lastApiError = '';
-        async function geminiCall(prompt) { const key = getApiKey(); if (!key) { lastApiError = 'nokey'; return null; } lastApiError = ''; try { const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) }); if (!r.ok) { const errBody = await r.text(); console.error('Gemini API error:', r.status, errBody); if (r.status === 429) { lastApiError = 'quota'; } else if (r.status === 400 || r.status === 403) { lastApiError = 'key'; } else { lastApiError = 'http' + r.status; } return null; } const d = await r.json(); return d.candidates?.[0]?.content?.parts?.[0]?.text || null; } catch (e) { console.error('Gemini fetch error:', e); lastApiError = 'network'; return null; } }
-        async function callGeminiError(q, student) { document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!getApiKey()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const prompt = `Sen deneyimli bir İngilizce öğretmenisin.\nTürkçe cümle: "${q.turkish}"\nDoğru çeviri: "${q.english}"\nÖğrencinin yazdığı: "${student}"\nYALNIZCA geçerli JSON döndür:\n{"errorTag":"preposition|past_tense|present_perfect|article|word_order|vocabulary|spelling|other","errorLabel":"Türkçe kısa hata adı","topicExplanation":"2-3 cümle Türkçe açıklama veya boş string","hint":"Doğru cevabı verme, ipucu yaz"}`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>Hata:</strong> ${j.errorLabel}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (j.topicExplanation) { document.getElementById('apiTopic').innerHTML = `📖 ${j.topicExplanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>İpucu:</strong> ${j.hint}`; if (j.errorTag && q.id) { const e = getSRS(q.id); if (!e.errorTags.includes(j.errorTag)) { e.errorTags.push(j.errorTag); saveSRS(e); } } } catch { showApiErr(); } }
+        let lastApiTime = 0;
+        let lastApiProvider = '';
+        const API_THROTTLE = 3000;
+        async function callGroq(prompt) {
+            const key = getGroqKey(); if (!key) return null;
+            const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 512 }) });
+            if (!r.ok) { const e = await r.text(); console.error('Groq error:', r.status, e); if (r.status === 429) throw 'quota'; if (r.status === 401) throw 'key'; throw 'http' + r.status; }
+            const d = await r.json(); lastApiProvider = 'Groq'; return d.choices?.[0]?.message?.content || null;
+        }
+        async function callGemini(prompt) {
+            const key = getGeminiKey(); if (!key) return null;
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+            if (!r.ok) { const e = await r.text(); console.error('Gemini error:', r.status, e); if (r.status === 429) throw 'quota'; if (r.status === 400 || r.status === 403) throw 'key'; throw 'http' + r.status; }
+            const d = await r.json(); lastApiProvider = 'Gemini'; return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
+        }
+        async function geminiCall(prompt) {
+            if (!getApiKey()) { lastApiError = 'nokey'; return null; }
+            const now = Date.now(); const wait = API_THROTTLE - (now - lastApiTime); if (wait > 0) await new Promise(r => setTimeout(r, wait)); lastApiTime = Date.now(); lastApiError = '';
+            // Try Groq first, then Gemini
+            try { const r = await callGroq(prompt); if (r) return r; } catch (e) { console.log('Groq failed:', e); }
+            try { const r = await callGemini(prompt); if (r) return r; } catch (e) { console.log('Gemini failed:', e); lastApiError = e; }
+            if (!lastApiError) lastApiError = 'network'; return null;
+        }
+        async function callGeminiError(q, student) {
+            document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!getApiKey()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const prompt = `TR:"${q.turkish}" EN:"${q.english}" Öğrenci:"${student}"
+Hata Türü: [preposition|past_tense|present_perfect|article|word_order|vocabulary|spelling|other]
+Hata: [Türkçe kısa ad]
+Açıklama: [2-3 cümle Türkçe]
+İpucu: [cevabı verme, yönlendir]`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>Hata:</strong> ${errorLabel || 'Gramer hatası'}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${explanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>İpucu:</strong> ${hint || 'Doğru cevabı incele.'}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
+        }
         function showApiErr() { document.getElementById('apiFeedback').classList.remove('hidden'); const el = document.getElementById('apiErrorType'); if (lastApiError === 'quota') { el.innerHTML = '⚠️ <strong>Kota limiti doldu!</strong> Ücretsiz API limiti aşıldı. Birkaç dakika bekleyip tekrar dene.'; el.style.color = '#fbbf24'; } else if (lastApiError === 'key') { el.innerHTML = '❌ <strong>API key geçersiz.</strong> Ayarlar\'dan kontrol et.'; el.style.color = '#f87171'; } else if (lastApiError === 'nokey') { el.innerHTML = '🔑 API key girilmemiş. Ayarlar\'dan Gemini API key girin.'; el.style.color = '#60a5fa'; } else if (lastApiError === 'network') { el.innerHTML = '🌐 İnternet bağlantısı sorunu. Bağlantını kontrol et.'; el.style.color = '#9ca3af'; } else { el.textContent = '⚠️ API bağlantısı kurulamadı. Doğru cevabı incele.'; el.style.color = '#9ca3af'; } document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').textContent = ''; }
         // AI FEATURES
-        async function generateAISentence() { if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const btn = document.getElementById('aiGenBtn'); btn.textContent = '🤖 Üretiliyor...'; btn.disabled = true; const topic = S.tab === 'all' ? TOPICS[Math.floor(Math.random() * TOPICS.length)] : S.tab; const prompt = `Bir İngilizce öğretmenisin. "${topic}" konusunda A2-B1 seviyesinde 1 cümle üret.\nYALNIZCA JSON döndür:\n{"turkish":"...","english":"...","keywords":[{"tr":"kelime","en":"word"}]}\nCümle doğal, günlük konuşmada kullanılan bir cümle olsun. 2-3 keyword ekle.`; const txt = await geminiCall(prompt); btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false; if (!txt) { alert('AI cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic, level: 'AI', turkish: j.turkish, english: j.english, keywords: j.keywords || [], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); } }
-        async function practiceWeakPoint() { if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const tags = {}; SENTENCES.forEach(s => { getSRS(s.id).errorTags.forEach(t => { tags[t] = (tags[t] || 0) + 1; }); }); const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]); if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; } const weakTag = sorted[0][0]; const btn = document.getElementById('weakBtn'); btn.textContent = '🎯 Üretiliyor...'; btn.disabled = true; const tl = { preposition: 'edat kullanımı', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime bilgisi', spelling: 'yazım', other: 'genel' }; const prompt = `İngilizce öğretmenisin. Öğrenci "${tl[weakTag] || weakTag}" konusunda zayıf.\nBu gramer konusunu hedefleyen A2-B1 seviyesinde 1 cümle üret.\nYALNIZCA JSON:\n{"turkish":"...","english":"...","keywords":[{"tr":"kelime","en":"word"}]}`; const txt = await geminiCall(prompt); btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false; if (!txt) { alert('Cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: j.turkish, english: j.english, keywords: j.keywords || [], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); } }
-        async function askTeachMe() { if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Açıklama hazırlanıyor...</p>'; const prompt = `İngilizce öğretmenisin. Öğrenci şu cümleyi yanlış çevirdi:\nTürkçe: "${S.q.turkish}"\nDoğru: "${S.q.english}"\nBu cümledeki gramer konusunu Türkçe olarak öğret. Mini ders ver (5-6 cümle). Örnekler ekle. Düz metin yaz.`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Açıklama yüklenemedi.</p>'; }
-        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 Hazırlanıyor...</p>'; const prompt = `İngilizce öğretmenisin. Şu cümlenin 3 farklı İngilizce söyleniş biçimini göster. Aynı anlam, farklı yapılar.\nCümle: "${S.q.english}"\nHer birini numaralı liste olarak yaz. Kısa Türkçe açıklama ekle. Düz metin yaz.`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 Alternatif Söyleniş</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>'; }
+        async function generateAISentence() {
+            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const btn = document.getElementById('aiGenBtn'); btn.textContent = '🤖 Üretiliyor...'; btn.disabled = true; const topic = S.tab === 'all' ? TOPICS[Math.floor(Math.random() * TOPICS.length)] : S.tab; const prompt = `"${topic}", A2-B1, 1 cümle üret.
+JSON: {"turkish":"...","english":"...","keywords":[{"tr":"...","en":"..."}]}
+2 keyword. BAŞKA BİR ŞEY YAZMA.`; const txt = await geminiCall(prompt); btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false; if (!txt) { alert('AI cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic, level: 'AI', turkish: j.turkish, english: j.english, keywords: j.keywords || [], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
+        }
+        async function practiceWeakPoint() {
+            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const SS = getCurSentences(); const tags = {}; SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); }); const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]); if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; } const weakTag = sorted[0][0]; const btn = document.getElementById('weakBtn'); btn.textContent = '🎯 Üretiliyor...'; btn.disabled = true; const tl = { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' }; const nf = t('nativeField'); const prompt = `"${tl[weakTag] || weakTag}" gramer konusu, A2-B1, 1 cümle.\nJSON: {"${nf}":"...","english":"...","keywords":[{"${t('kwField')}":"...","en":"..."}]}\n2 keyword. BAŞKA YAZMA.`; const txt = await geminiCall(prompt); btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false; if (!txt) { alert('Cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: j.turkish, spanish: j.spanish, english: j.english, keywords: j.keywords || [], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
+        }
+        async function askTeachMe() {
+            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Hazırlanıyor...</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'Explica esta gramática en español. 4-5 oraciones, con ejemplos. Texto plano.' : 'Bu gramer konusunu Türkçe öğret. 4-5 cümle, örneklerle. Düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>';
+        }
+        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 Hazırlanıyor...</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 Alternatif Söyleniş</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>'; }
         // REVIEW
-        function showReview() { showScreen('reviewScreen'); const due = SENTENCES.filter(s => getSRS(s.id).nextReview <= today()); document.getElementById('reviewCount').textContent = `Bugün ${due.length} cümle tekrar zamanı.`; if (!due.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-500 py-12">🎉 Bugün tekrar yok!</p>'; return; } S.rQueue = [...due]; shuffle(S.rQueue); S.rIdx = 0; showReviewQ(); }
-        function showReviewQ() { if (S.rIdx >= S.rQueue.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-400 py-12">✅ Tamamlandı!</p>'; return; } const q = S.rQueue[S.rIdx], words = q.english.split(' '); shuffle(words); S.rSel = []; document.getElementById('reviewModeArea').innerHTML = `<div class="rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6">${q.topic}</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1a1a1a;color:#666">${q.level}</span></div><p class="text-lg font-medium text-gray-200 mb-1">${q.turkish}</p><p class="text-xs text-gray-500 mb-4">Kelimeleri doğru sıraya koy:</p><div id="rAns" class="min-h-12 rounded-xl p-3 mb-3 flex flex-wrap gap-2" style="background:#0f0f0f;border:1px dashed #333"></div><div id="rBank" class="flex flex-wrap gap-2 mb-4">${words.map((w, i) => `<button class="word-chip px-3 py-1.5 rounded-lg text-sm font-medium" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e5e5e5" data-idx="${i}" onclick="selRW(this,'${w.replace(/'/g, "\\'")}',${i})">${w}</button>`).join('')}</div><div id="rFb" class="hidden rounded-xl p-3 mb-3 text-sm"></div><div class="flex gap-3"><button onclick="checkRev()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">Kontrol Et</button><button onclick="clearRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">Temizle</button><button onclick="nextRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">Atla</button></div></div>`; }
+        function showReview() { showScreen('reviewScreen'); const SS = getCurSentences(); const due = SS.filter(s => getSRS(s.id).nextReview <= today()); document.getElementById('reviewCount').textContent = S.lang === 'es' ? `Hoy ${due.length} oraciones para repasar.` : `Bugün ${due.length} cümle tekrar zamanı.`; if (!due.length) { document.getElementById('reviewModeArea').innerHTML = `<p class="text-center text-gray-500 py-12">${t('reviewDone')}</p>`; return; } S.rQueue = [...due]; shuffle(S.rQueue); S.rIdx = 0; showReviewQ(); }
+        function showReviewQ() { if (S.rIdx >= S.rQueue.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-400 py-12">✅</p>'; return; } const q = S.rQueue[S.rIdx], words = q.english.split(' '); shuffle(words); S.rSel = []; const nativeText = getNative(q); document.getElementById('reviewModeArea').innerHTML = `<div class="rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6">${q.topic}</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1a1a1a;color:#666">${q.level}</span></div><p class="text-lg font-medium text-gray-200 mb-1">${nativeText}</p><p class="text-xs text-gray-500 mb-4">${t('orderWords')}</p><div id="rAns" class="min-h-12 rounded-xl p-3 mb-3 flex flex-wrap gap-2" style="background:#0f0f0f;border:1px dashed #333"></div><div id="rBank" class="flex flex-wrap gap-2 mb-4">${words.map((w, i) => `<button class="word-chip px-3 py-1.5 rounded-lg text-sm font-medium" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e5e5e5" data-idx="${i}" onclick="selRW(this,'${w.replace(/'/g, "\\'")}',${i})">${w}</button>`).join('')}</div><div id="rFb" class="hidden rounded-xl p-3 mb-3 text-sm"></div><div class="flex gap-3"><button onclick="checkRev()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="clearRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('clear')}</button><button onclick="nextRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; }
         function selRW(btn, w, idx) { if (btn.classList.contains('placed')) return; btn.classList.add('placed'); S.rSel.push({ word: w, idx }); const c = document.createElement('button'); c.className = 'word-chip px-3 py-1.5 rounded-lg text-sm font-medium'; c.style.background = '#3B82F6'; c.style.color = 'white'; c.textContent = w; c.onclick = () => { c.remove(); S.rSel = S.rSel.filter(x => x.idx !== idx); document.querySelector(`#rBank [data-idx="${idx}"]`)?.classList.remove('placed'); }; document.getElementById('rAns').appendChild(c); }
         function clearRev() { S.rSel = []; document.getElementById('rAns').innerHTML = ''; document.querySelectorAll('#rBank .word-chip').forEach(b => b.classList.remove('placed')); }
         function checkRev() { const q = S.rQueue[S.rIdx], built = S.rSel.map(x => x.word).join(' '), fb = document.getElementById('rFb'); fb.classList.remove('hidden'); if (norm(built) === norm(q.english)) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.textContent = '✅ Doğru!'; updateSRS(q.id, true); setTimeout(nextRev, 1500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = `❌ Doğru: <strong>${q.english}</strong>`; updateSRS(q.id, false); } }
         function nextRev() { S.rIdx++; showReviewQ(); }
         // STATS
-        function showStats() { showScreen('statsScreen'); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SENTENCES.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SENTENCES.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); document.getElementById('topicStats').innerHTML = TOPICS.map(t => { const ss = SENTENCES.filter(s => s.topic === t), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${t}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SENTENCES.forEach(s => getSRS(s.id).errorTags.forEach(t => { tf[t] = (tf[t] || 0) + 1; })); const tl = { preposition: 'Edat Kullanımı (to/for/from)', past_tense: 'Geçmiş Zaman', present_perfect: 'Present Perfect', article: 'Article (a/an/the)', word_order: 'Kelime Sırası', vocabulary: 'Kelime Bilgisi', spelling: 'Yazım Hatası', other: 'Diğer' }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${cnt} hata</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">Odaklan</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">Henüz hata kaydı yok.</p>'; }
-        // VERBS
-        function getVerbSRS(v1) { const d = LS.get('verb_srs', {}); return d[v1] || { v1, streak: 0, wrong: 0, nextReview: today(), learned: false }; }
-        function saveVerbSRS(e) { const d = LS.get('verb_srs', {}); d[e.v1] = e; LS.set('verb_srs', d); }
-        function showVerbs() { showScreen('verbScreen'); const td = today(); const due = VERBS.filter(v => getVerbSRS(v.v1).nextReview <= td); const notStarted = VERBS.filter(v => { const e = getVerbSRS(v.v1); return e.streak === 0 && e.wrong === 0; }); const learned = VERBS.filter(v => getVerbSRS(v.v1).streak >= 3).length; document.getElementById('verbProgress').textContent = learned + '/' + VERBS.length + ' öğrenildi'; let daily = [...due]; if (daily.length < 5) { const extra = notStarted.filter(v => !daily.find(d => d.v1 === v.v1)).slice(0, 5 - daily.length); daily = [...daily, ...extra]; } daily = daily.slice(0, 5); if (!daily.length) { document.getElementById('verbDailyArea').innerHTML = '<p class="text-center text-gray-400 py-12">🎉 Bugünkü fiiller tamamlandı!</p>'; return; } S.verbIdx = 0; S.verbList = daily; showVerbCard(); }
-        function showVerbCard() { if (S.verbIdx >= S.verbList.length) { document.getElementById('verbDailyArea').innerHTML = '<div class="text-center py-12 fade-in"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">Günlük fiiller tamamlandı!</p><p class="text-gray-500 text-sm mt-2">Yarın yeni fiiller seni bekliyor.</p></div>'; return; } const v = S.verbList[S.verbIdx]; document.getElementById('verbDailyArea').innerHTML = `<div class="verb-card rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex justify-between mb-4"><span class="text-blue-400 text-sm font-medium">${S.verbIdx + 1} / ${S.verbList.length}</span><span class="text-xs text-gray-600">${v.tr}</span></div><p class="text-center text-2xl font-bold mb-1 text-white">${v.v1}</p><p class="text-center text-sm text-gray-500 mb-6">V2 ve V3 halini yazın</p><div class="grid grid-cols-2 gap-3 mb-4"><div><label class="block text-xs text-gray-500 mb-1">V2 (Past Simple)</label><input type="text" id="v2Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')document.getElementById('v3Input').focus()"></div><div><label class="block text-xs text-gray-500 mb-1">V3 (Past Participle)</label><input type="text" id="v3Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')checkVerb()"></div></div><div id="verbFb" class="hidden rounded-xl p-3 mb-4 text-sm"></div><div class="flex gap-3"><button onclick="checkVerb()" id="verbCheckBtn" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">Kontrol Et</button><button onclick="S.verbIdx++;showVerbCard()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">Atla</button></div></div>`; document.getElementById('v2Input').focus(); }
-        function checkVerb() { const v = S.verbList[S.verbIdx], v2 = document.getElementById('v2Input').value.trim().toLowerCase(), v3 = document.getElementById('v3Input').value.trim().toLowerCase(); if (!v2 || !v3) return; const ok2 = v2 === v.v2.toLowerCase(), ok3 = v3 === v.v3.toLowerCase(), allOk = ok2 && ok3; const fb = document.getElementById('verbFb'); fb.classList.remove('hidden'); const e = getVerbSRS(v.v1); const tenseHtml = `<div class="mt-3 pt-3 text-gray-300" style="border-top:1px solid ${allOk ? '#1a3a1a' : '#3a1a1a'}"><p class="text-xs text-gray-500 mb-2">📖 ${allOk ? 'Zaman Çekimleri' : 'Doğru çekimler'}:</p><p class="mb-1"><span class="text-blue-400">Present Simple:</span> I <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v1}</strong><span class="tip">${v.tr}</span></span> every day.</p><p class="mb-1"><span class="text-yellow-400">Past Simple:</span> I <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v2}</strong><span class="tip">${v.tr2}</span></span> yesterday.</p><p><span class="text-purple-400">Present Perfect:</span> I have <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v3}</strong><span class="tip">${v.tr3}</span></span> before.</p></div>`; if (allOk) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.innerHTML = `✅ Doğru! <strong>${v.v1} → ${v.v2} → ${v.v3}</strong> (${v.tr})` + tenseHtml; e.streak++; e.nextReview = new Date(Date.now() + 86400000 * Math.min(e.streak * 2, 14)).toISOString().split('T')[0]; if (e.streak >= 3) e.learned = true; saveVerbSRS(e); updateStreak(); document.getElementById('verbCheckBtn').classList.add('hidden'); setTimeout(() => { S.verbIdx++; showVerbCard(); }, 4500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = `❌ <strong>${v.v1} → <span style="color:${ok2 ? '#4ade80' : '#fbbf24'}">${v.v2}</span> → <span style="color:${ok3 ? '#4ade80' : '#fbbf24'}">${v.v3}</span></strong> (${v.tr})` + tenseHtml; e.streak = 0; e.wrong++; e.nextReview = new Date(Date.now() + 86400000).toISOString().split('T')[0]; e.learned = false; saveVerbSRS(e); } }
+        function showStats() { showScreen('statsScreen'); const SS = getCurSentences(); const TT = getCurTopics(); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SS.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SS.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); document.getElementById('topicStats').innerHTML = TT.map(tp => { const ss = SS.filter(s => s.topic === tp), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${tp}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SS.forEach(s => getSRS(s.id).errorTags.forEach(tg => { tf[tg] = (tf[tg] || 0) + 1; })); const tl = { preposition: 'Edat Kullanımı (to/for/from)', past_tense: 'Geçmiş Zaman', present_perfect: 'Present Perfect', article: 'Article (a/an/the)', word_order: 'Kelime Sırası', vocabulary: 'Kelime Bilgisi', spelling: 'Yazım Hatası', other: 'Diğer' }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${cnt} hata</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">Odaklan</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">Henüz hata kaydı yok.</p>'; }
+        // VERBS (getVerbSRS/saveVerbSRS defined above in STATE section)
+        function showVerbs() { showScreen('verbScreen'); const VV = getCurVerbs(); const td = today(); const due = VV.filter(v => getVerbSRS(v.v1).nextReview <= td); const notStarted = VV.filter(v => { const e = getVerbSRS(v.v1); return e.streak === 0 && e.wrong === 0; }); const learned = VV.filter(v => getVerbSRS(v.v1).streak >= 3).length; document.getElementById('verbProgress').textContent = learned + '/' + VV.length; let daily = [...due]; if (daily.length < 5) { const extra = notStarted.filter(v => !daily.find(d => d.v1 === v.v1)).slice(0, 5 - daily.length); daily = [...daily, ...extra]; } daily = daily.slice(0, 5); if (!daily.length) { document.getElementById('verbDailyArea').innerHTML = `<p class="text-center text-gray-400 py-12">${t('verbDone')}</p>`; return; } S.verbIdx = 0; S.verbList = daily; showVerbCard(); }
+        function showVerbCard() { if (S.verbIdx >= S.verbList.length) { document.getElementById('verbDailyArea').innerHTML = `<div class="text-center py-12 fade-in"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">${t('verbDone')}</p></div>`; return; } const v = S.verbList[S.verbIdx]; const nv = getVerbNative(v); document.getElementById('verbDailyArea').innerHTML = `<div class="verb-card rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex justify-between mb-4"><span class="text-blue-400 text-sm font-medium">${S.verbIdx + 1} / ${S.verbList.length}</span><span class="text-xs text-gray-600">${nv}</span></div><p class="text-center text-2xl font-bold mb-1 text-white">${v.v1}</p><p class="text-center text-sm text-gray-500 mb-6">${t('verbV2label')} + ${t('verbV3label')}</p><div class="grid grid-cols-2 gap-3 mb-4"><div><label class="block text-xs text-gray-500 mb-1">${t('verbV2label')}</label><input type="text" id="v2Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')document.getElementById('v3Input').focus()"></div><div><label class="block text-xs text-gray-500 mb-1">${t('verbV3label')}</label><input type="text" id="v3Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')checkVerb()"></div></div><div id="verbFb" class="hidden rounded-xl p-3 mb-4 text-sm"></div><div class="flex gap-3"><button onclick="checkVerb()" id="verbCheckBtn" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="S.verbIdx++;showVerbCard()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; document.getElementById('v2Input').focus(); }
+        function checkVerb() { const v = S.verbList[S.verbIdx], v2 = document.getElementById('v2Input').value.trim().toLowerCase(), v3 = document.getElementById('v3Input').value.trim().toLowerCase(); if (!v2 || !v3) return; const ok2 = v2 === v.v2.toLowerCase(), ok3 = v3 === v.v3.toLowerCase(), allOk = ok2 && ok3; const fb = document.getElementById('verbFb'); fb.classList.remove('hidden'); const e = getVerbSRS(v.v1); const nv = getVerbNative(v); const nv2 = getVerbNative(v, '2'); const nv3 = getVerbNative(v, '3'); const tenseHtml = `<div class="mt-3 pt-3 text-gray-300" style="border-top:1px solid ${allOk ? '#1a3a1a' : '#3a1a1a'}"><p class="text-xs text-gray-500 mb-2">📖</p><p class="mb-1"><span class="text-blue-400">Present Simple:</span> I <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v1}</strong><span class="tip">${nv}</span></span> every day.</p><p class="mb-1"><span class="text-yellow-400">Past Simple:</span> I <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v2}</strong><span class="tip">${nv2}</span></span> yesterday.</p><p><span class="text-purple-400">Present Perfect:</span> I have <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v3}</strong><span class="tip">${nv3}</span></span> before.</p></div>`; if (allOk) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.innerHTML = `✅ <strong>${v.v1} → ${v.v2} → ${v.v3}</strong> (${nv})` + tenseHtml; e.streak++; e.nextReview = new Date(Date.now() + 86400000 * Math.min(e.streak * 2, 14)).toISOString().split('T')[0]; if (e.streak >= 3) e.learned = true; saveVerbSRS(e); updateStreak(); document.getElementById('verbCheckBtn').classList.add('hidden'); setTimeout(() => { S.verbIdx++; showVerbCard(); }, 4500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = `❌ <strong>${v.v1} → <span style="color:${ok2 ? '#4ade80' : '#fbbf24'}">${v.v2}</span> → <span style="color:${ok3 ? '#4ade80' : '#fbbf24'}">${v.v3}</span></strong> (${nv})` + tenseHtml; e.streak = 0; e.wrong++; e.nextReview = new Date(Date.now() + 86400000).toISOString().split('T')[0]; e.learned = false; saveVerbSRS(e); } }
         // SETTINGS
-        function openSettings() { document.getElementById('apiKeyInput').value = getApiKey(); document.getElementById('settingsOverlay').classList.remove('hidden'); }
+        function openSettings() { document.getElementById('apiKeyInput').value = getGeminiKey(); document.getElementById('groqKeyInput').value = getGroqKey(); document.getElementById('settingsOverlay').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settingsOverlay').classList.add('hidden'); }
-        function saveApiKey() { const key = document.getElementById('apiKeyInput').value.trim(); try { localStorage.setItem('gemini_api_key', key); } catch (e) { alert('API key kaydedilemedi! Tarayıcıda localStorage engellenmiş olabilir.'); return; } if (key) { const saved = localStorage.getItem('gemini_api_key'); if (saved === key) { closeSettings(); } else { alert('API key kaydedildi ama doğrulama başarısız. Tarayıcı ayarlarını kontrol edin.'); } } else { closeSettings(); } }
+        function saveApiKeys() { const gKey = document.getElementById('apiKeyInput').value.trim(); const qKey = document.getElementById('groqKeyInput').value.trim(); try { localStorage.setItem('gemini_api_key', gKey); localStorage.setItem('groq_api_key', qKey); } catch (e) { alert('API key kaydedilemedi!'); return; } if (!gKey && !qKey) { alert('En az bir API key girin.'); return; } closeSettings(); }
         function confirmReset() { document.getElementById('resetModal').classList.remove('hidden'); }
         function closeResetModal() { document.getElementById('resetModal').classList.add('hidden'); }
-        function resetAllData() { localStorage.removeItem('srs'); localStorage.removeItem('gstats'); localStorage.removeItem('verb_srs'); closeResetModal(); selectTab('all'); }
+        function resetAllData() { localStorage.removeItem('srs'); localStorage.removeItem('gstats'); localStorage.removeItem('verb_srs'); localStorage.removeItem('srs_es'); localStorage.removeItem('gstats_es'); localStorage.removeItem('verb_srs_es'); closeResetModal(); selectTab('all'); }
         // INIT
-        document.addEventListener('DOMContentLoaded', () => { renderTabs(); updateStreakUI(); selectTab('all'); });
+        document.addEventListener('DOMContentLoaded', () => { updateLangUI(); renderTabs(); updateStreakUI(); selectTab('all'); });
         // PWA Service Worker
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(r => console.log('SW registered:', r.scope)).catch(e => console.log('SW failed:', e)); }
     </script>
