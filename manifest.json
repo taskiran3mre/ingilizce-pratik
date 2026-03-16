@@ -1,10 +1,10 @@
 {
-  "name": "İngilizce Pratik",
+  "name": "EN Pratik",
   "short_name": "EN Pratik",
   "description": "Türkçe-İngilizce çeviri pratik uygulaması",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0a0a0a",
+  "background_color": "#0f0f0f",
   "theme_color": "#3B82F6",
   "orientation": "portrait",
   "icons": [

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,293 +7,130 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EN Pratik">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <title>İngilizce Pratik</title>
+    <title>🇺🇸 EN Pratik</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
     <style>
-        * {
-            font-family: 'Inter', sans-serif
-        }
-
-        body {
-            background: #0f0f0f;
-            color: #f5f5f5
-        }
-
-        .tab-scroll::-webkit-scrollbar {
-            display: none
-        }
-
-        .tab-scroll {
-            -ms-overflow-style: none;
-            scrollbar-width: none
-        }
-
-        input:focus {
-            outline: none
-        }
-
-        .tooltip {
-            position: relative;
-            display: inline
-        }
-
-        .tooltip .tip {
-            visibility: hidden;
-            opacity: 0;
-            position: absolute;
-            bottom: 130%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e1e1e;
-            border: 1px solid #333;
-            color: #3B82F6;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: .78rem;
-            white-space: nowrap;
-            transition: opacity .2s;
-            z-index: 100
-        }
-
-        .tooltip .tip::after {
-            content: '';
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: #333
-        }
-
-        .tooltip:hover .tip,
-        .tooltip.active .tip {
-            visibility: visible;
-            opacity: 1
-        }
-
-        .kw {
-            color: #3B82F6;
-            text-decoration: underline;
-            cursor: pointer
-        }
-
-        .shake {
-            animation: shake .4s
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0)
-            }
-
-            25% {
-                transform: translateX(-6px)
-            }
-
-            75% {
-                transform: translateX(6px)
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn .3s ease
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px)
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0)
-            }
-        }
-
-        .word-chip {
-            cursor: pointer;
-            transition: all .15s
-        }
-
-        .word-chip:hover {
-            background: #3B82F6 !important;
-            color: white !important
-        }
-
-        .word-chip.placed {
-            background: #16a34a !important;
-            color: white !important;
-            opacity: .6;
-            cursor: not-allowed
-        }
-
-        .progress-bar-fill {
-            transition: width .5s ease
-        }
-
-        .settings-panel {
-            transition: all .25s ease
-        }
-
-        .ai-box {
-            background: #0c1929;
-            border: 1px solid #1e3a5f;
-            border-radius: 12px;
-            padding: 16px
-        }
-
-        .verb-card {
-            transition: all .2s
-        }
-
-        .verb-card:hover {
-            border-color: #3B82F6 !important
-        }
-
-        ::-webkit-scrollbar {
-            width: 4px
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 4px
-        }
+        * { font-family: 'Inter', sans-serif }
+        body { background: #0f0f0f; color: #f5f5f5 }
+        .tab-scroll::-webkit-scrollbar { display: none }
+        .tab-scroll { -ms-overflow-style: none; scrollbar-width: none }
+        input:focus { outline: none }
+        .tooltip { position: relative; display: inline }
+        .tooltip .tip { visibility: hidden; opacity: 0; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1e1e1e; border: 1px solid #333; color: #3B82F6; padding: 3px 10px; border-radius: 6px; font-size: .78rem; white-space: nowrap; transition: opacity .2s; z-index: 100 }
+        .tooltip .tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #333 }
+        .tooltip:hover .tip, .tooltip.active .tip { visibility: visible; opacity: 1 }
+        .kw { color: #3B82F6; text-decoration: underline; cursor: pointer }
+        .shake { animation: shake .4s }
+        @keyframes shake { 0%, 100% { transform: translateX(0) } 25% { transform: translateX(-6px) } 75% { transform: translateX(6px) } }
+        .fade-in { animation: fadeIn .3s ease }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+        .word-chip { cursor: pointer; transition: all .15s }
+        .word-chip:hover { background: #3B82F6 !important; color: white !important }
+        .word-chip.placed { background: #16a34a !important; color: white !important; opacity: .6; cursor: not-allowed }
+        .progress-bar-fill { transition: width .5s ease }
+        .settings-panel { transition: all .25s ease }
+        .ai-box { background: #0c1929; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px }
+        .verb-card { transition: all .2s }
+        .verb-card:hover { border-color: #3B82F6 !important }
+        ::-webkit-scrollbar { width: 4px }
+        ::-webkit-scrollbar-track { background: #1a1a1a }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px }
     </style>
 </head>
-
 <body class="min-h-screen">
     <div id="app" class="max-w-2xl mx-auto px-4 pb-20">
         <!-- Header -->
         <div class="flex items-center justify-between py-4 sticky top-0 z-40" style="background:#0f0f0f">
             <div class="flex items-center gap-3">
-                <span class="text-xl font-bold tracking-tight">🇬🇧 İngilizce Pratik</span>
-                <span id="streakBadge" class="hidden text-sm font-semibold px-2 py-0.5 rounded-full"
-                    style="background:#1a1a1a;border:1px solid #333">🔥 <span id="streakCount">0</span></span>
+                <span class="text-xl font-bold tracking-tight">🇺🇸 EN Pratik</span>
+                <span id="streakBadge" class="hidden text-sm font-semibold px-2 py-0.5 rounded-full" style="background:#1a1a1a;border:1px solid #333">🔥 <span id="streakCount">0</span></span>
             </div>
             <div class="flex items-center gap-3">
-                <div class="text-right text-sm"><span class="text-green-400 font-bold" id="scoreCorrect">0</span><span
-                        class="text-gray-500 mx-1">/</span><span class="text-red-400 font-bold" id="scoreWrong">0</span>
+                <div class="text-right text-sm"><span class="text-green-400 font-bold" id="scoreCorrect">0</span><span class="text-gray-500 mx-1">/</span><span class="text-red-400 font-bold" id="scoreWrong">0</span></div>
+                <div id="userBadge" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl" style="background:#1a2a1a;border:1px solid #2a4a2a">
+                    <span class="text-xs font-medium text-green-400 max-w-[80px] truncate" id="userEmail"></span>
+                    <button onclick="logout()" class="text-xs text-gray-500 hover:text-white">Çıkış</button>
                 </div>
-                <button id="langToggle" onclick="switchLang()"
-                    class="px-2 py-1 rounded-lg text-xs font-bold transition hover:opacity-80"
-                    style="border:1px solid #2a2a2a">ES</button>
-                <button onclick="openSettings()"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-gray-400 hover:text-white">⚙️</button>
+                <button id="loginBtn" onclick="openAuthModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold transition hover:opacity-80" style="background:#3B82F6;color:white">Giriş Yap</button>
+                <button id="langToggle" onclick="switchLang()" class="px-2 py-1 rounded-lg text-xs font-bold transition hover:opacity-80" style="border:1px solid #2a2a2a">ES</button>
+                <button onclick="openSettings()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-gray-400 hover:text-white">⚙️</button>
             </div>
         </div>
+        
         <!-- Progress -->
         <div class="mb-4">
-            <div class="flex justify-between text-xs text-gray-500 mb-1"><span id="sessionLabel">Oturum</span><span
-                    id="progressText">0/0</span></div>
-            <div class="rounded-full h-1.5" style="background:#1a1a1a">
-                <div id="progressBar" class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:0%">
-                </div>
-            </div>
+            <div class="flex justify-between text-xs text-gray-500 mb-1"><span id="sessionLabel">Oturum</span><span id="progressText">0/0</span></div>
+            <div class="rounded-full h-1.5" style="background:#1a1a1a"><div id="progressBar" class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:0%"></div></div>
         </div>
+        
         <!-- Tabs -->
         <div class="tab-scroll flex gap-2 overflow-x-auto pb-2 mb-6" id="tabContainer"></div>
-        <!-- Practice -->
+        
+        <!-- Practice Screen -->
         <div id="practiceScreen">
             <div class="flex items-center justify-between mb-4 px-1" id="directionToggle">
                 <span class="text-xs text-gray-500" id="dirText">Çeviri Yönü:</span>
-                <button onclick="toggleDirection()" id="dirToggleBtn"
-                    class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#e5e5e5">
-                    <span id="dirLabel">🇹🇷 → 🇬🇧</span>
-                </button>
+                <button onclick="toggleDirection()" id="dirToggleBtn" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#e5e5e5"><span id="dirLabel">🇹🇷 → EN</span></button>
             </div>
-            <div id="questionCard" class="rounded-2xl p-6 mb-4 fade-in"
-                style="background:#161616;border:1px solid #222">
+            <div id="questionCard" class="rounded-2xl p-6 mb-4 fade-in" style="background:#161616;border:1px solid #222">
                 <div class="flex items-start justify-between mb-3">
-                    <div class="flex gap-2"><span id="questionTopic"
-                            class="text-xs px-2 py-0.5 rounded-full font-medium"
-                            style="background:#1e2a3a;color:#3B82F6"></span><span id="questionLevel"
-                            class="text-xs px-2 py-0.5 rounded-full font-medium"
-                            style="background:#1a1a1a;color:#666"></span><span id="aiGenBadge"
-                            class="hidden text-xs px-2 py-0.5 rounded-full font-medium"
-                            style="background:#1a2e1a;color:#4ade80">🤖 AI</span></div>
+                    <div class="flex gap-2"><span id="questionTopic" class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6"></span><span id="questionLevel" class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1a1a1a;color:#666"></span><span id="aiGenBadge" class="hidden text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1a2e1a;color:#4ade80">🤖 AI</span></div>
                     <span class="text-xs text-gray-600" id="questionNum"></span>
                 </div>
                 <p class="text-lg font-medium leading-relaxed mb-1 text-gray-200" id="turkishSentence"></p>
                 <p class="text-xs text-gray-600" id="keywordsLine"></p>
             </div>
+            
             <div id="feedbackBox" class="hidden rounded-2xl p-4 mb-4 fade-in">
                 <p id="feedbackText" class="font-semibold text-base mb-2"></p>
-                <div id="correctAnswerBox" class="hidden mb-3">
-                    <p class="text-xs text-gray-400 mb-1" id="correctAnswerLabel">Doğru cevap:</p>
-                    <p class="font-medium" id="correctAnswerText"></p>
-                </div>
-                <div id="apiFeedback" class="hidden text-sm space-y-1.5 mt-3 pt-3"
-                    style="border-top:1px solid rgba(255,255,255,0.08)">
-                    <p id="apiErrorType" class="font-medium"></p>
-                    <p id="apiTopic" class="text-gray-400"></p>
-                    <p id="apiHint" class="text-gray-300"></p>
-                </div>
-                <div id="apiLoading" class="hidden text-sm text-gray-500 animate-pulse mt-2">🤖 Analizando...</div>
-                <!-- AI Extras after correct/wrong -->
-                <div id="aiExtras" class="hidden mt-3 pt-3 space-y-2"
-                    style="border-top:1px solid rgba(255,255,255,0.08)">
-                    <button onclick="askTeachMe()" id="teachMeBtn"
-                        class="hidden w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition"
-                        style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd"><span id="teachMeLabel">📖 Bu konuyu bana öğret</span></button>
-                    <button onclick="askVariations()" id="variationsBtn"
-                        class="hidden w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition"
-                        style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd"><span id="variationsLabel">🔄 Bu cümleyi başka nasıl kurarım?</span></button>
+                <div id="correctAnswerBox" class="hidden mb-3"><p class="text-xs text-gray-400 mb-1" id="correctAnswerLabel">Doğru cevap:</p><p class="font-medium" id="correctAnswerText"></p></div>
+                <div id="apiFeedback" class="hidden text-sm space-y-1.5 mt-3 pt-3" style="border-top:1px solid rgba(255,255,255,0.08)"><p id="apiErrorType" class="font-medium"></p><p id="apiTopic" class="text-gray-400"></p><p id="apiHint" class="text-gray-300"></p></div>
+                <div id="apiLoading" class="hidden text-sm text-gray-500 animate-pulse mt-2">🤖 Değerlendiriliyor...</div>
+                <div id="aiExtras" class="hidden mt-3 pt-3 space-y-2" style="border-top:1px solid rgba(255,255,255,0.08)">
+                    <button onclick="askTeachMe()" id="teachMeBtn" class="hidden w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd"><span id="teachMeLabel">📖 Bu konuyu bana öğret</span></button>
+                    <button onclick="askVariations()" id="variationsBtn" class="hidden w-full text-left text-sm px-3 py-2 rounded-lg hover:bg-gray-800 transition" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#93c5fd"><span id="variationsLabel">🔄 Bu cümleyi başka nasıl kurarım?</span></button>
                 </div>
                 <div id="aiTeachBox" class="hidden ai-box mt-3 text-sm text-gray-300 leading-relaxed"></div>
                 <div id="aiVariationsBox" class="hidden ai-box mt-3 text-sm text-gray-300 leading-relaxed"></div>
             </div>
-            <div id="softCheckBox" class="hidden rounded-2xl p-4 mb-4 fade-in"
-                style="background:#2a1f0a;border:1px solid #d97706">
+            
+            <div id="softCheckBox" class="hidden rounded-2xl p-4 mb-4 fade-in" style="background:#2a1f0a;border:1px solid #d97706">
                 <p class="font-semibold text-amber-400 text-base mb-2" id="softTitle">🌟 Neredeyse kusursuz!</p>
                 <p id="softCheckText" class="text-amber-200 text-sm mb-3"></p>
-                <button onclick="retrySoft()" class="w-full py-2.5 rounded-xl font-semibold text-sm" id="softRetryBtn"
-                    style="background:#d97706;color:white">🔄 Tekrar Dene</button>
+                <button onclick="retrySoft()" class="w-full py-2.5 rounded-xl font-semibold text-sm" id="softRetryBtn" style="background:#d97706;color:white">🔄 Tekrar Dene</button>
             </div>
-            <div class="mb-4"><input type="text" id="answerInput" placeholder="İngilizce çevirinizi yazın..."
-                    class="w-full rounded-xl px-4 py-4 text-base font-medium transition-all"
-                    style="background:#161616;border:1px solid #2a2a2a;color:#f5f5f5"
-                    onkeydown="if(event.key==='Enter')checkAnswer()" autocomplete="off"></div>
+            
+            <div class="mb-4"><input type="text" id="answerInput" placeholder="İngilizce çevirinizi yazın..." class="w-full rounded-xl px-4 py-4 text-base font-medium transition-all" style="background:#161616;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')checkAnswer()" autocomplete="off"></div>
+            
             <div class="flex gap-3 mb-3" id="mainButtons">
-                <button onclick="checkAnswer()" id="checkBtn"
-                    class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
-                    style="background:#3B82F6;color:white"><span id="checkBtnLabel">Kontrol Et</span></button>
-                <button onclick="getHint()" id="hintBtn"
-                    class="px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-gray-700"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span id="hintBtnLabel">💡 İpucu</span></button>
-                <button onclick="skipQuestion()" id="skipBtn"
-                    class="px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-gray-700"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span id="skipBtnLabel">Atla</span></button>
+                <button onclick="checkAnswer()" id="checkBtn" class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-95" style="background:#3B82F6;color:white"><span id="checkBtnLabel">Kontrol Et</span></button>
+                <button onclick="getHint()" id="hintBtn" class="px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-gray-700" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span id="hintBtnLabel">💡 İpucu</span></button>
+                <button onclick="skipQuestion()" id="skipBtn" class="px-4 py-3 rounded-xl font-semibold text-sm transition-all hover:bg-gray-700" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span id="skipBtnLabel">Atla</span></button>
             </div>
+            
             <div class="flex gap-3 mb-3">
-                <button onclick="generateAISentence()" id="aiGenBtn"
-                    class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-                    style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa"><span id="aiGenLabel">🤖 AI ile Yeni Cümle</span></button>
-                <button onclick="practiceWeakPoint()" id="weakBtn"
-                    class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90"
-                    style="background:#1a0f0f;border:1px solid #5f1e1e;color:#f87171"><span id="weakBtnLabel">🎯 Zayıf Noktam</span></button>
+                <select id="aiLevelSelect" class="px-3 py-3 rounded-xl font-semibold text-sm transition-all" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#fff">
+                    <option value="A1">A1</option><option value="A2">A2</option><option value="B1" selected>B1</option><option value="B2">B2</option><option value="C1">C1</option>
+                </select>
+                <button onclick="generateAISentence()" id="aiGenBtn" class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90" style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa"><span id="aiGenLabel">🤖 AI ile Yeni Cümle</span></button>
+                <button onclick="practiceWeakPoint()" id="weakBtn" class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90" style="background:#1a0f0f;border:1px solid #5f1e1e;color:#f87171"><span id="weakBtnLabel">🎯 Zayıf Noktam</span></button>
             </div>
+            
             <div id="wrongButtons" class="hidden flex gap-3">
-                <button onclick="retryQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5" id="retryBtn">Tekrar Dene</button>
-                <button onclick="nextQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm"
-                    style="background:#3B82F6;color:white" id="nextBtn">Sonraki →</button>
+                <button onclick="retryQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5" id="retryBtn">Tekrar Dene</button>
+                <button onclick="nextQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white" id="nextBtn">Sonraki →</button>
             </div>
-            <div id="hintBox" class="hidden rounded-xl p-3 mt-2 text-sm"
-                style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span
-                    class="text-yellow-400 font-medium">💡 </span><span id="hintText"></span></div>
+            
+            <div id="hintBox" class="hidden rounded-xl p-3 mt-2 text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span class="text-yellow-400 font-medium">💡 </span><span id="hintText"></span></div>
         </div>
+        
         <!-- Review -->
         <div id="reviewScreen" class="hidden">
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
@@ -303,25 +139,14 @@
             </div>
             <div id="reviewModeArea"></div>
         </div>
+        
         <!-- Stats -->
         <div id="statsScreen" class="hidden fade-in">
             <div class="grid grid-cols-2 gap-3 mb-5">
-                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1" id="statTotalLabel">Toplam Soru</p>
-                    <p class="text-2xl font-bold" id="statTotal">0</p>
-                </div>
-                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1" id="statAccLabel">Doğruluk</p>
-                    <p class="text-2xl font-bold text-green-400" id="statAccuracy">0%</p>
-                </div>
-                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1" id="statLearnedLabel">Öğrenildi</p>
-                    <p class="text-2xl font-bold" id="statLearned">0</p>
-                </div>
-                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222">
-                    <p class="text-xs text-gray-500 mb-1" id="statStreakLabel">Günlük Seri</p>
-                    <p class="text-2xl font-bold text-orange-400" id="statStreak">🔥 0</p>
-                </div>
+                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222"><p class="text-xs text-gray-500 mb-1" id="statTotalLabel">Toplam Soru</p><p class="text-2xl font-bold" id="statTotal">0</p></div>
+                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222"><p class="text-xs text-gray-500 mb-1" id="statAccLabel">Doğruluk</p><p class="text-2xl font-bold text-green-400" id="statAccuracy">0%</p></div>
+                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222"><p class="text-xs text-gray-500 mb-1" id="statLearnedLabel">Öğrenildi</p><p class="text-2xl font-bold" id="statLearned">0</p></div>
+                <div class="rounded-2xl p-4" style="background:#161616;border:1px solid #222"><p class="text-xs text-gray-500 mb-1" id="statStreakLabel">Günlük Seri</p><p class="text-2xl font-bold text-orange-400" id="statStreak">🔥 0</p></div>
             </div>
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
                 <h3 class="font-bold mb-4" id="topicPerfLabel">Konu Bazında Performans</h3>
@@ -332,317 +157,95 @@
                 <p class="text-xs text-gray-500 mb-4" id="weakReportDesc">En çok hata yaptığın konular</p>
                 <div id="weakAreas" class="space-y-3"></div>
             </div>
-            <button onclick="confirmReset()" id="resetBtn"
-                class="w-full py-3 rounded-xl text-sm font-medium transition-all hover:bg-red-900"
-                style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f87171">🗑️ Tüm Veriyi Sıfırla</button>
+            <button onclick="confirmReset()" id="resetBtn" class="w-full py-3 rounded-xl text-sm font-medium transition-all hover:bg-red-900" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f87171">🗑️ Tüm Veriyi Sıfırla</button>
         </div>
+        
         <!-- Verbs -->
         <div id="verbScreen" class="hidden fade-in">
             <div class="rounded-2xl p-5 mb-5" style="background:#161616;border:1px solid #222">
                 <div class="flex justify-between items-center mb-1">
-                    <h2 class="text-lg font-bold" id="verbTitle">📝 Düzensiz Fiiller</h2><span class="text-xs px-2 py-1 rounded-full"
-                        style="background:#1a1a1a;color:#aaa" id="verbProgress">0/50</span>
+                    <h2 class="text-lg font-bold" id="verbTitle">📝 Düzensiz Fiiller</h2><span class="text-xs px-2 py-1 rounded-full" style="background:#1a1a1a;color:#aaa" id="verbProgress">0/50</span>
                 </div>
                 <p class="text-sm text-gray-500" id="verbSubtitle">Günde 5 fiil, her gün tekrarla</p>
             </div>
             <div id="verbDailyArea"></div>
         </div>
     </div>
-    <!-- Settings -->
-    <div id="settingsOverlay" class="hidden fixed inset-0 z-50 flex items-end justify-end p-4"
-        style="background:rgba(0,0,0,0.6)" onclick="if(event.target===this)closeSettings()">
-        <div class="settings-panel rounded-2xl p-5 w-full max-w-sm"
-            style="background:#161616;border:1px solid #2a2a2a;max-height:90vh;overflow-y:auto">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-base">⚙️ Ayarlar</h3><button onclick="closeSettings()"
-                    class="text-gray-500 hover:text-white">✕</button>
+    
+    <!-- Auth Modal -->
+    <div id="authModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,0.7)">
+        <div class="rounded-2xl p-6 w-full max-w-sm relative" style="background:#161616;border:1px solid #2a2a2a">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg" id="authTitle">Giriş Yap</h3>
+                <button onclick="closeAuthModal()" class="text-gray-500 hover:text-white">✕</button>
             </div>
-            <div class="rounded-xl p-3 mb-3" style="background:#0a1628;border:1px solid #1e3a5f">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-bold text-orange-400">⚡ Groq</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-400">1. Öncelik</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2">Ultra hızlı • 14.400 istek/gün • Ücretsiz</p>
-                <input type="password" id="groqKeyInput" placeholder="gsk_..."
-                    class="w-full rounded-lg px-3 py-2 text-sm mb-2"
-                    style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <p class="text-xs text-gray-600">
-                    <a href="https://console.groq.com/keys" target="_blank" class="text-orange-400 underline">🔑 Key al
-                        (Groq)</a>
-                    • Kaydol → API Keys → Create
-                </p>
+            <div id="authErrorBox" class="hidden mb-3 p-3 rounded-lg text-xs" style="background:#2a0f0f;border:1px solid #dc2626;color:#f87171"></div>
+            <div class="space-y-3 mb-4">
+                <input type="email" id="authEmail" placeholder="E-posta" class="w-full rounded-xl px-4 py-3 text-sm" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <input type="password" id="authPass" placeholder="Şifre" class="w-full rounded-xl px-4 py-3 text-sm" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+            </div>
+            <button onclick="handleEmailAuth()" id="authActionBtn" class="w-full py-3 rounded-xl font-semibold text-sm mb-3" style="background:#3B82F6;color:white">Giriş Yap</button>
+            <p class="text-xs text-center text-gray-500 mt-4"><span id="authToggleText">Hesabın yok mu?</span><button onclick="toggleAuthMode()" class="text-blue-400 hover:underline inline-block ml-1" id="authToggleBtn">Kayıt Ol</button></p>
+        </div>
+    </div>
+
+    <!-- Settings Overlay -->
+    <div id="settingsOverlay" class="hidden fixed inset-0 z-50 flex items-end justify-end p-4" style="background:rgba(0,0,0,0.6)" onclick="if(event.target===this)closeSettings()">
+        <div class="settings-panel rounded-2xl p-5 w-full max-w-sm" style="background:#161616;border:1px solid #2a2a2a;max-height:90vh;overflow-y:auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-base">⚙️ Ayarlar</h3>
+                <button onclick="closeSettings()" class="text-gray-500 hover:text-white">✕</button>
             </div>
             <div class="rounded-xl p-3 mb-3" style="background:#0a1a28;border:1px solid #1a3a4f">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-sm font-bold text-blue-400">🧠 Gemini</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-400">2. Yedek</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-400">1. Öncelik</span>
                 </div>
                 <p class="text-xs text-gray-500 mb-2">Gemini 2.5 Flash • 500 istek/gün • Ücretsiz</p>
-                <input type="password" id="apiKeyInput" placeholder="AIza..."
-                    class="w-full rounded-lg px-3 py-2 text-sm mb-2"
-                    style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <p class="text-xs text-gray-600">
-                    <a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline">🔑 Key
-                        al (Gemini)</a>
-                    • Google hesabıyla giriş → Get API Key
-                </p>
+                <input type="password" id="apiKeyInput" placeholder="AIza..." class="w-full rounded-lg px-3 py-2 text-sm mb-2" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <p class="text-xs text-gray-600"><a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline">🔑 Key al (Gemini)</a></p>
             </div>
-            <button onclick="saveApiKeys()" class="w-full py-2.5 rounded-xl font-semibold text-sm mb-2"
-                style="background:#3B82F6;color:white">Kaydet</button>
-            <p class="text-xs text-gray-600 text-center">En az bir key girin. İkisini girerseniz Groq önce denenir,
-                başarısız olursa Gemini devralır.</p>
+            <div class="rounded-xl p-3 mb-3" style="background:#0a1628;border:1px solid #1e3a5f">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-bold text-orange-400">⚡ Groq</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-400">2. Yedek</span>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">Ultra hızlı • Ücretsiz</p>
+                <input type="password" id="groqKeyInput" placeholder="gsk_..." class="w-full rounded-lg px-3 py-2 text-sm mb-2" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <p class="text-xs text-gray-600"><a href="https://console.groq.com/keys" target="_blank" class="text-orange-400 underline">🔑 Key al (Groq)</a></p>
+            </div>
+            <button onclick="saveApiKeys()" class="w-full py-2.5 rounded-xl font-semibold text-sm mb-2" style="background:#3B82F6;color:white">Kaydet</button>
+            <p class="text-xs text-gray-600 text-center">Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.</p>
         </div>
     </div>
+    
     <!-- Reset Modal -->
-    <div id="resetModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
-        style="background:rgba(0,0,0,0.7)">
+    <div id="resetModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,0.7)">
         <div class="rounded-2xl p-6 w-full max-w-sm" style="background:#161616;border:1px solid #2a2a2a">
             <h3 class="font-bold text-base mb-2">Veriyi Sıfırla</h3>
             <p class="text-sm text-gray-400 mb-5">Tüm ilerleme silinecek. Geri alınamaz.</p>
-            <div class="flex gap-3"><button onclick="closeResetModal()"
-                    class="flex-1 py-2.5 rounded-xl text-sm font-medium"
-                    style="background:#1a1a1a;border:1px solid #2a2a2a">İptal</button><button onclick="resetAllData()"
-                    class="flex-1 py-2.5 rounded-xl text-sm font-semibold"
-                    style="background:#dc2626;color:white">Sıfırla</button></div>
+            <div class="flex gap-3">
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a">İptal</button>
+                <button onclick="resetAllData()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:#dc2626;color:white">Sıfırla</button>
+            </div>
         </div>
     </div>
+
+    <!-- MAIN DATA AND LOGIC -->
+    <script src="data.js"></script>
     <script>
-        // === DATA ===
-        const SENTENCES = [
-            { id: 1, topic: "Günlük Hayat", level: "A1", turkish: "Her sabah kahvaltı yapmadan önce duş alırım.", english: "I take a shower before having breakfast every morning.", keywords: [{ tr: "kahvaltı", en: "breakfast" }, { tr: "duş", en: "shower" }] },
-            { id: 2, topic: "Günlük Hayat", level: "A1", turkish: "Akşamları genellikle bir kitap okuyorum.", english: "I usually read a book in the evenings.", keywords: [{ tr: "kitap", en: "book" }, { tr: "akşam", en: "evening" }] },
-            { id: 3, topic: "Günlük Hayat", level: "A2", turkish: "Mutfağı temizlemem gerekiyor ama çok yorgunum.", english: "I need to clean the kitchen but I am very tired.", keywords: [{ tr: "mutfak", en: "kitchen" }, { tr: "temizlemek", en: "to clean" }] },
-            { id: 4, topic: "Günlük Hayat", level: "A2", turkish: "Köpeğimi her gün parkta gezdiriyorum.", english: "I walk my dog in the park every day.", keywords: [{ tr: "park", en: "park" }, { tr: "gezdirmek", en: "to walk" }] },
-            { id: 5, topic: "Günlük Hayat", level: "B1", turkish: "Hafta sonları arkadaşlarımla buluşmayı tercih ediyorum.", english: "I prefer to meet with my friends on weekends.", keywords: [{ tr: "tercih etmek", en: "to prefer" }, { tr: "hafta sonu", en: "weekend" }] },
-            { id: 6, topic: "Günlük Hayat", level: "B1", turkish: "Dün gece geç saate kadar çalıştım.", english: "I worked until late last night.", keywords: [{ tr: "geç", en: "late" }, { tr: "dün gece", en: "last night" }] },
-            { id: 7, topic: "Günlük Hayat", level: "B2", turkish: "Alışkanlıklarımı değiştirmek istiyorum ama zor oluyor.", english: "I want to change my habits but it is getting difficult.", keywords: [{ tr: "alışkanlık", en: "habit" }, { tr: "değiştirmek", en: "to change" }] },
-            { id: 8, topic: "Günlük Hayat", level: "A1", turkish: "Sabahları erken kalkmaktan hoşlanmıyorum.", english: "I do not like waking up early in the mornings.", keywords: [{ tr: "erken", en: "early" }, { tr: "kalkmak", en: "to wake up" }] },
-            { id: 9, topic: "Günlük Hayat", level: "B1", turkish: "Geçen hafta yeni bir telefon aldım.", english: "I bought a new phone last week.", keywords: [{ tr: "almak", en: "to buy" }, { tr: "geçen hafta", en: "last week" }] },
-            { id: 10, topic: "Günlük Hayat", level: "B2", turkish: "Komşularla iyi geçinmek için sabırlı olmak gerekiyor.", english: "You need to be patient to get along with neighbors.", keywords: [{ tr: "komşu", en: "neighbor" }, { tr: "sabırlı", en: "patient" }] },
-            { id: 11, topic: "Seyahat", level: "A1", turkish: "Lütfen bana en yakın oteli gösterir misiniz?", english: "Can you show me the nearest hotel please?", keywords: [{ tr: "otel", en: "hotel" }, { tr: "en yakın", en: "nearest" }] },
-            { id: 12, topic: "Seyahat", level: "A2", turkish: "Bu uçuş kaç saat sürecek?", english: "How many hours will this flight take?", keywords: [{ tr: "uçuş", en: "flight" }, { tr: "sürmek", en: "to take" }] },
-            { id: 13, topic: "Seyahat", level: "A2", turkish: "Pasaportunuzu görmem gerekiyor.", english: "I need to see your passport.", keywords: [{ tr: "pasaport", en: "passport" }] },
-            { id: 14, topic: "Seyahat", level: "B1", turkish: "Valizim kayboldu ve çok endişeleniyorum.", english: "My suitcase is lost and I am very worried.", keywords: [{ tr: "valiz", en: "suitcase" }, { tr: "endişelenmek", en: "to worry" }] },
-            { id: 15, topic: "Seyahat", level: "B1", turkish: "Bu şehirde mutlaka görülmesi gereken yerler hangileri?", english: "What are the must-see places in this city?", keywords: [{ tr: "görülmesi gereken", en: "must-see" }] },
-            { id: 16, topic: "Seyahat", level: "B2", turkish: "O ülkeye gitmeden önce vize başvurusunu tamamlamalıyım.", english: "I must complete the visa application before going to that country.", keywords: [{ tr: "vize", en: "visa" }, { tr: "başvuru", en: "application" }] },
-            { id: 17, topic: "Seyahat", level: "A1", turkish: "Havalimanına nasıl gidebilirim?", english: "How can I get to the airport?", keywords: [{ tr: "havalimanı", en: "airport" }] },
-            { id: 18, topic: "Seyahat", level: "B1", turkish: "Otelde iki gece daha kalmak istiyorum.", english: "I would like to stay two more nights at the hotel.", keywords: [{ tr: "kalmak", en: "to stay" }] },
-            { id: 19, topic: "Seyahat", level: "B2", turkish: "Gümrükte beyan etmem gereken bir şey var mı?", english: "Is there anything I need to declare at customs?", keywords: [{ tr: "gümrük", en: "customs" }, { tr: "beyan etmek", en: "to declare" }] },
-            { id: 20, topic: "İş & Kariyer", level: "A2", turkish: "Yarın sabah önemli bir toplantım var.", english: "I have an important meeting tomorrow morning.", keywords: [{ tr: "toplantı", en: "meeting" }, { tr: "önemli", en: "important" }] },
-            { id: 21, topic: "İş & Kariyer", level: "B1", turkish: "Şirkete katıldığımdan beri çok şey öğrendim.", english: "I have learned a lot since I joined the company.", keywords: [{ tr: "şirket", en: "company" }, { tr: "katılmak", en: "to join" }] },
-            { id: 22, topic: "İş & Kariyer", level: "B1", turkish: "Bu projeyi zamanında teslim etmemiz gerekiyor.", english: "We need to deliver this project on time.", keywords: [{ tr: "proje", en: "project" }, { tr: "teslim etmek", en: "to deliver" }] },
-            { id: 23, topic: "İş & Kariyer", level: "B2", turkish: "Terfi başvurusunu değerlendirmenizi rica ediyorum.", english: "I kindly request you to consider my promotion application.", keywords: [{ tr: "terfi", en: "promotion" }, { tr: "değerlendirmek", en: "to consider" }] },
-            { id: 24, topic: "İş & Kariyer", level: "B2", turkish: "Müzakere becerileri iyi bir lider için çok önemlidir.", english: "Negotiation skills are very important for a good leader.", keywords: [{ tr: "müzakere", en: "negotiation" }, { tr: "lider", en: "leader" }] },
-            { id: 25, topic: "İş & Kariyer", level: "A2", turkish: "Maaşım her ayın sonunda yatıyor.", english: "My salary is paid at the end of every month.", keywords: [{ tr: "maaş", en: "salary" }] },
-            { id: 26, topic: "İş & Kariyer", level: "B1", turkish: "Patronum benden bir rapor hazırlamamı istedi.", english: "My boss asked me to prepare a report.", keywords: [{ tr: "patron", en: "boss" }, { tr: "rapor", en: "report" }] },
-            { id: 27, topic: "İş & Kariyer", level: "A2", turkish: "Ofise her gün otobüsle gidiyorum.", english: "I go to the office by bus every day.", keywords: [{ tr: "ofis", en: "office" }, { tr: "otobüs", en: "bus" }] },
-            { id: 28, topic: "İş & Kariyer", level: "B2", turkish: "İş görüşmesinde kendimi iyi ifade edemedim.", english: "I could not express myself well in the job interview.", keywords: [{ tr: "iş görüşmesi", en: "job interview" }, { tr: "ifade etmek", en: "to express" }] },
-            { id: 29, topic: "Sağlık", level: "A1", turkish: "Başım çok ağrıyor, aspirine ihtiyacım var.", english: "My head hurts a lot, I need aspirin.", keywords: [{ tr: "baş ağrısı", en: "headache" }, { tr: "ihtiyaç", en: "need" }] },
-            { id: 30, topic: "Sağlık", level: "A2", turkish: "Doktora randevu almam lazım.", english: "I need to make an appointment with the doctor.", keywords: [{ tr: "doktor", en: "doctor" }, { tr: "randevu", en: "appointment" }] },
-            { id: 31, topic: "Sağlık", level: "B1", turkish: "Düzenli egzersiz yapmanın sağlığa çok faydası var.", english: "Regular exercise has many benefits for health.", keywords: [{ tr: "egzersiz", en: "exercise" }, { tr: "düzenli", en: "regular" }] },
-            { id: 32, topic: "Sağlık", level: "B1", turkish: "Stres bağışıklık sistemini zayıflatabilir.", english: "Stress can weaken the immune system.", keywords: [{ tr: "stres", en: "stress" }, { tr: "bağışıklık sistemi", en: "immune system" }] },
-            { id: 33, topic: "Sağlık", level: "B2", turkish: "Bu ilacı günde iki kez yemekten sonra almanız gerekiyor.", english: "You need to take this medicine twice a day after meals.", keywords: [{ tr: "ilaç", en: "medicine" }, { tr: "yemekten sonra", en: "after meals" }] },
-            { id: 34, topic: "Sağlık", level: "A1", turkish: "Kolum çok acıyor, düştüm.", english: "My arm hurts a lot, I fell.", keywords: [{ tr: "kol", en: "arm" }, { tr: "düşmek", en: "to fall" }] },
-            { id: 35, topic: "Sağlık", level: "A2", turkish: "Her gün en az iki litre su içmelisiniz.", english: "You should drink at least two liters of water every day.", keywords: [{ tr: "su", en: "water" }, { tr: "içmek", en: "to drink" }] },
-            { id: 36, topic: "Sağlık", level: "B2", turkish: "Ameliyattan sonra iki hafta dinlenmem gerekiyor.", english: "I need to rest for two weeks after the surgery.", keywords: [{ tr: "ameliyat", en: "surgery" }, { tr: "dinlenmek", en: "to rest" }] },
-            { id: 37, topic: "Alışveriş", level: "A1", turkish: "Bu gömlek kaç para?", english: "How much is this shirt?", keywords: [{ tr: "gömlek", en: "shirt" }] },
-            { id: 38, topic: "Alışveriş", level: "A2", turkish: "Bunu daha büyük bedende var mı?", english: "Do you have this in a larger size?", keywords: [{ tr: "beden", en: "size" }, { tr: "büyük", en: "larger" }] },
-            { id: 39, topic: "Alışveriş", level: "A2", turkish: "İade politikanız nedir?", english: "What is your return policy?", keywords: [{ tr: "iade", en: "return" }, { tr: "politika", en: "policy" }] },
-            { id: 40, topic: "Alışveriş", level: "B1", turkish: "Bu ürün için indirim uygulayabilir misiniz?", english: "Can you apply a discount for this product?", keywords: [{ tr: "indirim", en: "discount" }, { tr: "ürün", en: "product" }] },
-            { id: 41, topic: "Alışveriş", level: "B1", turkish: "Kredi kartıyla ödeme yapabilir miyim?", english: "Can I pay with a credit card?", keywords: [{ tr: "kredi kartı", en: "credit card" }] },
-            { id: 42, topic: "Alışveriş", level: "B2", turkish: "Faturayı kurumsal adresime keser misiniz?", english: "Can you issue the invoice to my corporate address?", keywords: [{ tr: "fatura", en: "invoice" }, { tr: "kurumsal", en: "corporate" }] },
-            { id: 43, topic: "Alışveriş", level: "A1", turkish: "Bu ayakkabıları denemek istiyorum.", english: "I want to try on these shoes.", keywords: [{ tr: "ayakkabı", en: "shoes" }, { tr: "denemek", en: "to try on" }] },
-            { id: 44, topic: "Alışveriş", level: "B1", turkish: "Online siparişim hâlâ teslim edilmedi.", english: "My online order has not been delivered yet.", keywords: [{ tr: "sipariş", en: "order" }, { tr: "teslim etmek", en: "to deliver" }] },
-            { id: 45, topic: "Zaman & Tarihler", level: "A1", turkish: "Bugün hava çok güzel.", english: "The weather is very nice today.", keywords: [{ tr: "hava", en: "weather" }, { tr: "güzel", en: "nice" }] },
-            { id: 46, topic: "Zaman & Tarihler", level: "A2", turkish: "Toplantı saat üçte başlayacak.", english: "The meeting will start at three o'clock.", keywords: [{ tr: "başlamak", en: "to start" }] },
-            { id: 47, topic: "Zaman & Tarihler", level: "B1", turkish: "Geçen yıl bu zamanlarda İspanya'daydım.", english: "I was in Spain this time last year.", keywords: [{ tr: "geçen yıl", en: "last year" }] },
-            { id: 48, topic: "Zaman & Tarihler", level: "B1", turkish: "Proje teslim tarihi önümüzdeki Cuma.", english: "The project deadline is next Friday.", keywords: [{ tr: "teslim tarihi", en: "deadline" }, { tr: "önümüzdeki", en: "next" }] },
-            { id: 49, topic: "Zaman & Tarihler", level: "B2", turkish: "Planları son dakikada değiştirmek profesyonelce değil.", english: "Changing plans at the last minute is not very professional.", keywords: [{ tr: "son dakika", en: "last minute" }, { tr: "profesyonel", en: "professional" }] },
-            { id: 50, topic: "Zaman & Tarihler", level: "A1", turkish: "Saat kaç? Geç kaldım!", english: "What time is it? I am late!", keywords: [{ tr: "geç kalmak", en: "to be late" }] },
-            { id: 51, topic: "Zaman & Tarihler", level: "A2", turkish: "Doğum günüm on beş Mart.", english: "My birthday is on March fifteenth.", keywords: [{ tr: "doğum günü", en: "birthday" }] },
-            { id: 52, topic: "Zaman & Tarihler", level: "B1", turkish: "Bu işi bitirmem en az üç gün sürer.", english: "It will take me at least three days to finish this job.", keywords: [{ tr: "bitirmek", en: "to finish" }, { tr: "sürmek", en: "to take" }] },
-            { id: 53, topic: "Sosyal & Teknoloji", level: "A2", turkish: "Her gün sosyal medyada çok vakit geçiriyorum.", english: "I spend too much time on social media every day.", keywords: [{ tr: "sosyal medya", en: "social media" }, { tr: "vakit", en: "time" }] },
-            { id: 54, topic: "Sosyal & Teknoloji", level: "B1", turkish: "Telefonumun şarjı bitmek üzere.", english: "My phone is about to run out of battery.", keywords: [{ tr: "şarj", en: "battery" }, { tr: "bitmek", en: "to run out" }] },
-            { id: 55, topic: "Sosyal & Teknoloji", level: "B1", turkish: "Bu uygulamayı indirdim ama nasıl kullanacağımı bilmiyorum.", english: "I downloaded this app but I do not know how to use it.", keywords: [{ tr: "indirmek", en: "to download" }, { tr: "uygulama", en: "app" }] },
-            { id: 56, topic: "Sosyal & Teknoloji", level: "B2", turkish: "İnternetsiz bir gün geçirebileceğimi sanmıyorum.", english: "I do not think I can spend a day without the internet.", keywords: [{ tr: "internet", en: "internet" }] },
-            { id: 57, topic: "Sosyal & Teknoloji", level: "A2", turkish: "Sana bir mesaj attım, gördün mü?", english: "I sent you a message, did you see it?", keywords: [{ tr: "mesaj", en: "message" }, { tr: "görmek", en: "to see" }] },
-            { id: 58, topic: "Yemek & Restoran", level: "A1", turkish: "Menüyü görebilir miyim lütfen?", english: "Can I see the menu please?", keywords: [{ tr: "menü", en: "menu" }] },
-            { id: 59, topic: "Yemek & Restoran", level: "A2", turkish: "Ben acı yemek yiyemiyorum.", english: "I cannot eat spicy food.", keywords: [{ tr: "acı", en: "spicy" }, { tr: "yemek", en: "food" }] },
-            { id: 60, topic: "Yemek & Restoran", level: "B1", turkish: "Hesabı ayrı ayrı ödeyebilir miyiz?", english: "Can we pay the bill separately?", keywords: [{ tr: "hesap", en: "bill" }, { tr: "ayrı ayrı", en: "separately" }] },
-            { id: 61, topic: "Yemek & Restoran", level: "B1", turkish: "Bu restoranın deniz ürünleri harika.", english: "The seafood at this restaurant is amazing.", keywords: [{ tr: "deniz ürünleri", en: "seafood" }, { tr: "restoran", en: "restaurant" }] },
-            { id: 62, topic: "Yemek & Restoran", level: "A2", turkish: "Bir bardak su alabilir miyim?", english: "Can I have a glass of water?", keywords: [{ tr: "bardak", en: "glass" }, { tr: "su", en: "water" }] },
-            { id: 63, topic: "Duygular & Fikirler", level: "A2", turkish: "Bugün çok mutluyum çünkü sınavı geçtim.", english: "I am very happy today because I passed the exam.", keywords: [{ tr: "mutlu", en: "happy" }, { tr: "sınav", en: "exam" }] },
-            { id: 64, topic: "Duygular & Fikirler", level: "B1", turkish: "Bu konuda sana katılmıyorum.", english: "I do not agree with you on this matter.", keywords: [{ tr: "katılmak", en: "to agree" }, { tr: "konu", en: "matter" }] },
-            { id: 65, topic: "Duygular & Fikirler", level: "B2", turkish: "Başarısızlıktan korkmak ilerlemeyi engeller.", english: "Being afraid of failure prevents progress.", keywords: [{ tr: "başarısızlık", en: "failure" }, { tr: "korkmak", en: "to be afraid" }] },
-            { id: 66, topic: "Duygular & Fikirler", level: "A1", turkish: "Çok üzgünüm, geç kaldım.", english: "I am very sorry, I am late.", keywords: [{ tr: "üzgün", en: "sorry" }] },
-            { id: 67, topic: "Duygular & Fikirler", level: "B1", turkish: "Bence bu fikir çok mantıklı.", english: "I think this idea is very logical.", keywords: [{ tr: "fikir", en: "idea" }, { tr: "mantıklı", en: "logical" }] },
-        ];
-        const TOPICS = [...new Set(SENTENCES.map(s => s.topic))];
-        function getTabLabels() { return { all: t('tabAll'), review: t('tabReview'), stats: t('tabStats'), verbs: t('tabVerbs') }; }
 
-        const VERBS = [
-            { v1: "go", v2: "went", v3: "gone", tr: "gitmek", tr2: "gitti", tr3: "gitmiş" },
-            { v1: "come", v2: "came", v3: "come", tr: "gelmek", tr2: "geldi", tr3: "gelmiş" },
-            { v1: "take", v2: "took", v3: "taken", tr: "almak", tr2: "aldı", tr3: "almış" },
-            { v1: "make", v2: "made", v3: "made", tr: "yapmak", tr2: "yaptı", tr3: "yapmış" },
-            { v1: "see", v2: "saw", v3: "seen", tr: "görmek", tr2: "gördü", tr3: "görmüş" },
-            { v1: "know", v2: "knew", v3: "known", tr: "bilmek", tr2: "bildi", tr3: "bilmiş" },
-            { v1: "get", v2: "got", v3: "gotten", tr: "almak/elde etmek", tr2: "aldı/elde etti", tr3: "almış/elde etmiş" },
-            { v1: "give", v2: "gave", v3: "given", tr: "vermek", tr2: "verdi", tr3: "vermiş" },
-            { v1: "find", v2: "found", v3: "found", tr: "bulmak", tr2: "buldu", tr3: "bulmuş" },
-            { v1: "think", v2: "thought", v3: "thought", tr: "düşünmek", tr2: "düşündü", tr3: "düşünmüş" },
-            { v1: "tell", v2: "told", v3: "told", tr: "söylemek", tr2: "söyledi", tr3: "söylemiş" },
-            { v1: "become", v2: "became", v3: "become", tr: "olmak", tr2: "oldu", tr3: "olmuş" },
-            { v1: "leave", v2: "left", v3: "left", tr: "ayrılmak", tr2: "ayrıldı", tr3: "ayrılmış" },
-            { v1: "feel", v2: "felt", v3: "felt", tr: "hissetmek", tr2: "hissetti", tr3: "hissetmiş" },
-            { v1: "put", v2: "put", v3: "put", tr: "koymak", tr2: "koydu", tr3: "koymuş" },
-            { v1: "bring", v2: "brought", v3: "brought", tr: "getirmek", tr2: "getirdi", tr3: "getirmiş" },
-            { v1: "begin", v2: "began", v3: "begun", tr: "başlamak", tr2: "başladı", tr3: "başlamış" },
-            { v1: "keep", v2: "kept", v3: "kept", tr: "tutmak", tr2: "tuttu", tr3: "tutmuş" },
-            { v1: "hold", v2: "held", v3: "held", tr: "tutmak/kavramak", tr2: "tuttu", tr3: "tutmuş" },
-            { v1: "write", v2: "wrote", v3: "written", tr: "yazmak", tr2: "yazdı", tr3: "yazmış" },
-            { v1: "stand", v2: "stood", v3: "stood", tr: "ayakta durmak", tr2: "ayakta durdu", tr3: "ayakta durmuş" },
-            { v1: "hear", v2: "heard", v3: "heard", tr: "duymak", tr2: "duydu", tr3: "duymuş" },
-            { v1: "let", v2: "let", v3: "let", tr: "izin vermek", tr2: "izin verdi", tr3: "izin vermiş" },
-            { v1: "mean", v2: "meant", v3: "meant", tr: "anlamına gelmek", tr2: "anlamına geldi", tr3: "anlamına gelmiş" },
-            { v1: "set", v2: "set", v3: "set", tr: "ayarlamak", tr2: "ayarladı", tr3: "ayarlamış" },
-            { v1: "meet", v2: "met", v3: "met", tr: "tanışmak/buluşmak", tr2: "tanıştı", tr3: "tanışmış" },
-            { v1: "run", v2: "ran", v3: "run", tr: "koşmak", tr2: "koştu", tr3: "koşmuş" },
-            { v1: "pay", v2: "paid", v3: "paid", tr: "ödemek", tr2: "ödedi", tr3: "ödemiş" },
-            { v1: "sit", v2: "sat", v3: "sat", tr: "oturmak", tr2: "oturdu", tr3: "oturmuş" },
-            { v1: "speak", v2: "spoke", v3: "spoken", tr: "konuşmak", tr2: "konuştu", tr3: "konuşmuş" },
-            { v1: "read", v2: "read", v3: "read", tr: "okumak", tr2: "okudu", tr3: "okumuş" },
-            { v1: "grow", v2: "grew", v3: "grown", tr: "büyümek", tr2: "büyüdü", tr3: "büyümüş" },
-            { v1: "lose", v2: "lost", v3: "lost", tr: "kaybetmek", tr2: "kaybetti", tr3: "kaybetmiş" },
-            { v1: "fall", v2: "fell", v3: "fallen", tr: "düşmek", tr2: "düştü", tr3: "düşmüş" },
-            { v1: "send", v2: "sent", v3: "sent", tr: "göndermek", tr2: "gönderdi", tr3: "göndermiş" },
-            { v1: "build", v2: "built", v3: "built", tr: "inşa etmek", tr2: "inşa etti", tr3: "inşa etmiş" },
-            { v1: "understand", v2: "understood", v3: "understood", tr: "anlamak", tr2: "anladı", tr3: "anlamış" },
-            { v1: "draw", v2: "drew", v3: "drawn", tr: "çizmek", tr2: "çizdi", tr3: "çizmiş" },
-            { v1: "break", v2: "broke", v3: "broken", tr: "kırmak", tr2: "kırdı", tr3: "kırmış" },
-            { v1: "spend", v2: "spent", v3: "spent", tr: "harcamak", tr2: "harcadı", tr3: "harcamış" },
-            { v1: "cut", v2: "cut", v3: "cut", tr: "kesmek", tr2: "kesti", tr3: "kesmiş" },
-            { v1: "rise", v2: "rose", v3: "risen", tr: "yükselmek", tr2: "yükseldi", tr3: "yükselmiş" },
-            { v1: "drive", v2: "drove", v3: "driven", tr: "sürmek", tr2: "sürdü", tr3: "sürmüş" },
-            { v1: "buy", v2: "bought", v3: "bought", tr: "satın almak", tr2: "satın aldı", tr3: "satın almış" },
-            { v1: "wear", v2: "wore", v3: "worn", tr: "giymek", tr2: "giydi", tr3: "giymiş" },
-            { v1: "choose", v2: "chose", v3: "chosen", tr: "seçmek", tr2: "seçti", tr3: "seçmiş" },
-            { v1: "throw", v2: "threw", v3: "thrown", tr: "fırlatmak", tr2: "fırlattı", tr3: "fırlatmış" },
-            { v1: "eat", v2: "ate", v3: "eaten", tr: "yemek", tr2: "yedi", tr3: "yemiş" },
-            { v1: "catch", v2: "caught", v3: "caught", tr: "yakalamak", tr2: "yakaladı", tr3: "yakalamış" },
-            { v1: "teach", v2: "taught", v3: "taught", tr: "öğretmek", tr2: "öğretti", tr3: "öğretmiş" },
-        ];
-
-        // === SPANISH DATA ===
-        const SENTENCES_ES = [
-            { id: 1, topic: "Vida Diaria", level: "A1", spanish: "Tomo una ducha antes de desayunar cada mañana.", english: "I take a shower before having breakfast every morning.", keywords: [{ es: "desayunar", en: "breakfast" }, { es: "ducha", en: "shower" }] },
-            { id: 2, topic: "Vida Diaria", level: "A1", spanish: "Por las noches, generalmente leo un libro.", english: "I usually read a book in the evenings.", keywords: [{ es: "libro", en: "book" }, { es: "noche", en: "evening" }] },
-            { id: 3, topic: "Vida Diaria", level: "A2", spanish: "Necesito limpiar la cocina pero estoy muy cansado.", english: "I need to clean the kitchen but I am very tired.", keywords: [{ es: "cocina", en: "kitchen" }, { es: "limpiar", en: "to clean" }] },
-            { id: 4, topic: "Vida Diaria", level: "A2", spanish: "Paseo a mi perro en el parque todos los días.", english: "I walk my dog in the park every day.", keywords: [{ es: "parque", en: "park" }, { es: "pasear", en: "to walk" }] },
-            { id: 5, topic: "Vida Diaria", level: "B1", spanish: "Los fines de semana prefiero reunirme con mis amigos.", english: "I prefer to meet with my friends on weekends.", keywords: [{ es: "preferir", en: "to prefer" }, { es: "fin de semana", en: "weekend" }] },
-            { id: 6, topic: "Vida Diaria", level: "B1", spanish: "Anoche trabajé hasta muy tarde.", english: "I worked until late last night.", keywords: [{ es: "tarde", en: "late" }, { es: "anoche", en: "last night" }] },
-            { id: 7, topic: "Vida Diaria", level: "B2", spanish: "Quiero cambiar mis hábitos pero se está poniendo difícil.", english: "I want to change my habits but it is getting difficult.", keywords: [{ es: "hábito", en: "habit" }, { es: "cambiar", en: "to change" }] },
-            { id: 8, topic: "Vida Diaria", level: "A1", spanish: "No me gusta despertarme temprano por las mañanas.", english: "I do not like waking up early in the mornings.", keywords: [{ es: "temprano", en: "early" }, { es: "despertarse", en: "to wake up" }] },
-            { id: 9, topic: "Viajes", level: "A1", spanish: "¿Puede mostrarme el hotel más cercano, por favor?", english: "Can you show me the nearest hotel please?", keywords: [{ es: "hotel", en: "hotel" }, { es: "cercano", en: "nearest" }] },
-            { id: 10, topic: "Viajes", level: "A2", spanish: "¿Cuántas horas durará este vuelo?", english: "How many hours will this flight take?", keywords: [{ es: "vuelo", en: "flight" }, { es: "durar", en: "to take" }] },
-            { id: 11, topic: "Viajes", level: "A2", spanish: "Necesito cambiar mi reservación.", english: "I need to change my reservation.", keywords: [{ es: "reservación", en: "reservation" }, { es: "cambiar", en: "to change" }] },
-            { id: 12, topic: "Viajes", level: "B1", spanish: "He visitado muchos países pero Japón es mi favorito.", english: "I have visited many countries but Japan is my favorite.", keywords: [{ es: "visitar", en: "to visit" }, { es: "país", en: "country" }] },
-            { id: 13, topic: "Viajes", level: "B1", spanish: "El tren sale a las ocho de la mañana.", english: "The train departs at eight in the morning.", keywords: [{ es: "tren", en: "train" }, { es: "salir", en: "to depart" }] },
-            { id: 14, topic: "Viajes", level: "B2", spanish: "Me perdí porque no tenía un mapa.", english: "I got lost because I did not have a map.", keywords: [{ es: "perderse", en: "to get lost" }, { es: "mapa", en: "map" }] },
-            { id: 15, topic: "Trabajo", level: "A2", spanish: "Tengo una reunión importante mañana por la mañana.", english: "I have an important meeting tomorrow morning.", keywords: [{ es: "reunión", en: "meeting" }, { es: "importante", en: "important" }] },
-            { id: 16, topic: "Trabajo", level: "B1", spanish: "He aprendido mucho desde que me uní a la empresa.", english: "I have learned a lot since I joined the company.", keywords: [{ es: "empresa", en: "company" }, { es: "unirse", en: "to join" }] },
-            { id: 17, topic: "Trabajo", level: "B1", spanish: "Necesitamos entregar este proyecto a tiempo.", english: "We need to deliver this project on time.", keywords: [{ es: "proyecto", en: "project" }, { es: "entregar", en: "to deliver" }] },
-            { id: 18, topic: "Trabajo", level: "A2", spanish: "Mi salario se paga al final de cada mes.", english: "My salary is paid at the end of every month.", keywords: [{ es: "salario", en: "salary" }] },
-            { id: 19, topic: "Trabajo", level: "B1", spanish: "Mi jefe me pidió que preparara un informe.", english: "My boss asked me to prepare a report.", keywords: [{ es: "jefe", en: "boss" }, { es: "informe", en: "report" }] },
-            { id: 20, topic: "Trabajo", level: "A2", spanish: "Voy a la oficina en autobús todos los días.", english: "I go to the office by bus every day.", keywords: [{ es: "oficina", en: "office" }, { es: "autobús", en: "bus" }] },
-            { id: 21, topic: "Salud", level: "A1", spanish: "Me duele mucho la cabeza, necesito una aspirina.", english: "My head hurts a lot, I need aspirin.", keywords: [{ es: "dolor de cabeza", en: "headache" }, { es: "necesitar", en: "need" }] },
-            { id: 22, topic: "Salud", level: "A2", spanish: "Necesito hacer una cita con el doctor.", english: "I need to make an appointment with the doctor.", keywords: [{ es: "doctor", en: "doctor" }, { es: "cita", en: "appointment" }] },
-            { id: 23, topic: "Salud", level: "B1", spanish: "El ejercicio regular tiene muchos beneficios para la salud.", english: "Regular exercise has many benefits for health.", keywords: [{ es: "ejercicio", en: "exercise" }, { es: "regular", en: "regular" }] },
-            { id: 24, topic: "Salud", level: "B1", spanish: "El estrés puede debilitar el sistema inmunológico.", english: "Stress can weaken the immune system.", keywords: [{ es: "estrés", en: "stress" }, { es: "sistema inmunológico", en: "immune system" }] },
-            { id: 25, topic: "Salud", level: "A1", spanish: "Me duele mucho el brazo, me caí.", english: "My arm hurts a lot, I fell.", keywords: [{ es: "brazo", en: "arm" }, { es: "caer", en: "to fall" }] },
-            { id: 26, topic: "Salud", level: "A2", spanish: "Debes beber al menos dos litros de agua cada día.", english: "You should drink at least two liters of water every day.", keywords: [{ es: "agua", en: "water" }, { es: "beber", en: "to drink" }] },
-            { id: 27, topic: "Compras", level: "A1", spanish: "¿Cuánto cuesta esta camisa?", english: "How much is this shirt?", keywords: [{ es: "camisa", en: "shirt" }] },
-            { id: 28, topic: "Compras", level: "A2", spanish: "¿Tienen esto en una talla más grande?", english: "Do you have this in a larger size?", keywords: [{ es: "talla", en: "size" }, { es: "grande", en: "larger" }] },
-            { id: 29, topic: "Compras", level: "A2", spanish: "¿Cuál es su política de devolución?", english: "What is your return policy?", keywords: [{ es: "devolución", en: "return" }, { es: "política", en: "policy" }] },
-            { id: 30, topic: "Compras", level: "B1", spanish: "¿Puede aplicar un descuento para este producto?", english: "Can you apply a discount for this product?", keywords: [{ es: "descuento", en: "discount" }, { es: "producto", en: "product" }] },
-            { id: 31, topic: "Compras", level: "B1", spanish: "¿Puedo pagar con tarjeta de crédito?", english: "Can I pay with a credit card?", keywords: [{ es: "tarjeta de crédito", en: "credit card" }] },
-            { id: 32, topic: "Compras", level: "A1", spanish: "Quiero probarme estos zapatos.", english: "I want to try on these shoes.", keywords: [{ es: "zapatos", en: "shoes" }, { es: "probarse", en: "to try on" }] },
-            { id: 33, topic: "Tiempo y Fechas", level: "A1", spanish: "El clima está muy bonito hoy.", english: "The weather is very nice today.", keywords: [{ es: "clima", en: "weather" }, { es: "bonito", en: "nice" }] },
-            { id: 34, topic: "Tiempo y Fechas", level: "A2", spanish: "La reunión comenzará a las tres en punto.", english: "The meeting will start at three o'clock.", keywords: [{ es: "comenzar", en: "to start" }] },
-            { id: 35, topic: "Tiempo y Fechas", level: "A1", spanish: "¿Qué hora es? ¡Llegué tarde!", english: "What time is it? I am late!", keywords: [{ es: "llegar tarde", en: "to be late" }] },
-            { id: 36, topic: "Tiempo y Fechas", level: "A2", spanish: "Mi cumpleaños es el quince de marzo.", english: "My birthday is on March fifteenth.", keywords: [{ es: "cumpleaños", en: "birthday" }] },
-            { id: 37, topic: "Social y Tecnología", level: "A2", spanish: "Paso demasiado tiempo en las redes sociales cada día.", english: "I spend too much time on social media every day.", keywords: [{ es: "redes sociales", en: "social media" }, { es: "tiempo", en: "time" }] },
-            { id: 38, topic: "Social y Tecnología", level: "B1", spanish: "La batería de mi teléfono está a punto de agotarse.", english: "My phone is about to run out of battery.", keywords: [{ es: "batería", en: "battery" }, { es: "agotarse", en: "to run out" }] },
-            { id: 39, topic: "Social y Tecnología", level: "B1", spanish: "Descargué esta aplicación pero no sé cómo usarla.", english: "I downloaded this app but I do not know how to use it.", keywords: [{ es: "descargar", en: "to download" }, { es: "aplicación", en: "app" }] },
-            { id: 40, topic: "Social y Tecnología", level: "A2", spanish: "Te envié un mensaje, ¿lo viste?", english: "I sent you a message, did you see it?", keywords: [{ es: "mensaje", en: "message" }, { es: "ver", en: "to see" }] },
-            { id: 41, topic: "Comida", level: "A1", spanish: "¿Puedo ver el menú, por favor?", english: "Can I see the menu please?", keywords: [{ es: "menú", en: "menu" }] },
-            { id: 42, topic: "Comida", level: "A2", spanish: "No puedo comer comida picante.", english: "I cannot eat spicy food.", keywords: [{ es: "picante", en: "spicy" }, { es: "comida", en: "food" }] },
-            { id: 43, topic: "Comida", level: "B1", spanish: "¿Podemos pagar la cuenta por separado?", english: "Can we pay the bill separately?", keywords: [{ es: "cuenta", en: "bill" }, { es: "por separado", en: "separately" }] },
-            { id: 44, topic: "Comida", level: "A2", spanish: "¿Puedo tener un vaso de agua?", english: "Can I have a glass of water?", keywords: [{ es: "vaso", en: "glass" }, { es: "agua", en: "water" }] },
-            { id: 45, topic: "Sentimientos", level: "A2", spanish: "Estoy muy feliz hoy porque aprobé el examen.", english: "I am very happy today because I passed the exam.", keywords: [{ es: "feliz", en: "happy" }, { es: "examen", en: "exam" }] },
-            { id: 46, topic: "Sentimientos", level: "B1", spanish: "No estoy de acuerdo contigo en este asunto.", english: "I do not agree with you on this matter.", keywords: [{ es: "estar de acuerdo", en: "to agree" }, { es: "asunto", en: "matter" }] },
-            { id: 47, topic: "Sentimientos", level: "A1", spanish: "Lo siento mucho, llegué tarde.", english: "I am very sorry, I am late.", keywords: [{ es: "lo siento", en: "sorry" }] },
-            { id: 48, topic: "Sentimientos", level: "B1", spanish: "Creo que esta idea es muy lógica.", english: "I think this idea is very logical.", keywords: [{ es: "idea", en: "idea" }, { es: "lógico", en: "logical" }] },
-            { id: 49, topic: "Vida Diaria", level: "B1", spanish: "La semana pasada compré un teléfono nuevo.", english: "I bought a new phone last week.", keywords: [{ es: "comprar", en: "to buy" }, { es: "semana pasada", en: "last week" }] },
-            { id: 50, topic: "Viajes", level: "B2", spanish: "Me gustaría hacer una excursión por la ciudad.", english: "I would like to take a tour around the city.", keywords: [{ es: "excursión", en: "tour" }, { es: "ciudad", en: "city" }] },
-        ];
-        const TOPICS_ES = [...new Set(SENTENCES_ES.map(s => s.topic))];
-        const VERBS_ES = [
-            { v1: "go", v2: "went", v3: "gone", es: "ir", es2: "fue", es3: "ido" },
-            { v1: "come", v2: "came", v3: "come", es: "venir", es2: "vino", es3: "venido" },
-            { v1: "take", v2: "took", v3: "taken", es: "tomar", es2: "tomó", es3: "tomado" },
-            { v1: "make", v2: "made", v3: "made", es: "hacer", es2: "hizo", es3: "hecho" },
-            { v1: "see", v2: "saw", v3: "seen", es: "ver", es2: "vio", es3: "visto" },
-            { v1: "know", v2: "knew", v3: "known", es: "saber", es2: "supo", es3: "sabido" },
-            { v1: "get", v2: "got", v3: "gotten", es: "obtener", es2: "obtuvo", es3: "obtenido" },
-            { v1: "give", v2: "gave", v3: "given", es: "dar", es2: "dio", es3: "dado" },
-            { v1: "find", v2: "found", v3: "found", es: "encontrar", es2: "encontró", es3: "encontrado" },
-            { v1: "think", v2: "thought", v3: "thought", es: "pensar", es2: "pensó", es3: "pensado" },
-            { v1: "tell", v2: "told", v3: "told", es: "decir", es2: "dijo", es3: "dicho" },
-            { v1: "become", v2: "became", v3: "become", es: "volverse", es2: "se volvió", es3: "vuelto" },
-            { v1: "leave", v2: "left", v3: "left", es: "salir", es2: "salió", es3: "salido" },
-            { v1: "feel", v2: "felt", v3: "felt", es: "sentir", es2: "sintió", es3: "sentido" },
-            { v1: "put", v2: "put", v3: "put", es: "poner", es2: "puso", es3: "puesto" },
-            { v1: "bring", v2: "brought", v3: "brought", es: "traer", es2: "trajo", es3: "traído" },
-            { v1: "begin", v2: "began", v3: "begun", es: "empezar", es2: "empezó", es3: "empezado" },
-            { v1: "keep", v2: "kept", v3: "kept", es: "mantener", es2: "mantuvo", es3: "mantenido" },
-            { v1: "write", v2: "wrote", v3: "written", es: "escribir", es2: "escribió", es3: "escrito" },
-            { v1: "speak", v2: "spoke", v3: "spoken", es: "hablar", es2: "habló", es3: "hablado" },
-            { v1: "read", v2: "read", v3: "read", es: "leer", es2: "leyó", es3: "leído" },
-            { v1: "run", v2: "ran", v3: "run", es: "correr", es2: "corrió", es3: "corrido" },
-            { v1: "eat", v2: "ate", v3: "eaten", es: "comer", es2: "comió", es3: "comido" },
-            { v1: "buy", v2: "bought", v3: "bought", es: "comprar", es2: "compró", es3: "comprado" },
-            { v1: "send", v2: "sent", v3: "sent", es: "enviar", es2: "envió", es3: "enviado" },
-            { v1: "fall", v2: "fell", v3: "fallen", es: "caer", es2: "cayó", es3: "caído" },
-            { v1: "build", v2: "built", v3: "built", es: "construir", es2: "construyó", es3: "construido" },
-            { v1: "understand", v2: "understood", v3: "understood", es: "entender", es2: "entendió", es3: "entendido" },
-            { v1: "break", v2: "broke", v3: "broken", es: "romper", es2: "rompió", es3: "roto" },
-            { v1: "drive", v2: "drove", v3: "driven", es: "conducir", es2: "condujo", es3: "conducido" },
-            { v1: "lose", v2: "lost", v3: "lost", es: "perder", es2: "perdió", es3: "perdido" },
-            { v1: "teach", v2: "taught", v3: "taught", es: "enseñar", es2: "enseñó", es3: "enseñado" },
-            { v1: "grow", v2: "grew", v3: "grown", es: "crecer", es2: "creció", es3: "crecido" },
-            { v1: "pay", v2: "paid", v3: "paid", es: "pagar", es2: "pagó", es3: "pagado" },
-            { v1: "choose", v2: "chose", v3: "chosen", es: "elegir", es2: "eligió", es3: "elegido" },
-            { v1: "wear", v2: "wore", v3: "worn", es: "llevar", es2: "llevó", es3: "llevado" },
-            { v1: "catch", v2: "caught", v3: "caught", es: "atrapar", es2: "atrapó", es3: "atrapado" },
-            { v1: "throw", v2: "threw", v3: "thrown", es: "lanzar", es2: "lanzó", es3: "lanzado" },
-            { v1: "sit", v2: "sat", v3: "sat", es: "sentarse", es2: "se sentó", es3: "sentado" },
-            { v1: "spend", v2: "spent", v3: "spent", es: "gastar", es2: "gastó", es3: "gastado" },
-            { v1: "cut", v2: "cut", v3: "cut", es: "cortar", es2: "cortó", es3: "cortado" },
-            { v1: "draw", v2: "drew", v3: "drawn", es: "dibujar", es2: "dibujó", es3: "dibujado" },
-            { v1: "hear", v2: "heard", v3: "heard", es: "oír", es2: "oyó", es3: "oído" },
-            { v1: "meet", v2: "met", v3: "met", es: "conocer", es2: "conoció", es3: "conocido" },
-            { v1: "stand", v2: "stood", v3: "stood", es: "estar de pie", es2: "estuvo de pie", es3: "estado de pie" },
-        ];
-
+// === MAIN DATA LOGIC ===
+// === DATA ===
+        // Data is now loaded from data.js
         // === LANGUAGE SYSTEM ===
         const UI = {
-            tr: { appTitle: '🇬🇧 İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → 🇬🇧', dirLabelRev: '🇬🇧 → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
-            es: { appTitle: '🇬🇧 Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: 'Todos', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → 🇬🇧', dirLabelRev: '🇬🇧 → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
+            tr: { appTitle: '🇺🇸 İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → 🇺🇸', dirLabelRev: '🇺🇸 → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
+            es: { appTitle: '🇺🇸 Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: '🎲 Aleatorio', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → 🇺🇸', dirLabelRev: '🇺🇸 → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
         };
-        function getCurSentences() { return S.lang === 'es' ? SENTENCES_ES : SENTENCES; }
+        function getCurSentences() { let cs=[]; try{ const raw=JSON.parse(localStorage.getItem('custom_sentences')||'[]'); if(Array.isArray(raw)) cs=raw.filter(s=>s&&s.english&&s.topic&&typeof s.topic==='string'&&s.topic.includes(':')); }catch(e){} return [...cs,...(S.lang==='es'?SENTENCES_ES:SENTENCES)]; }
         function getCurVerbs() { return S.lang === 'es' ? VERBS_ES : VERBS; }
-        function getCurTopics() { return [...new Set(getCurSentences().map(s => s.topic))]; }
+        function getCurTopics() { return [...new Set(getCurSentences().filter(s=>s&&s.topic&&typeof s.topic==='string').map(s => s.topic.split(':')[0].trim()))].sort(); }
         function t(key) { return UI[S.lang]?.[key] || UI.tr[key] || key; }
         function getNative(q) { return q[t('nativeField')] || q.turkish || q.spanish || ''; }
         function getKw(kw) { return kw[t('kwField')] || kw.tr || kw.es || ''; }
@@ -657,41 +260,88 @@
         function updateLangUI() {
             const btn = document.getElementById('langToggle'); btn.textContent = S.lang === 'tr' ? 'ES' : 'TR'; btn.style.background = S.lang === 'es' ? '#1e3a1a' : '#1a1a1a'; btn.style.color = S.lang === 'es' ? '#4ade80' : '#e5e5e5';
             document.querySelector('#app .text-xl').textContent = t('appTitle');
-            document.getElementById('dirLabel').textContent = S.lang === 'es' ? 'ES → 🇬🇧' : '🇹🇷 → 🇬🇧';
+            document.getElementById('dirLabel').textContent = S.lang === 'es' ? 'ES → 🇺🇸' : '🇹🇷 → 🇺🇸';
             const mapping = { sessionLabel: 'session', dirText: 'dirText', correctAnswerLabel: 'correctAnswer', teachMeLabel: 'teach', variationsLabel: 'variations', softTitle: 'softTitle', softRetryBtn: 'softRetry', checkBtnLabel: 'checkBtn', hintBtnLabel: 'hint', skipBtnLabel: 'skip', aiGenLabel: 'aiGen', weakBtnLabel: 'weakPoint', retryBtn: 'retry', nextBtn: 'next', reviewTitle: 'reviewTitle', statTotalLabel: 'statTotalLabel', statAccLabel: 'statAccLabel', statLearnedLabel: 'statLearnedLabel', statStreakLabel: 'statStreakLabel', topicPerfLabel: 'topicPerfLabel', weakReportLabel: 'weakReportLabel', weakReportDesc: 'weakReportDesc', resetBtn: 'resetBtn', verbTitle: 'verbTitle', verbSubtitle: 'verbSubtitle' };
             Object.entries(mapping).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
             const inp = document.getElementById('answerInput'); if (inp) inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');
         }
-        const today = () => new Date().toISOString().split('T')[0];
-        const LS = { get: (k, d) => JSON.parse(localStorage.getItem(k) || JSON.stringify(d)), set: (k, v) => localStorage.setItem(k, JSON.stringify(v)) };
+        const LS = { 
+            get: (k, d = null) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } }, 
+            set: (k, v) => { localStorage.setItem(k, JSON.stringify(v)); triggerCloudSync(); } 
+        };
         const getSRS = id => { const d = LS.get(srsKey(), {}); return d[id] || { id, correctStreak: 0, wrongCount: 0, easeFactor: 2.5, interval: 1, nextReview: today(), errorTags: [] }; };
-        const saveSRS = e => { const d = LS.get(srsKey(), {}); d[e.id] = e; LS.set(srsKey(), d); };
-        const getGS = () => LS.get(gsKey(), { totalCorrect: 0, totalWrong: 0, lastActiveDate: '', streak: 0 });
-        const saveGS = s => LS.set(gsKey(), s);
+        
         const getGeminiKey = () => { try { return localStorage.getItem('gemini_api_key') || ''; } catch { return ''; } };
         const getGroqKey = () => { try { return localStorage.getItem('groq_api_key') || ''; } catch { return ''; } };
         const getApiKey = () => getGroqKey() || getGeminiKey();
+        const getGS = () => { const d = LS.get(gsKey(), {}); return { streak: 0, lastActiveDate: '', totalCorrect: 0, totalWrong: 0, ...d }; };
+        const saveGS = s => LS.set(gsKey(), s);
+        const saveSRS = e => { const d = LS.get(srsKey(), {}); d[e.id] = e; LS.set(srsKey(), d); };
         const getVerbSRS = v1 => { const d = LS.get(verbSrsKey(), {}); return d[v1] || { v1, streak: 0, wrong: 0, learned: false, nextReview: today() }; };
         const saveVerbSRS = e => { const d = LS.get(verbSrsKey(), {}); d[e.v1] = e; LS.set(verbSrsKey(), d); };
         const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } };
         const CONTRACTIONS = { "can't": "cannot", "won't": "will not", "don't": "do not", "doesn't": "does not", "didn't": "did not", "isn't": "is not", "aren't": "are not", "wasn't": "was not", "weren't": "were not", "hasn't": "has not", "haven't": "have not", "hadn't": "had not", "wouldn't": "would not", "shouldn't": "should not", "couldn't": "could not", "i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is", "it's": "it is", "we're": "we are", "they're": "they are", "i've": "i have", "you've": "you have", "we've": "we have", "they've": "they have", "i'll": "i will", "you'll": "you will", "he'll": "he will", "she'll": "she will", "we'll": "we will", "they'll": "they will", "i'd": "i would", "you'd": "you would", "he'd": "he would", "she'd": "she would", "we'd": "we would", "they'd": "they would", "that's": "that is", "there's": "there is", "here's": "here is", "what's": "what is", "who's": "who is", "let's": "let us" };
         function norm(s) { let t = s.toLowerCase().trim().replace(/[.,!?;:'"\u2018\u2019\u201c\u201d]+/g, '').replace(/\s+/g, ' '); Object.entries(CONTRACTIONS).forEach(([c, e]) => { t = t.replace(new RegExp('\\b' + c.replace("'", "['’]?") + '\\b', 'gi'), e); }); const REV = {}; Object.entries(CONTRACTIONS).forEach(([c, e]) => { REV[e] = c; }); Object.entries(REV).forEach(([e, c]) => { t = t.replace(new RegExp('\\b' + e + '\\b', 'gi'), e); }); return t; }
-        function updateSRS(id, ok, tag) { const e = getSRS(id); if (ok) { e.easeFactor = Math.min(3, e.easeFactor + .1); e.interval = Math.round(e.interval * e.easeFactor); e.correctStreak++; const d = new Date(); d.setDate(d.getDate() + e.interval); e.nextReview = d.toISOString().split('T')[0]; } else { e.easeFactor = Math.max(1.3, e.easeFactor - .2); e.interval = 1; e.correctStreak = 0; e.wrongCount++; const d = new Date(); d.setDate(d.getDate() + 1); e.nextReview = d.toISOString().split('T')[0]; if (tag && !e.errorTags.includes(tag)) e.errorTags.push(tag); } saveSRS(e); }
+        function updateSRS(id, ok, tag) { 
+            
+ 
+            const tpKey = S.lang === 'es' ? 'topics_es' : 'topics_tr';
+            const topicsDict = LS.get(tpKey, {});
+            const sT = getCurSentences().find(s => s.id === id);
+            if (sT && sT.topic) { topicsDict[sT.topic] = today(); LS.set(tpKey, topicsDict); }
+ const e = getSRS(id); if (ok) { e.easeFactor = Math.min(3, e.easeFactor + .1); e.interval = Math.round(e.interval * e.easeFactor); e.correctStreak++; const d = new Date(); d.setDate(d.getDate() + e.interval); e.nextReview = d.toISOString().split('T')[0]; } else { e.easeFactor = Math.max(1.3, e.easeFactor - .2); e.interval = 1; e.correctStreak = 0; e.wrongCount++; const d = new Date(); d.setDate(d.getDate() + 1); e.nextReview = d.toISOString().split('T')[0]; if (tag && !e.errorTags.includes(tag)) e.errorTags.push(tag); } saveSRS(e); }
         function updateStreak() { const gs = getGS(); if (gs.lastActiveDate === today()) return; const y = new Date(); y.setDate(y.getDate() - 1); const yd = y.toISOString().split('T')[0]; gs.streak = gs.lastActiveDate === yd ? gs.streak + 1 : 1; gs.lastActiveDate = today(); saveGS(gs); updateStreakUI(); }
         function updateStreakUI() { const gs = getGS(); const b = document.getElementById('streakBadge'), c = document.getElementById('streakCount'); if (gs.streak > 0) { b.classList.remove('hidden'); c.textContent = gs.streak + ' gün'; } else b.classList.add('hidden'); }
         function updateGlobalStats(ok) { const gs = getGS(); ok ? gs.totalCorrect = (gs.totalCorrect || 0) + 1 : gs.totalWrong = (gs.totalWrong || 0) + 1; saveGS(gs); }
         // TABS
-        function renderTabs() { const topics = getCurTopics(); const tabs = ['all', ...topics, 'review', 'stats', 'verbs']; const labels = getTabLabels(); document.getElementById('tabContainer').innerHTML = tabs.map(tb => `<button class="tab-btn flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all" data-tab="${tb}" onclick="selectTab('${tb}')">${labels[tb] || tb}</button>`).join(''); }
-        function selectTab(t) { S.tab = t; S.aiQ = null; document.querySelectorAll('.tab-btn').forEach(b => { const a = b.dataset.tab === t; b.style.background = a ? '#3B82F6' : '#161616'; b.style.color = a ? 'white' : '#9ca3af'; b.style.border = a ? 'none' : '1px solid #2a2a2a'; }); hideAll(); if (t === 'review') showReview(); else if (t === 'stats') showStats(); else if (t === 'verbs') showVerbs(); else buildQueue(t); }
+        function renderTabs() { 
+            const topics = getCurTopics(); 
+            const tabs = ['all', ...topics, 'review', 'verbs']; 
+            
+            document.getElementById('tabContainer').innerHTML = tabs.map(tb => {
+                let label = tb;
+                if (tb === 'all') label = S.lang === 'es' ? '🎲 Aleatorio' : '🎲 Karışık';
+                if (tb === 'review') label = S.lang === 'es' ? '⏰ Repaso' : '⏰ Tekrar';
+                if (tb === 'verbs') label = S.lang === 'es' ? '📝 Verbos' : '📝 Fiiller';
+                return `<button class="tab-btn flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all" data-tab="${tb}" onclick="selectTab('${tb}')">${label}</button>`;
+            }).join(''); 
+        }
+        function selectTab(tb) { S.tab = tb; S.subtab = null; S.aiQ = null; document.querySelectorAll('.tab-btn').forEach(b => { const a = b.dataset.tab === tb; b.style.background = a ? '#3B82F6' : '#161616'; b.style.color = a ? 'white' : '#9ca3af'; b.style.border = a ? 'none' : '1px solid #2a2a2a'; }); hideAll(); if (tb === 'review') showReview(); else if (tb === 'stats') showStats(); else if (tb === 'verbs') showVerbs(); else if (tb === 'all') buildQueue('all'); else showSubTopicPicker(tb); }
+        function showSubTopicPicker(main) {
+            const SS = getCurSentences();
+            const subs = [...new Set(SS.filter(s => s.topic.startsWith(main + ':')).map(s => s.topic))].sort();
+            showScreen('practiceScreen');
+            // Soru UI'ini gizle - questionCard dahil
+            ['answerInput','mainButtons','wrongButtons','hintBox','feedbackBox','softCheckBox','directionToggle','questionCard'].forEach(function(id){ const el=document.getElementById(id); if(el) el.classList.add('hidden'); });
+            if (!subs.length) { buildQueue(main); return; }
+            // Picker div'i yarat veya yeniden kullan
+            let pd = document.getElementById('subTopicPickerDiv');
+            if (!pd) { pd = document.createElement('div'); pd.id = 'subTopicPickerDiv'; const qc = document.getElementById('questionCard'); qc.parentNode.insertBefore(pd, qc); }
+            pd.classList.remove('hidden');
+            const lbl = S.lang === 'es' ? 'Elige un tema:' : 'Konu seç:';
+            let html = '<div class="rounded-2xl p-6 fade-in" style="background:#161616;border:1px solid #222">';
+            html += '<h3 style="font-weight:700;font-size:1rem;color:#60a5fa;margin-bottom:12px">' + main + '</h3>';
+            html += '<p style="font-size:.75rem;color:#6b7280;margin-bottom:12px">' + lbl + '</p>';
+            html += '<div style="display:grid;gap:8px">';
+            html += '<button onclick="buildQueue(\'' + main + '\')" style="text-align:left;padding:12px 16px;border-radius:12px;font-weight:600;font-size:.875rem;background:#1e2a3a;border:1px solid #3B82F6;color:#60a5fa;cursor:pointer">Karisik &mdash; ' + main + '</button>';
+            subs.forEach(function(st) {
+                const short = st.split(':').slice(1).join(':').trim();
+                const safe = st.replace(/'/g, "\\'");
+                html += '<button onclick="buildQueue(\'' + safe + '\')" style="text-align:left;padding:12px 16px;border-radius:12px;font-weight:500;font-size:.875rem;background:#1a1a1a;border:1px solid #2a2a2a;color:#e5e5e5;cursor:pointer">' + short + '</button>';
+            });
+            html += '</div></div>';
+            pd.innerHTML = html;
+            document.getElementById('progressText').textContent = subs.length + ' konu';
+        }
         function hideAll() { ['practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
         function showScreen(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
         function toggleDirection() { S.dir = S.dir === 'tr2en' ? 'en2tr' : 'tr2en'; document.getElementById('dirLabel').textContent = S.dir === 'tr2en' ? t('dirLabel') : t('dirLabelRev'); document.getElementById('dirToggleBtn').style.background = S.dir === 'en2tr' ? '#1e2a3a' : '#1a1a1a'; document.getElementById('dirToggleBtn').style.borderColor = S.dir === 'en2tr' ? '#3B82F6' : '#2a2a2a'; if (S.tab !== 'review' && S.tab !== 'stats' && S.tab !== 'verbs') buildQueue(S.tab); }
         // QUEUE
-        function buildQueue(tab) { const SS = getCurSentences(); let pool = tab === 'all' ? [...SS] : SS.filter(s => s.topic === tab); if (S.filterTag) { pool = SS.filter(s => getSRS(s.id).errorTags.includes(S.filterTag)); S.filterTag = null; } const td = today(); const due = pool.filter(s => getSRS(s.id).nextReview <= td); const rest = pool.filter(s => getSRS(s.id).nextReview > td); shuffle(rest); S.queue = [...due, ...rest]; S.done = 0; S.ok = 0; S.nok = 0; showScreen('practiceScreen'); nextQuestion(); }
-        function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); document.getElementById('questionCard').innerHTML = '<p class="text-center text-gray-400 py-8">Tüm sorular tamamlandı! 🎉</p>';['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
+        function buildQueue(tab) { const _spd=document.getElementById('subTopicPickerDiv'); if(_spd)_spd.classList.add('hidden'); const _cd2=document.getElementById('completionDiv'); if(_cd2)_cd2.classList.add('hidden'); const _qc=document.getElementById('questionCard'); if(_qc)_qc.classList.remove('hidden'); ['directionToggle','mainButtons','answerInput'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('hidden');}); if(tab.includes(':')) S.subtab = tab; const SS = getCurSentences(); let pool = tab === 'all' ? [...SS] : SS.filter(s => s.topic.startsWith(tab)); if (S.filterTag) { pool = SS.filter(s => getSRS(s.id).errorTags.includes(S.filterTag)); S.filterTag = null; } const td = today(); const due = pool.filter(s => getSRS(s.id).nextReview <= td); const rest = pool.filter(s => getSRS(s.id).nextReview > td); shuffle(rest); S.queue = [...due, ...rest]; S.done = 0; S.ok = 0; S.nok = 0; showScreen('practiceScreen'); nextQuestion(); }
+        function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); const _spd2=document.getElementById('subTopicPickerDiv'); if(_spd2)_spd2.classList.add('hidden'); document.getElementById('questionCard').classList.add('hidden'); let _cd=document.getElementById('completionDiv'); if(!_cd){_cd=document.createElement('div');_cd.id='completionDiv'; const _qcr=document.getElementById('questionCard'); _qcr.parentNode.insertBefore(_cd,_qcr);} _cd.classList.remove('hidden'); _cd.innerHTML='<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">Tüm sorular tamamlandı!</p></div>'; ['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
         function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox', 'softCheckBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
         function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = q.topic; document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
-        function showAIQuestion(q) { S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
+        function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
         function handleCorrect() { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('correct'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
@@ -699,7 +349,27 @@
         function handleAccepted(input) { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = t('accepted'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = 'Senin: <span class="text-green-400">' + input + '</span><br>Referans: ' + refText; document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
         // SOFT CHECK
         const SMALL_WORDS = new Set(['in', 'on', 'at', 'to', 'for', 'a', 'an', 'the', 'is', 'are', 'am', 'do', 'does', 'did', 'was', 'were', 'has', 'have', 'had', 'will', 'would', 'can', 'could', 'should', 'shall', 'may', 'might', 'must', 'been', 'being', 'of', 'by', 'with', 'from', 'up', 'out', 'off', 'it', 'its', 'not', 'no', 'so', 'very', 'than', 'then', 'just', 'also', 'too', 'but', 'and', 'or', 'nor', 'yet', 'if']);
+        function getLevenshteinDistance(a, b) {
+            const matrix = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+            for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+            for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
+                }
+            }
+            return matrix[a.length][b.length];
+        }
+
         function softCheck(input, correct) {
+            const iCleanStr = input.toLowerCase().replace(/[.,!?;:'"]+/g, '').trim();
+            const cCleanStr = correct.toLowerCase().replace(/[.,!?;:'"]+/g, '').trim();
+            
+            if (iCleanStr.length > 5 && cCleanStr.length > 5 && getLevenshteinDistance(iCleanStr, cCleanStr) <= 2) {
+                return S.lang === 'es' ? 'Parece que hay un pequeño error de ortografía.' : 'Küçük bir yazım hatası (harf eksikliği/fazlalığı) olabilir.';
+            }
+
             const iw = input.toLowerCase().replace(/[.,!?;:'"]+/g, '').split(/\s+/).filter(Boolean);
             const cw = correct.toLowerCase().replace(/[.,!?;:'"]+/g, '').split(/\s+/).filter(Boolean);
             // Find missing words (in correct but not in input)
@@ -760,34 +430,41 @@ Anlamca doğru mu? SADECE "EVET" veya "HAYIR" yaz.`; const txt = await geminiCal
         async function geminiCall(prompt) {
             if (!getApiKey()) { lastApiError = 'nokey'; return null; }
             const now = Date.now(); const wait = API_THROTTLE - (now - lastApiTime); if (wait > 0) await new Promise(r => setTimeout(r, wait)); lastApiTime = Date.now(); lastApiError = '';
-            // Try Groq first, then Gemini
-            try { const r = await callGroq(prompt); if (r) return r; } catch (e) { console.log('Groq failed:', e); }
-            try { const r = await callGemini(prompt); if (r) return r; } catch (e) { console.log('Gemini failed:', e); lastApiError = e; }
+            // Try Gemini first, then Groq
+            try { const r = await callGemini(prompt); if (r) return r; } catch (e) { console.log('Gemini failed:', e); }
+            try { const r = await callGroq(prompt); if (r) return r; } catch (e) { console.log('Groq failed:', e); lastApiError = e; }
             if (!lastApiError) lastApiError = 'network'; return null;
         }
         async function callGeminiError(q, student) {
-            document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!getApiKey()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const prompt = `TR:"${q.turkish}" EN:"${q.english}" Öğrenci:"${student}"
+            document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!getApiKey()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const isEs = S.lang === 'es';
+            const nativeText = isEs ? (q.spanish || q.turkish) : q.turkish;
+            const prompt = `Native:"${nativeText}" EN:"${q.english}" Student:"${student}"
 Hata Türü: [preposition|past_tense|present_perfect|article|word_order|vocabulary|spelling|other]
-Hata: [Türkçe kısa ad]
-Açıklama: [2-3 cümle Türkçe]
-İpucu: [cevabı verme, yönlendir]`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>Hata:</strong> ${errorLabel || 'Gramer hatası'}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${explanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>İpucu:</strong> ${hint || 'Doğru cevabı incele.'}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
+Hata: [${isEs ? 'Nombre corto del error en español' : 'Türkçe kısa ad'}]
+Açıklama: [${isEs ? '2-3 oraciones en español' : '2-3 cümle Türkçe'}]
+İpucu: [${isEs ? 'No des la respuesta, guía al estudiante en español' : 'cevabı verme, yönlendir'}]`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>Hata:</strong> ${errorLabel || 'Gramer hatası'}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${explanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>İpucu:</strong> ${hint || 'Doğru cevabı incele.'}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
         }
         function showApiErr() { document.getElementById('apiFeedback').classList.remove('hidden'); const el = document.getElementById('apiErrorType'); if (lastApiError === 'quota') { el.innerHTML = '⚠️ <strong>Kota limiti doldu!</strong> Ücretsiz API limiti aşıldı. Birkaç dakika bekleyip tekrar dene.'; el.style.color = '#fbbf24'; } else if (lastApiError === 'key') { el.innerHTML = '❌ <strong>API key geçersiz.</strong> Ayarlar\'dan kontrol et.'; el.style.color = '#f87171'; } else if (lastApiError === 'nokey') { el.innerHTML = '🔑 API key girilmemiş. Ayarlar\'dan Gemini API key girin.'; el.style.color = '#60a5fa'; } else if (lastApiError === 'network') { el.innerHTML = '🌐 İnternet bağlantısı sorunu. Bağlantını kontrol et.'; el.style.color = '#9ca3af'; } else { el.textContent = '⚠️ API bağlantısı kurulamadı. Doğru cevabı incele.'; el.style.color = '#9ca3af'; } document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').textContent = ''; }
         // AI FEATURES
         async function generateAISentence() {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const btn = document.getElementById('aiGenBtn'); btn.textContent = '🤖 Üretiliyor...'; btn.disabled = true; const topic = S.tab === 'all' ? TOPICS[Math.floor(Math.random() * TOPICS.length)] : S.tab; const prompt = `"${topic}", A2-B1, 1 cümle üret.
-JSON: {"turkish":"...","english":"...","keywords":[{"tr":"...","en":"..."}]}
-2 keyword. BAŞKA BİR ŞEY YAZMA.`; const txt = await geminiCall(prompt); btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false; if (!txt) { alert('AI cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic, level: 'AI', turkish: j.turkish, english: j.english, keywords: j.keywords || [], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
+            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const btn = document.getElementById('aiGenBtn'); btn.textContent = '🤖 Üretiliyor...'; btn.disabled = true; const _allSubs = [...new Set(getCurSentences().filter(s=>s.topic&&s.topic.includes(':')).map(s=>s.topic))]; let topic; if(S.subtab&&S.subtab.includes(':')){topic=S.subtab;} else if(S.tab==='all'){topic=_allSubs[Math.floor(Math.random()*_allSubs.length)]||'Faz 1: To Be (Am/Is/Are)';} else{const _subs=_allSubs.filter(t=>t.startsWith(S.tab+':'));topic=_subs.length?_subs[Math.floor(Math.random()*_subs.length)]:S.tab;} const _grammarTopic=topic.includes(':')?topic.split(':').slice(1).join(':').trim():topic; const _isES=S.lang==='es'; const prompt=_isES?`English grammar topic: "${_grammarTopic}". Level A2-B1. Generate 1 English sentence. Return ONLY JSON: {"spanish":"[Spanish]","english":"[English sentence]","keywords":[{"es":"[word]","en":"[word]"},{"es":"[word2]","en":"[word2]"}]}`:`İngilizce gramer konusu: "${_grammarTopic}". Seviye A2-B1. Bu konuyu kullanan 1 İngilizce cümle üret. SADECE şu JSON'u döndür: {"turkish":"[Türkçe]","english":"[İngilizce cümle]","keywords":[{"tr":"[kelime]","en":"[word]"},{"tr":"[kelime2]","en":"[word2]"}]}`; const txt = await geminiCall(prompt); btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false; if (!txt) { alert('AI cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); const aiId='ai_'+Date.now(); const _nativeVal = j[S.lang==='es'?'spanish':'turkish'] || j.turkish || j.spanish || ''; S.aiQ = { topic, level: 'AI', turkish: _nativeVal, spanish: _nativeVal, english: j.english||'', keywords: j.keywords||[], id: aiId }; try{let ca=JSON.parse(localStorage.getItem('custom_sentences')||'[]');ca.push({...S.aiQ});LS.set('custom_sentences',ca);}catch(e){} resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
         }
         async function practiceWeakPoint() {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const SS = getCurSentences(); const tags = {}; SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); }); const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]); if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; } const weakTag = sorted[0][0]; const btn = document.getElementById('weakBtn'); btn.textContent = '🎯 Üretiliyor...'; btn.disabled = true; const tl = { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' }; const nf = t('nativeField'); const prompt = `"${tl[weakTag] || weakTag}" gramer konusu, A2-B1, 1 cümle.\nJSON: {"${nf}":"...","english":"...","keywords":[{"${t('kwField')}":"...","en":"..."}]}\n2 keyword. BAŞKA YAZMA.`; const txt = await geminiCall(prompt); btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false; if (!txt) { alert('Cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: j.turkish, spanish: j.spanish, english: j.english, keywords: j.keywords || [], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
+            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const SS = getCurSentences(); const tags = {}; SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); }); const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]); if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; } const weakTag = sorted[0][0]; const btn = document.getElementById('weakBtn'); btn.textContent = '🎯 Üretiliyor...'; btn.disabled = true; const tl = { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' }; const nf = t('nativeField'); const prompt = `"${tl[weakTag] || weakTag}" gramer konusu, A2-B1, 1 cümle.\nJSON: {"${nf}":"...","english":"...","keywords":[{"${t('kwField')}":"...","en":"..."}]}\n2 keyword. BAŞKA YAZMA.`; const txt = await geminiCall(prompt); btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false; if (!txt) { alert('Cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: (j[nf]||j.turkish||''), spanish: (j[nf]||j.spanish||''), english: j.english||'', keywords: j.keywords||[], id: null }; resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
         }
         async function askTeachMe() {
-            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Hazırlanıyor...</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'Explica esta gramática en español. 4-5 oraciones, con ejemplos. Texto plano.' : 'Bu gramer konusunu Türkçe öğret. 4-5 cümle, örneklerle. Düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>';
+            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Hazırlanıyor...</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'You are an English teacher for Spanish speakers. Explain this ENGLISH grammar in Spanish using 3 English example sentences. Focus on English usage rules. Brief plain text.' : 'Sen bir İngilizce öğretmenisin. Bu İNGİLİZCE gramer kuralını Türkçe açıkla. 3 İngilizce örnek cümle ver ve Türkçe açıkla. Kısa, net, düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>';
         }
         async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 Hazırlanıyor...</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 Alternatif Söyleniş</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>'; }
         // REVIEW
-        function showReview() { showScreen('reviewScreen'); const SS = getCurSentences(); const due = SS.filter(s => getSRS(s.id).nextReview <= today()); document.getElementById('reviewCount').textContent = S.lang === 'es' ? `Hoy ${due.length} oraciones para repasar.` : `Bugün ${due.length} cümle tekrar zamanı.`; if (!due.length) { document.getElementById('reviewModeArea').innerHTML = `<p class="text-center text-gray-500 py-12">${t('reviewDone')}</p>`; return; } S.rQueue = [...due]; shuffle(S.rQueue); S.rIdx = 0; showReviewQ(); }
+        function showReview() { showScreen('reviewScreen'); const SS = getCurSentences(); 
+            const tDate = new Date(); tDate.setDate(tDate.getDate() - 1);
+            const yesterdayDate = tDate.toISOString().split('T')[0];
+            const yesterdayTopics = Object.keys(LS.get(S.lang === 'es' ? 'topics_es' : 'topics_tr', {})); // For future, tracked in buildQueue / practice
+            
+            const due = SS.filter(s => getSRS(s.id).nextReview <= today());
+
+ document.getElementById('reviewCount').textContent = S.lang === 'es' ? `Hoy ${due.length} oraciones para repasar.` : `Bugün ${due.length} cümle tekrar zamanı.`; if (!due.length) { document.getElementById('reviewModeArea').innerHTML = `<p class="text-center text-gray-500 py-12">${t('reviewDone')}</p>`; return; } S.rQueue = [...due]; shuffle(S.rQueue); S.rIdx = 0; showReviewQ(); }
         function showReviewQ() { if (S.rIdx >= S.rQueue.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-400 py-12">✅</p>'; return; } const q = S.rQueue[S.rIdx], words = q.english.split(' '); shuffle(words); S.rSel = []; const nativeText = getNative(q); document.getElementById('reviewModeArea').innerHTML = `<div class="rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6">${q.topic}</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1a1a1a;color:#666">${q.level}</span></div><p class="text-lg font-medium text-gray-200 mb-1">${nativeText}</p><p class="text-xs text-gray-500 mb-4">${t('orderWords')}</p><div id="rAns" class="min-h-12 rounded-xl p-3 mb-3 flex flex-wrap gap-2" style="background:#0f0f0f;border:1px dashed #333"></div><div id="rBank" class="flex flex-wrap gap-2 mb-4">${words.map((w, i) => `<button class="word-chip px-3 py-1.5 rounded-lg text-sm font-medium" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e5e5e5" data-idx="${i}" onclick="selRW(this,'${w.replace(/'/g, "\\'")}',${i})">${w}</button>`).join('')}</div><div id="rFb" class="hidden rounded-xl p-3 mb-3 text-sm"></div><div class="flex gap-3"><button onclick="checkRev()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="clearRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('clear')}</button><button onclick="nextRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; }
         function selRW(btn, w, idx) { if (btn.classList.contains('placed')) return; btn.classList.add('placed'); S.rSel.push({ word: w, idx }); const c = document.createElement('button'); c.className = 'word-chip px-3 py-1.5 rounded-lg text-sm font-medium'; c.style.background = '#3B82F6'; c.style.color = 'white'; c.textContent = w; c.onclick = () => { c.remove(); S.rSel = S.rSel.filter(x => x.idx !== idx); document.querySelector(`#rBank [data-idx="${idx}"]`)?.classList.remove('placed'); }; document.getElementById('rAns').appendChild(c); }
         function clearRev() { S.rSel = []; document.getElementById('rAns').innerHTML = ''; document.querySelectorAll('#rBank .word-chip').forEach(b => b.classList.remove('placed')); }
@@ -810,7 +487,116 @@ JSON: {"turkish":"...","english":"...","keywords":[{"tr":"...","en":"..."}]}
         document.addEventListener('DOMContentLoaded', () => { updateLangUI(); renderTabs(); updateStreakUI(); selectTab('all'); });
         // PWA Service Worker
         if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js').then(r => console.log('SW registered:', r.scope)).catch(e => console.log('SW failed:', e)); }
+// === FIREBASE INJECTION ===
+        const today = () => new Date().toISOString().split('T')[0];
+        
+        // --- FIREBASE & STATE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZPcwdsERocJE5u4ZDJ268e3Ze2gOt4pE",
+            authDomain: "english-app-b012f.firebaseapp.com",
+            projectId: "english-app-b012f",
+            storageBucket: "english-app-b012f.firebasestorage.app",
+            messagingSenderId: "760623606825",
+            appId: "1:760623606825:web:7f49f025df7612f693c038",
+            measurementId: "G-Z61XK57XPD"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        let CLOUD_SYNC_ACTIVE = false;
+        let CLOUD_UID = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                CLOUD_SYNC_ACTIVE = true;
+                CLOUD_UID = user.uid;
+                document.getElementById('loginBtn').classList.add('hidden');
+                const badge = document.getElementById('userBadge');
+                badge.classList.remove('hidden');
+                badge.classList.add('flex');
+                document.getElementById('userEmail').textContent = user.email.split('@')[0];
+                syncFromCloud();
+            } else {
+                CLOUD_SYNC_ACTIVE = false;
+                CLOUD_UID = null;
+                document.getElementById('loginBtn').classList.remove('hidden');
+                const badge = document.getElementById('userBadge');
+                badge.classList.add('hidden');
+                badge.classList.remove('flex');
+            }
+        });
+
+        async function triggerCloudSync() {
+            if (!CLOUD_SYNC_ACTIVE || !CLOUD_UID) return;
+            try {
+                const srs = LS.get(srsKey(), {});
+                const gs = getGS();
+                const vsrs = LS.get(verbSrsKey(), {});
+                const srs_es = LS.get('srs_es', {});
+                const gstats_es = LS.get('gstats_es', {});
+                const verb_srs_es = LS.get('verb_srs_es', {});
+                const custom_sentences = LS.get('custom_sentences', []);
+                await db.collection('users').doc(CLOUD_UID).set({
+                    srs, gs, vsrs, srs_es, gstats_es, verb_srs_es, custom_sentences,
+                    lastSync: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('Firebase Sync OK');
+            } catch(e) { console.error('Sync Error', e); }
+        }
+
+        async function syncFromCloud() {
+            if (!CLOUD_UID) return;
+            try {
+                const doc = await db.collection('users').doc(CLOUD_UID).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.srs) localStorage.setItem(srsKey(), JSON.stringify(data.srs));
+                    if (data.gs) localStorage.setItem(gsKey(), JSON.stringify(data.gs));
+                    if (data.vsrs) localStorage.setItem(verbSrsKey(), JSON.stringify(data.vsrs));
+                    if (data.srs_es) localStorage.setItem('srs_es', JSON.stringify(data.srs_es));
+                    if (data.gstats_es) localStorage.setItem('gstats_es', JSON.stringify(data.gstats_es));
+                    if (data.verb_srs_es) localStorage.setItem('verb_srs_es', JSON.stringify(data.verb_srs_es));
+                    if (data.custom_sentences) localStorage.setItem('custom_sentences', JSON.stringify(data.custom_sentences));
+                    console.log('Cloud Data Loaded');
+                    const curTab = S.tab;
+                    renderTabs(); updateStreakUI(); selectTab(curTab);
+                }
+            } catch(e) { console.error('Cloud Load Error', e); }
+        }
+
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('authErrorBox').classList.add('hidden'); }
+        
+        let loginMode = true;
+        function toggleAuthMode() {
+            loginMode = !loginMode;
+            document.getElementById('authTitle').textContent = loginMode ? 'Giriş Yap' : 'Kayıt Ol';
+            document.getElementById('authActionBtn').textContent = loginMode ? 'Giriş Yap' : 'Kayıt Ol';
+            document.getElementById('authToggleText').textContent = loginMode ? 'Hesabın yok mu?' : 'Zaten hesabın var mı?';
+            document.getElementById('authToggleBtn').textContent = loginMode ? 'Kayıt Ol' : 'Giriş Yap';
+            document.getElementById('authErrorBox').classList.add('hidden');
+        }
+
+        async function handleEmailAuth() {
+            const email = document.getElementById('authEmail').value.trim();
+            const pass = document.getElementById('authPass').value.trim();
+            const errBox = document.getElementById('authErrorBox');
+            if (!email || !pass) { errBox.textContent = 'E-posta ve şifre gerekli.'; errBox.classList.remove('hidden'); return; }
+            errBox.classList.add('hidden');
+            const btn = document.getElementById('authActionBtn');
+            btn.textContent = 'Bekleniyor...'; btn.disabled = true;
+            try {
+                if (loginMode) { await auth.signInWithEmailAndPassword(email, pass); } 
+                else { await auth.createUserWithEmailAndPassword(email, pass); }
+                closeAuthModal();
+            } catch (e) { errBox.textContent = e.message; errBox.classList.remove('hidden'); }
+            btn.textContent = loginMode ? 'Giriş Yap' : 'Kayıt Ol'; btn.disabled = false;
+        }
+
+        async function logout() { await auth.signOut(); localStorage.clear(); location.reload(); }
+        // --- END FIREBASE ---
+
     </script>
 </body>
-
 </html>
