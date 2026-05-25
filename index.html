@@ -58,6 +58,7 @@
             <div class="flex items-center gap-3">
                 <div class="text-right text-sm"><span class="text-green-400 font-bold" id="scoreCorrect">0</span><span class="text-gray-500 mx-1">/</span><span class="text-red-400 font-bold" id="scoreWrong">0</span></div>
                 <div id="userBadge" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl" style="background:#1a2a1a;border:1px solid #2a4a2a">
+                    <span id="syncDot" class="hidden w-2 h-2 rounded-full" title="Senkron durumu" style="background:#6b7280"></span>
                     <span class="text-xs font-medium text-green-400 max-w-[80px] truncate" id="userEmail"></span>
                     <button onclick="logout()" class="text-xs text-gray-500 hover:text-white">Çıkış</button>
                 </div>
@@ -926,6 +927,7 @@ BAŞKA HİÇBİR ŞEY YAZMA.`;
                 badge.classList.remove('hidden');
                 badge.classList.add('flex');
                 document.getElementById('userEmail').textContent = user.email.split('@')[0];
+                _setSyncState('idle');
                 syncFromCloud();
             } else {
                 CLOUD_SYNC_ACTIVE = false;
@@ -934,25 +936,88 @@ BAŞKA HİÇBİR ŞEY YAZMA.`;
                 const badge = document.getElementById('userBadge');
                 badge.classList.add('hidden');
                 badge.classList.remove('flex');
+                updateSyncUI();
             }
         });
 
-        async function triggerCloudSync() {
+        // === SYNC: debounced cloud writes ===
+        const SYNC_DEBOUNCE_MS = 2000;
+        let _syncTimer = null;
+        let _syncState = 'idle'; // idle | pending | saving | saved | error
+        let _syncInFlight = false;
+
+        function _setSyncState(s) {
+            _syncState = s;
+            updateSyncUI();
+            // 'saved' durumu 2 saniye sonra idle'a düşsün
+            if (s === 'saved') setTimeout(() => { if (_syncState === 'saved') _setSyncState('idle'); }, 2000);
+        }
+
+        function triggerCloudSync() {
             if (!CLOUD_SYNC_ACTIVE || !CLOUD_UID) return;
+            if (_syncTimer) clearTimeout(_syncTimer);
+            _setSyncState('pending');
+            _syncTimer = setTimeout(_performCloudSync, SYNC_DEBOUNCE_MS);
+        }
+
+        async function _performCloudSync() {
+            _syncTimer = null;
+            if (!CLOUD_SYNC_ACTIVE || !CLOUD_UID) return;
+            if (_syncInFlight) {
+                // Önceki yazım hâlâ giderken yeni istek geldi: önceki bittikten sonra tekrar dene
+                setTimeout(() => triggerCloudSync(), 500);
+                return;
+            }
+            _syncInFlight = true;
+            _setSyncState('saving');
             try {
-                const srs = LS.get(srsKey(), {});
-                const gs = getGS();
-                const vsrs = LS.get(verbSrsKey(), {});
-                const srs_es = LS.get('srs_es', {});
-                const gstats_es = LS.get('gstats_es', {});
-                const verb_srs_es = LS.get('verb_srs_es', {});
-                const custom_sentences = LS.get('custom_sentences', []);
-                await db.collection('users').doc(CLOUD_UID).set({
-                    srs, gs, vsrs, srs_es, gstats_es, verb_srs_es, custom_sentences,
+                const payload = {
+                    srs: LS.get('srs', {}),
+                    gs: LS.get('gstats', {}),
+                    vsrs: LS.get('verb_srs', {}),
+                    srs_es: LS.get('srs_es', {}),
+                    gstats_es: LS.get('gstats_es', {}),
+                    verb_srs_es: LS.get('verb_srs_es', {}),
+                    custom_sentences: LS.get('custom_sentences', []),
                     lastSync: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                };
+                await db.collection('users').doc(CLOUD_UID).set(payload, { merge: true });
                 console.log('Firebase Sync OK');
-            } catch(e) { console.error('Sync Error', e); }
+                _setSyncState('saved');
+            } catch (e) {
+                console.error('Sync Error', e);
+                _setSyncState('error');
+            } finally {
+                _syncInFlight = false;
+            }
+        }
+
+        // Sayfa kapanırken bekleyen yazımı hemen tetikle (browser fire-and-forget olarak gönderir)
+        window.addEventListener('beforeunload', () => {
+            if (_syncTimer) {
+                clearTimeout(_syncTimer);
+                _syncTimer = null;
+                _performCloudSync();
+            }
+        });
+
+        function updateSyncUI() {
+            const dot = document.getElementById('syncDot');
+            if (!dot) return;
+            if (!CLOUD_SYNC_ACTIVE) { dot.classList.add('hidden'); return; }
+            dot.classList.remove('hidden');
+            dot.classList.remove('animate-pulse');
+            const map = {
+                idle:    { color: '#22c55e', title: 'Senkron' },
+                pending: { color: '#eab308', title: 'Değişiklik bekliyor...' },
+                saving:  { color: '#3B82F6', title: 'Kaydediliyor...' },
+                saved:   { color: '#22c55e', title: '✓ Kaydedildi' },
+                error:   { color: '#ef4444', title: '⚠️ Senkron hatası — bağlantını kontrol et' }
+            };
+            const c = map[_syncState] || map.idle;
+            dot.style.background = c.color;
+            dot.title = c.title;
+            if (_syncState === 'saving' || _syncState === 'pending') dot.classList.add('animate-pulse');
         }
 
         async function syncFromCloud() {
