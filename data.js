@@ -77,7 +77,66 @@ const SENTENCES = [
     { id: 504, topic: "Faz 5: Sıfat Cümlecikleri (Relative Clauses)", level: "B2", turkish: "Dün aldığım araba bozuldu.", english: "The car that I bought yesterday broke down.", keywords: [{ tr: "bozulmak", en: "to break down" }] },
     { id: 505, topic: "Faz 5: Fiilimsiler (Gerunds & Infinitives)", level: "B2", turkish: "Yalnız seyahat etmekten keyif alıyorum.", english: "I enjoy traveling alone.", keywords: [{ tr: "keyif almak", en: "to enjoy" }] },
     { id: 506, topic: "Faz 5: Dolaylı Anlatım (Reported Speech)", level: "B2", turkish: "Bana oraya gitmeyeceğini söyledi.", english: "He told me he would not go there.", keywords: [{ tr: "söylemek", en: "to tell" }] },
-    { id: 507, topic: "Faz 5: Ettirgen (Causatives)", level: "B2", turkish: "Dün saçımı kestirdim.", english: "I had my hair cut yesterday.", keywords: [{ tr: "kestirmek", en: "to have cut" }] }
+    { id: 507, topic: "Faz 5: Ettirgen (Causatives)", level: "B2", turkish: "Dün saçımı kestirdim.", english: "I had my hair cut yesterday.", keywords: [{ tr: "kestirmek", en: "to have cut" }] },
+
+    // === CURATED EXPANSION v1 (TR) — Faz 3/4/5 takviyesi + Faz 1 varyasyonu ===
+    // Faz 1: To Be
+    { id: 113, topic: "Faz 1: To Be (Am/Is/Are)", level: "A1", turkish: "Onlar şu an evde değiller.", english: "They are not at home right now.", keywords: [{ tr: "şu an", en: "right now" }] },
+    { id: 114, topic: "Faz 1: To Be (Am/Is/Are)", level: "A2", turkish: "Bu kararından emin misin?", english: "Are you sure about this decision?", keywords: [{ tr: "emin", en: "sure" }, { tr: "karar", en: "decision" }] },
+    { id: 115, topic: "Faz 1: To Be (Was/Were)", level: "A2", turkish: "Çocukken çok utangaçtım.", english: "I was very shy when I was a child.", keywords: [{ tr: "utangaç", en: "shy" }] },
+    { id: 116, topic: "Faz 1: To Be (Was/Were)", level: "A2", turkish: "Toplantıdaki herkes gergindi.", english: "Everyone at the meeting was nervous.", keywords: [{ tr: "gergin", en: "nervous" }] },
+    // Faz 1: Nouns
+    { id: 117, topic: "Faz 1: İsimler (Nouns)", level: "A2", turkish: "Bu konuda bazı tavsiyelere ihtiyacım var.", english: "I need some advice on this matter.", keywords: [{ tr: "tavsiye", en: "advice" }, { tr: "konu", en: "matter" }] },
+    { id: 118, topic: "Faz 1: İsimler (Nouns)", level: "A2", turkish: "Mutfakta iki ekmek ve biraz süt kaldı.", english: "There are two loaves of bread and some milk left in the kitchen.", keywords: [{ tr: "ekmek", en: "loaf of bread" }, { tr: "süt", en: "milk" }] },
+    // Faz 1: Articles
+    { id: 119, topic: "Faz 1: Belirteçler (A, An, The)", level: "A1", turkish: "Çantamda bir kalem ve bir defter var.", english: "I have a pen and a notebook in my bag.", keywords: [{ tr: "kalem", en: "pen" }, { tr: "defter", en: "notebook" }] },
+    { id: 120, topic: "Faz 1: Belirteçler (A, An, The)", level: "A2", turkish: "Dünyadaki en yüksek dağ Everest'tir.", english: "The highest mountain in the world is Everest.", keywords: [{ tr: "dağ", en: "mountain" }] },
+    // Faz 1: Pronouns
+    { id: 121, topic: "Faz 1: Zamirler (Pronouns)", level: "A2", turkish: "Birisi pencereyi açık bırakmış.", english: "Someone has left the window open.", keywords: [{ tr: "birisi", en: "someone" }, { tr: "pencere", en: "window" }] },
+    { id: 122, topic: "Faz 1: Zamirler (Pronouns)", level: "B1", turkish: "Aramızda kalsın, henüz kimseye söyleme.", english: "Just between us, do not tell anyone yet.", keywords: [{ tr: "aramızda", en: "between us" }, { tr: "henüz", en: "yet" }] },
+    // Faz 1: There/Demonstratives
+    { id: 123, topic: "Faz 1: They/There/Demonstratives", level: "A1", turkish: "Buzdolabında hiç meyve var mı?", english: "Is there any fruit in the fridge?", keywords: [{ tr: "buzdolabı", en: "fridge" }, { tr: "meyve", en: "fruit" }] },
+    { id: 124, topic: "Faz 1: They/There/Demonstratives", level: "A2", turkish: "Şu binanın arkasında küçük bir park var.", english: "There is a small park behind that building.", keywords: [{ tr: "bina", en: "building" }, { tr: "arka", en: "behind" }] },
+    // Faz 1: Quantifiers
+    { id: 125, topic: "Faz 1: Miktar Belirteçleri", level: "A2", turkish: "Toplantıdan önce yalnızca birkaç dakikamız var.", english: "We only have a few minutes before the meeting.", keywords: [{ tr: "yalnızca", en: "only" }, { tr: "birkaç", en: "a few" }] },
+    { id: 126, topic: "Faz 1: Miktar Belirteçleri", level: "B1", turkish: "Bu projeye çok az ilgi var.", english: "There is very little interest in this project.", keywords: [{ tr: "ilgi", en: "interest" }] },
+
+    // Faz 2: Tenses — varyasyon
+    { id: 258, topic: "Faz 2: Geniş Zaman (Present Simple)", level: "A2", turkish: "Her zaman gerçeği söyler misin?", english: "Do you always tell the truth?", keywords: [{ tr: "gerçek", en: "truth" }] },
+    { id: 259, topic: "Faz 2: Geçmiş Zaman (Past Simple)", level: "A2", turkish: "Dün sınava neden gelmedin?", english: "Why did you not come to the exam yesterday?", keywords: [{ tr: "sınav", en: "exam" }] },
+    { id: 260, topic: "Faz 2: Present Perfect", level: "B1", turkish: "Bu filmi daha önce hiç izlemedim.", english: "I have never seen this movie before.", keywords: [{ tr: "hiç", en: "never" }] },
+    { id: 261, topic: "Faz 2: Present Perfect", level: "B1", turkish: "Yıllardır onunla konuşmadım.", english: "I have not spoken to him for years.", keywords: [{ tr: "yıllardır", en: "for years" }] },
+    { id: 262, topic: "Faz 2: Gelecek Zaman (Future)", level: "A2", turkish: "Yarın yağmur yağarsa pikniği iptal edeceğiz.", english: "If it rains tomorrow, we will cancel the picnic.", keywords: [{ tr: "iptal etmek", en: "to cancel" }, { tr: "piknik", en: "picnic" }] },
+
+    // Faz 3: Modals
+    { id: 306, topic: "Faz 3: Yetenek (Ability)", level: "A2", turkish: "Üç yaşındayken bisiklet sürebiliyordum.", english: "I could ride a bicycle when I was three.", keywords: [{ tr: "bisiklet", en: "bicycle" }] },
+    { id: 307, topic: "Faz 3: Yetenek (Ability)", level: "B1", turkish: "İspanyolca konuşabiliyorum ama akıcı değilim.", english: "I can speak Spanish, but I am not fluent.", keywords: [{ tr: "akıcı", en: "fluent" }] },
+    { id: 308, topic: "Faz 3: Zorunluluk (Obligation)", level: "A2", turkish: "Acele etmemize gerek yok, zamanımız var.", english: "We do not need to hurry, we have time.", keywords: [{ tr: "acele etmek", en: "to hurry" }] },
+    { id: 309, topic: "Faz 3: Zorunluluk (Obligation)", level: "B1", turkish: "Pasaportunu yanında getirmek zorundasın.", english: "You have to bring your passport with you.", keywords: [{ tr: "pasaport", en: "passport" }, { tr: "zorunda", en: "have to" }] },
+    { id: 310, topic: "Faz 3: Tavsiye (Advice)", level: "B1", turkish: "Bence bir doktora gitmelisin.", english: "I think you should see a doctor.", keywords: [{ tr: "doktor", en: "doctor" }] },
+    { id: 311, topic: "Faz 3: Tavsiye (Advice)", level: "B2", turkish: "Onunla bu kadar sert konuşmamalıydın.", english: "You should not have spoken to him so harshly.", keywords: [{ tr: "sert", en: "harshly" }] },
+    { id: 312, topic: "Faz 3: İhtimal (Possibility)", level: "B1", turkish: "Telefonu açmıyor, meşgul olabilir.", english: "He is not answering the phone, he might be busy.", keywords: [{ tr: "meşgul", en: "busy" }] },
+    { id: 313, topic: "Faz 3: İhtimal (Possibility)", level: "B2", turkish: "Daha sıkı çalışsaydım sınavı geçmiş olabilirdim.", english: "I might have passed the exam if I had studied harder.", keywords: [{ tr: "sıkı", en: "hard" }, { tr: "geçmek", en: "to pass" }] },
+
+    // Faz 4: Sentence Engineering
+    { id: 405, topic: "Faz 4: Karşılaştırma (Comparatives)", level: "A2", turkish: "Bugün dün kadar sıcak değil.", english: "Today is not as hot as yesterday.", keywords: [{ tr: "sıcak", en: "hot" }] },
+    { id: 406, topic: "Faz 4: Karşılaştırma (Comparatives)", level: "B1", turkish: "Trafik her geçen gün daha kötüye gidiyor.", english: "The traffic is getting worse every day.", keywords: [{ tr: "trafik", en: "traffic" }, { tr: "kötü", en: "bad" }] },
+    { id: 407, topic: "Faz 4: En Üstünlük (Superlatives)", level: "A2", turkish: "Bu hayatımdaki en güzel hediye.", english: "This is the best gift of my life.", keywords: [{ tr: "hediye", en: "gift" }] },
+    { id: 408, topic: "Faz 4: En Üstünlük (Superlatives)", level: "B1", turkish: "Hatırlayabildiğim en kötü deneyimdi.", english: "It was the worst experience I can remember.", keywords: [{ tr: "deneyim", en: "experience" }] },
+    { id: 409, topic: "Faz 4: Zaman/Yer Edatları (Prepositions)", level: "A2", turkish: "Otobüs her sabah saat sekizde kalkar.", english: "The bus leaves at eight every morning.", keywords: [{ tr: "kalkmak", en: "to leave" }] },
+    { id: 410, topic: "Faz 4: Zaman/Yer Edatları (Prepositions)", level: "A2", turkish: "Anahtarlar masanın üstünde değil, çantanın içinde.", english: "The keys are not on the table, they are in the bag.", keywords: [{ tr: "üstünde", en: "on" }, { tr: "içinde", en: "in" }] },
+    { id: 411, topic: "Faz 4: Bağlaçlar (Conjunctions)", level: "B1", turkish: "Yorgun olmama rağmen yürüyüşe çıktım.", english: "I went for a walk although I was tired.", keywords: [{ tr: "rağmen", en: "although" }, { tr: "yürüyüş", en: "walk" }] },
+    { id: 412, topic: "Faz 4: Bağlaçlar (Conjunctions)", level: "B1", turkish: "Erken çıkacağım çünkü uçağımı kaçırmak istemiyorum.", english: "I will leave early because I do not want to miss my flight.", keywords: [{ tr: "kaçırmak", en: "to miss" }, { tr: "uçak", en: "flight" }] },
+
+    // Faz 5: Advanced
+    { id: 508, topic: "Faz 5: Koşul Cümleleri (If Clauses)", level: "B2", turkish: "Eğer beni dinlemiş olsaydın bu olmazdı.", english: "If you had listened to me, this would not have happened.", keywords: [{ tr: "dinlemek", en: "to listen" }] },
+    { id: 509, topic: "Faz 5: Koşul Cümleleri (If Clauses)", level: "B2", turkish: "Daha fazla zamanım olsaydı sana yardım ederdim.", english: "If I had more time, I would help you.", keywords: [{ tr: "yardım etmek", en: "to help" }] },
+    { id: 510, topic: "Faz 5: Edilgen Çatı (Passive Voice)", level: "B1", turkish: "Yeni ofisimiz gelecek ay açılacak.", english: "Our new office will be opened next month.", keywords: [{ tr: "ofis", en: "office" }, { tr: "açmak", en: "to open" }] },
+    { id: 511, topic: "Faz 5: Edilgen Çatı (Passive Voice)", level: "B2", turkish: "Bu fotoğraf 1950'de çekilmiş.", english: "This photo was taken in 1950.", keywords: [{ tr: "fotoğraf", en: "photo" }, { tr: "çekmek", en: "to take" }] },
+    { id: 512, topic: "Faz 5: Sıfat Cümlecikleri (Relative Clauses)", level: "B1", turkish: "Bana yardım eden adam çok kibardı.", english: "The man who helped me was very kind.", keywords: [{ tr: "kibar", en: "kind" }] },
+    { id: 513, topic: "Faz 5: Fiilimsiler (Gerunds & Infinitives)", level: "B2", turkish: "Sigara içmeyi bırakmaya karar verdim.", english: "I have decided to quit smoking.", keywords: [{ tr: "sigara içmek", en: "to smoke" }, { tr: "bırakmak", en: "to quit" }] },
+    { id: 514, topic: "Faz 5: Dolaylı Anlatım (Reported Speech)", level: "B2", turkish: "Yorgun olduğunu ve eve gitmek istediğini söyledi.", english: "He said he was tired and wanted to go home.", keywords: [{ tr: "yorgun", en: "tired" }] },
+    { id: 515, topic: "Faz 5: Ettirgen (Causatives)", level: "B2", turkish: "Arabamı tamir ettirmem gerekiyor.", english: "I need to get my car repaired.", keywords: [{ tr: "tamir etmek", en: "to repair" }, { tr: "araba", en: "car" }] }
 ];
 
 
