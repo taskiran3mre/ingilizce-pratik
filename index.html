@@ -337,16 +337,25 @@
             tr: { appTitle: 'İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → EN', dirLabelRev: 'EN → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
             es: { appTitle: 'Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: '🎲 Aleatorio', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → EN', dirLabelRev: 'EN → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
         };
+        // Dil etiketi yoksa topic prefix'inden çıkar (legacy AI cümleler için)
+        function _inferSentenceLang(s) {
+            if (s.lang) return s.lang;
+            if (s.topic && typeof s.topic === 'string') {
+                if (s.topic.startsWith('Fase ')) return 'es';
+                if (s.topic.startsWith('Faz ')) return 'tr';
+            }
+            return null; // bilinmiyor (örn. "🎯 edat" gibi tag-tabanlı) — her iki dilde göster
+        }
         function getCurSentences() {
             let cs = [];
             try {
                 const raw = JSON.parse(localStorage.getItem('custom_sentences') || '[]');
                 if (Array.isArray(raw)) {
-                    // Geçerli AI cümlesi: english + topic var, dili eşleşiyor (eski cümlelerde lang yoksa ikisinde de göster)
-                    cs = raw.filter(s =>
-                        s && s.english && s.topic && typeof s.topic === 'string' &&
-                        (!s.lang || s.lang === S.lang)
-                    );
+                    cs = raw.filter(s => {
+                        if (!s || !s.english || !s.topic || typeof s.topic !== 'string') return false;
+                        const lng = _inferSentenceLang(s);
+                        return lng === null || lng === S.lang;
+                    });
                 }
             } catch (e) {}
             return [...cs, ...(S.lang === 'es' ? SENTENCES_ES : SENTENCES)];
@@ -457,7 +466,9 @@
             if (!b) return;
             if (cur.length === ALL_LEVELS.length) { b.classList.add('hidden'); return; }
             b.classList.remove('hidden');
-            b.querySelector('#levelFilterBadgeText').textContent = cur.slice().sort().join('+');
+            // 1-2 seviye: tam isim; 3+: kısaltma — header'da yer kaybını önler
+            const txt = cur.length <= 2 ? cur.slice().sort().join('+') : (cur.length + '/' + ALL_LEVELS.length);
+            b.querySelector('#levelFilterBadgeText').textContent = txt;
         }
         function passesLevelFilter(s) {
             if (!s || !s.level) return true;
