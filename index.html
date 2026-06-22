@@ -421,7 +421,7 @@
         const saveVerbSRS = e => { const d = LS.get(verbSrsKey(), {}); d[e.v1] = e; LS.set(verbSrsKey(), d); };
         const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } };
         const CONTRACTIONS = { "can't": "cannot", "won't": "will not", "don't": "do not", "doesn't": "does not", "didn't": "did not", "isn't": "is not", "aren't": "are not", "wasn't": "was not", "weren't": "were not", "hasn't": "has not", "haven't": "have not", "hadn't": "had not", "wouldn't": "would not", "shouldn't": "should not", "couldn't": "could not", "i'm": "i am", "you're": "you are", "he's": "he is", "she's": "she is", "it's": "it is", "we're": "we are", "they're": "they are", "i've": "i have", "you've": "you have", "we've": "we have", "they've": "they have", "i'll": "i will", "you'll": "you will", "he'll": "he will", "she'll": "she will", "we'll": "we will", "they'll": "they will", "i'd": "i would", "you'd": "you would", "he'd": "he would", "she'd": "she would", "we'd": "we would", "they'd": "they would", "that's": "that is", "there's": "there is", "here's": "here is", "what's": "what is", "who's": "who is", "let's": "let us" };
-        function norm(s) { let t = s.toLowerCase().trim().replace(/[.,!?;:'"\u2018\u2019\u201c\u201d]+/g, '').replace(/\s+/g, ' '); Object.entries(CONTRACTIONS).forEach(([c, e]) => { t = t.replace(new RegExp('\\b' + c.replace("'", "['’]?") + '\\b', 'gi'), e); }); const REV = {}; Object.entries(CONTRACTIONS).forEach(([c, e]) => { REV[e] = c; }); Object.entries(REV).forEach(([e, c]) => { t = t.replace(new RegExp('\\b' + e + '\\b', 'gi'), e); }); return t; }
+        function norm(s) { let t = s.toLowerCase().trim().replace(/[.,!?;:'"\u2018\u2019\u201c\u201d]+/g, '').replace(/\s+/g, ' '); Object.entries(CONTRACTIONS).forEach(([c, e]) => { t = t.replace(new RegExp('\\b' + c.replace("'", "['’]?") + '\\b', 'gi'), e); }); return t; }
         function updateSRS(id, ok, tag) { 
             
  
@@ -435,6 +435,31 @@
         function getAISentences() {
             try { const r = JSON.parse(localStorage.getItem('custom_sentences') || '[]'); return Array.isArray(r) ? r : []; }
             catch (e) { return []; }
+        }
+        // Havuzdaki bozuk AI cümlelerini ayıkla: boş/eksik alanlı, çevirisi olmayan veya tekrar edenler.
+        // Temizlenmiş hali LS.set ile kaydedilir, böylece Firestore'daki kopya da temizlenir.
+        function sanitizeAISentences() {
+            const all = getAISentences();
+            if (!all.length) return;
+            const seen = new Set();
+            const clean = all.filter(s => {
+                if (!s || typeof s !== 'object') return false;
+                if (!s.topic || typeof s.topic !== 'string') return false;
+                const en = (s.english || '').trim();
+                const nv = ((s.turkish || '') + (s.spanish || '')).trim();
+                if (en.length < 3 || nv.length < 3) return false;            // boş ya da eksik
+                if (en.toLowerCase() === nv.toLowerCase()) return false;     // çeviri üretilmemiş
+                if (NON_ENGLISH_RX.test(en)) return false;                   // İngilizce alanına dil sızıntısı
+                const key = en.toLowerCase();
+                if (seen.has(key)) return false;                             // birebir tekrar
+                seen.add(key);
+                return true;
+            });
+            if (clean.length !== all.length) {
+                LS.set('custom_sentences', clean);
+                console.log('AI havuzu temizlendi: ' + (all.length - clean.length) + ' bozuk cümle silindi');
+                updateAIPoolUI();
+            }
         }
         function updateAIPoolUI() {
             const all = getAISentences();
@@ -673,7 +698,7 @@
         }
         function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); const _spd2=document.getElementById('subTopicPickerDiv'); if(_spd2)_spd2.classList.add('hidden'); document.getElementById('questionCard').classList.add('hidden'); let _cd=document.getElementById('completionDiv'); if(!_cd){_cd=document.createElement('div');_cd.id='completionDiv'; const _qcr=document.getElementById('questionCard'); _qcr.parentNode.insertBefore(_cd,_qcr);} _cd.classList.remove('hidden'); _cd.innerHTML='<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">Tüm sorular tamamlandı!</p></div>'; ['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
         function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox', 'softCheckBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
-        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = q.topic; document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
+        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = q.topic; document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); if (!kwNative || !kwNative.trim()) return; const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
         function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
@@ -736,8 +761,11 @@
             const softHint = softCheck(input, correctText);
             if (softHint) { ['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').style.borderColor = '#d97706'; const box = document.getElementById('softCheckBox'); box.classList.remove('hidden'); document.getElementById('softCheckText').innerHTML = 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊<br>' + softHint; return; }
             if (getApiKey()) {
-                const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = '🤖 Değerlendiriliyor...'; fb.style.background = '#161616'; fb.style.border = '1px solid #333'; ft.style.color = '#9ca3af';['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); const prompt = `Referans:"${correctText}" Öğrenci:"${input}"
-Anlamca doğru mu? SADECE "EVET" veya "HAYIR" yaz.`; const txt = await geminiCall(prompt); if (txt && txt.trim().toUpperCase().includes('EVET')) { handleAccepted(input); return; } fb.classList.add('hidden'); handleWrong(input);
+                const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = '🤖 Değerlendiriliyor...'; fb.style.background = '#161616'; fb.style.border = '1px solid #333'; ft.style.color = '#9ca3af';['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); const prompt = `You are grading a translation exercise.
+Reference answer: "${correctText}"
+Student answer: "${input}"
+Does the student answer express the same meaning as the reference, with acceptable grammar? Minor word-choice or word-order differences are OK; grammar errors or meaning changes are NOT.
+Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); if (txt && /^\s*YES\b/i.test(txt.trim())) { handleAccepted(input); return; } fb.classList.add('hidden'); handleWrong(input);
             } else { handleWrong(input); }
         }
         function retryQuestion() { S.answered = false; resetUI(); renderQuestion(S.q, !!S.aiQ); }
@@ -748,42 +776,155 @@ Anlamca doğru mu? SADECE "EVET" veya "HAYIR" yaz.`; const txt = await geminiCal
         let lastApiTime = 0;
         let lastApiProvider = '';
         const API_THROTTLE = 3000;
-        async function callGroq(prompt) {
+        async function callGroq(prompt, opts = {}) {
             const key = getGroqKey(); if (!key) return null;
-            const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], temperature: 0.7, max_tokens: 512 }) });
+            const body = { model: 'llama-3.3-70b-versatile', messages: [{ role: 'user', content: prompt }], temperature: opts.temperature ?? 0.3, max_tokens: 512 };
+            if (opts.json) body.response_format = { type: 'json_object' };  // OpenAI uyumlu JSON modu
+            const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key }, body: JSON.stringify(body) });
             if (!r.ok) { const e = await r.text(); console.error('Groq error:', r.status, e); if (r.status === 429) throw 'quota'; if (r.status === 401) throw 'key'; throw 'http' + r.status; }
             const d = await r.json(); lastApiProvider = 'Groq'; return d.choices?.[0]?.message?.content || null;
         }
-        async function callGemini(prompt) {
+        async function callGemini(prompt, opts = {}) {
             const key = getGeminiKey(); if (!key) return null;
-            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }) });
+            const gc = { temperature: opts.temperature ?? 0.3 };
+            if (opts.json) gc.responseMimeType = 'application/json';  // markdown çiti/serbest metin yerine saf JSON
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: gc }) });
             if (!r.ok) { const e = await r.text(); console.error('Gemini error:', r.status, e); if (r.status === 429) throw 'quota'; if (r.status === 400 || r.status === 403) throw 'key'; throw 'http' + r.status; }
             const d = await r.json(); lastApiProvider = 'Gemini'; return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
         }
-        async function geminiCall(prompt) {
+        async function geminiCall(prompt, opts = {}) {
             if (!getApiKey()) { lastApiError = 'nokey'; return null; }
             const now = Date.now(); const wait = API_THROTTLE - (now - lastApiTime); if (wait > 0) await new Promise(r => setTimeout(r, wait)); lastApiTime = Date.now(); lastApiError = '';
             // Try Gemini first, then Groq
-            try { const r = await callGemini(prompt); if (r) return r; } catch (e) { console.log('Gemini failed:', e); }
-            try { const r = await callGroq(prompt); if (r) return r; } catch (e) { console.log('Groq failed:', e); lastApiError = e; }
+            try { const r = await callGemini(prompt, opts); if (r) return r; } catch (e) { console.log('Gemini failed:', e); lastApiError = e; }
+            try { const r = await callGroq(prompt, opts); if (r) return r; } catch (e) { console.log('Groq failed:', e); lastApiError = e; }
             if (!lastApiError) lastApiError = 'network'; return null;
+        }
+        // === AI YARDIMCILARI ===
+        // Model yanıtından ilk dengeli JSON objesini çıkar (markdown ```json çitlerine ve
+        // sonradan eklenen açıklama metnine dayanıklı).
+        function extractJSON(txt) {
+            if (!txt) return null;
+            const cleaned = txt.replace(/```(?:json)?/gi, '');
+            const start = cleaned.indexOf('{');
+            if (start === -1) return null;
+            let depth = 0;
+            for (let i = start; i < cleaned.length; i++) {
+                if (cleaned[i] === '{') depth++;
+                else if (cleaned[i] === '}') {
+                    depth--;
+                    if (depth === 0) {
+                        try { return JSON.parse(cleaned.slice(start, i + 1)); } catch { return null; }
+                    }
+                }
+            }
+            return null;
+        }
+        // İngilizce alanına Türkçe/İspanyolca'ya özgü karakter sızdıysa cümle bozuktur (dil sızıntısı).
+        const NON_ENGLISH_RX = /[ğĞşŞıİÇçÖöÜüñÑ¿¡áéíóúÁÉÍÓÚ]/;
+        // Üretilen cümleyi havuza almadan önce doğrula: iki alan da dolu, birbirinden farklı ve
+        // İngilizce alanı gerçekten İngilizce olmalı. Geçersizse null döner — bozuk cümlelerin
+        // havuza (ve Firestore'a) sızmasını engeller.
+        function validateAISentence(j) {
+            if (!j) return null;
+            const nf = S.lang === 'es' ? 'spanish' : 'turkish';
+            const en = (typeof j.english === 'string' ? j.english : '').trim();
+            const nv = (typeof j[nf] === 'string' ? j[nf] : '').trim();
+            if (en.length < 3 || nv.length < 3) return null;
+            if (en.toLowerCase() === nv.toLowerCase()) return null;
+            if (NON_ENGLISH_RX.test(en)) return null;   // İngilizce alanına dil sızıntısı → reddet
+            const keywords = Array.isArray(j.keywords)
+                ? j.keywords.filter(k => k && typeof k.en === 'string' && k.en.trim()).slice(0, 3)
+                : [];
+            return { english: en, native: nv, keywords };
+        }
+        // Üretim + doğrulama: tek seferlik model sapmasında (bozuk JSON, dil sızıntısı, ağ blibi)
+        // tüm akışı düşürmemek için birkaç denemeli. JSON modu açık çağırır; başarısızsa null döner.
+        async function genValidatedSentence(prompt, attempts = 2) {
+            for (let i = 0; i < attempts; i++) {
+                const txt = await geminiCall(prompt, { json: true });
+                if (txt) { const v = validateAISentence(extractJSON(txt)); if (v) return v; }
+            }
+            return null;
+        }
+        // Tüm cümle üretim akışlarının ortak prompt'u. Talimatlar İngilizce (modeller daha iyi uyar),
+        // çıktı dili ve doğal çeviri şartı açıkça belirtilir.
+        function buildSentenceGenPrompt(grammarTopic, opts) {
+            opts = opts || {};
+            const isES = S.lang === 'es';
+            const nf = isES ? 'spanish' : 'turkish';
+            const kf = isES ? 'es' : 'tr';
+            const nativeLang = isES ? 'Spanish' : 'Turkish';
+            const lf = getLevelFilter();
+            const level = lf.length === ALL_LEVELS.length ? 'A2-B1' : lf.slice().sort().join('/');
+            const focusCtx = focusContextForPrompt();
+            let p = `You are creating a translation exercise for a ${nativeLang}-speaking English learner.\n`;
+            p += `Grammar topic: "${grammarTopic}". CEFR level: ${level}.\n`;
+            if (focusCtx) p += `Context: write the sentence ${focusCtx}.\n`;
+            p += `Write ONE natural English sentence that clearly practices this grammar topic, plus its ${nativeLang} translation.\n`;
+            p += `Rules:\n`;
+            p += `- The ${nativeLang} translation must be fluent, natural ${nativeLang} — NOT a word-for-word literal translation.\n`;
+            p += `- Both sentences must be complete, meaningful and self-contained.\n`;
+            p += `- Pick exactly 2 useful vocabulary words from the sentence as keywords.\n`;
+            if (opts.avoid && opts.avoid.length) {
+                p += `- Do NOT repeat or closely paraphrase any of these sentences: ${opts.avoid.map(s => '"' + s + '"').join(', ')}.\n`;
+            }
+            p += `Respond with ONLY this JSON object — no markdown, no explanations:\n`;
+            p += `{"${nf}":"...","english":"...","keywords":[{"${kf}":"...","en":"..."},{"${kf}":"...","en":"..."}]}`;
+            return p;
         }
         async function callGeminiError(q, student) {
             document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!getApiKey()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const isEs = S.lang === 'es';
             const nativeText = isEs ? (q.spanish || q.turkish) : q.turkish;
-            const prompt = `Native:"${nativeText}" EN:"${q.english}" Student:"${student}"
-Hata Türü: [preposition|past_tense|present_perfect|article|word_order|vocabulary|spelling|other]
-Hata: [${isEs ? 'Nombre corto del error en español' : 'Türkçe kısa ad'}]
-Açıklama: [${isEs ? '2-3 oraciones en español' : '2-3 cümle Türkçe'}]
-İpucu: [${isEs ? 'No des la respuesta, guía al estudiante en español' : 'cevabı verme, yönlendir'}]`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>Hata:</strong> ${errorLabel || 'Gramer hatası'}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${explanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>İpucu:</strong> ${hint || 'Doğru cevabı incele.'}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
+            const prompt = `An English learner translated a sentence incorrectly.
+Source (${isEs ? 'Spanish' : 'Turkish'}): "${nativeText}"
+Correct English: "${q.english}"
+Student wrote: "${student}"
+
+Identify the student's MAIN error. Reply in EXACTLY this 4-line format, keeping the labels as written:
+Hata Türü: <choose ONE word from: preposition, past_tense, present_perfect, article, word_order, vocabulary, spelling, other>
+Hata: <${isEs ? 'short error name in Spanish' : 'hatanın kısa Türkçe adı'}>
+Açıklama: <${isEs ? '2-3 sentences in Spanish explaining the error' : 'hatayı açıklayan 2-3 Türkçe cümle'}>
+İpucu: <${isEs ? 'a short hint in Spanish that guides without revealing the answer' : 'cevabı vermeden yönlendiren kısa bir Türkçe ipucu'}>
+Write nothing else.`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>Hata:</strong> ${errorLabel || 'Gramer hatası'}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${explanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>İpucu:</strong> ${hint || 'Doğru cevabı incele.'}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
         }
         function showApiErr() { document.getElementById('apiFeedback').classList.remove('hidden'); const el = document.getElementById('apiErrorType'); if (lastApiError === 'quota') { el.innerHTML = '⚠️ <strong>Kota limiti doldu!</strong> Ücretsiz API limiti aşıldı. Birkaç dakika bekleyip tekrar dene.'; el.style.color = '#fbbf24'; } else if (lastApiError === 'key') { el.innerHTML = '❌ <strong>API key geçersiz.</strong> Ayarlar\'dan kontrol et.'; el.style.color = '#f87171'; } else if (lastApiError === 'nokey') { el.innerHTML = '🔑 API key girilmemiş. Ayarlar\'dan Gemini API key girin.'; el.style.color = '#60a5fa'; } else if (lastApiError === 'network') { el.innerHTML = '🌐 İnternet bağlantısı sorunu. Bağlantını kontrol et.'; el.style.color = '#9ca3af'; } else { el.textContent = '⚠️ API bağlantısı kurulamadı. Doğru cevabı incele.'; el.style.color = '#9ca3af'; } document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').textContent = ''; }
         // AI FEATURES
         async function generateAISentence() {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const btn = document.getElementById('aiGenBtn'); btn.textContent = '🤖 Üretiliyor...'; btn.disabled = true; const _allSubs = [...new Set(getCurSentences().filter(s=>s.topic&&s.topic.includes(':')).map(s=>s.topic))]; let topic; if(S.subtab&&S.subtab.includes(':')){topic=S.subtab;} else if(S.tab==='all'){topic=_allSubs[Math.floor(Math.random()*_allSubs.length)]||'Faz 1: To Be (Am/Is/Are)';} else{const _subs=_allSubs.filter(t=>t.startsWith(S.tab+':'));topic=_subs.length?_subs[Math.floor(Math.random()*_subs.length)]:S.tab;} const _grammarTopic=topic.includes(':')?topic.split(':').slice(1).join(':').trim():topic; const _isES=S.lang==='es'; const _focusCtx = focusContextForPrompt(); const _focusLine = _focusCtx ? ` Use a scenario ${_focusCtx}.` : ''; const prompt=_isES?`English grammar topic: "${_grammarTopic}". Level A2-B1.${_focusLine} Generate 1 English sentence. Return ONLY JSON: {"spanish":"[Spanish]","english":"[English sentence]","keywords":[{"es":"[word]","en":"[word]"},{"es":"[word2]","en":"[word2]"}]}`:`İngilizce gramer konusu: "${_grammarTopic}". Seviye A2-B1.${_focusLine ? ' Bağlam:' + _focusLine : ''} Bu konuyu kullanan 1 İngilizce cümle üret. SADECE şu JSON'u döndür: {"turkish":"[Türkçe]","english":"[İngilizce cümle]","keywords":[{"tr":"[kelime]","en":"[word]"},{"tr":"[kelime2]","en":"[word2]"}]}`; const txt = await geminiCall(prompt); btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false; if (!txt) { alert('AI cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); const aiId='ai_'+Date.now(); const _nativeVal = j[S.lang==='es'?'spanish':'turkish'] || j.turkish || j.spanish || ''; S.aiQ = { topic, level: 'AI', turkish: S.lang==='es' ? '' : _nativeVal, spanish: S.lang==='es' ? _nativeVal : '', english: j.english||'', keywords: j.keywords||[], id: aiId, lang: S.lang, createdAt: Date.now() }; try{let ca=JSON.parse(localStorage.getItem('custom_sentences')||'[]');ca.push({...S.aiQ});LS.set('custom_sentences',ca);updateAIPoolUI();}catch(e){} resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
+            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; }
+            const btn = document.getElementById('aiGenBtn'); btn.textContent = '🤖 Üretiliyor...'; btn.disabled = true;
+            const _allSubs = [...new Set(getCurSentences().filter(s => s.topic && s.topic.includes(':')).map(s => s.topic))];
+            let topic;
+            if (S.subtab && S.subtab.includes(':')) { topic = S.subtab; }
+            else if (S.tab === 'all') { topic = _allSubs[Math.floor(Math.random() * _allSubs.length)] || 'Faz 1: To Be (Am/Is/Are)'; }
+            else { const _subs = _allSubs.filter(t => t.startsWith(S.tab + ':')); topic = _subs.length ? _subs[Math.floor(Math.random() * _subs.length)] : S.tab; }
+            const _grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
+            const prompt = buildSentenceGenPrompt(_grammarTopic);
+            const v = await genValidatedSentence(prompt);
+            btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false;
+            if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
+            S.aiQ = { topic, level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_' + Date.now(), lang: S.lang, createdAt: Date.now() };
+            try { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } catch (e) {}
+            resetUI(); showAIQuestion(S.aiQ);
         }
         async function practiceWeakPoint() {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; } const SS = getCurSentences(); const tags = {}; SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); }); const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]); if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; } const weakTag = sorted[0][0]; const btn = document.getElementById('weakBtn'); btn.textContent = '🎯 Üretiliyor...'; btn.disabled = true; const tl = { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' }; const nf = t('nativeField'); const _wpFocus = focusContextForPrompt(); const _wpFocusLine = _wpFocus ? ` Use a scenario ${_wpFocus}.` : ''; const prompt = `"${tl[weakTag] || weakTag}" gramer konusu, A2-B1, 1 cümle.${_wpFocusLine}\nJSON: {"${nf}":"...","english":"...","keywords":[{"${t('kwField')}":"...","en":"..."}]}\n2 keyword. BAŞKA YAZMA.`; const txt = await geminiCall(prompt); btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false; if (!txt) { alert('Cümle üretilemedi.'); return; } try { const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]); const wpId='ai_wp_'+Date.now(); const _nv=(j[nf]||j.turkish||j.spanish||''); S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang==='es' ? '' : _nv, spanish: S.lang==='es' ? _nv : '', english: j.english||'', keywords: j.keywords||[], id: wpId, lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() }; try{let ca=JSON.parse(localStorage.getItem('custom_sentences')||'[]');ca.push({...S.aiQ});LS.set('custom_sentences',ca);updateAIPoolUI();}catch(e){} resetUI(); showAIQuestion(S.aiQ); } catch { alert('AI cevabı ayrıştırılamadı.'); }
+            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; }
+            const SS = getCurSentences(); const tags = {};
+            SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); });
+            const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]);
+            if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; }
+            const weakTag = sorted[0][0];
+            const btn = document.getElementById('weakBtn'); btn.textContent = '🎯 Üretiliyor...'; btn.disabled = true;
+            const tl = { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' };
+            // Prompt'a gramer konusunun İngilizce adı gider; ekran etiketi Türkçe kalır
+            const tlEn = { preposition: 'prepositions (in/on/at/to/for)', past_tense: 'past simple tense', present_perfect: 'present perfect tense', article: 'articles (a/an/the)', word_order: 'English word order', vocabulary: 'common vocabulary usage', spelling: 'commonly misspelled words', other: 'general grammar' };
+            const prompt = buildSentenceGenPrompt(tlEn[weakTag] || weakTag);
+            const v = await genValidatedSentence(prompt);
+            btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false;
+            if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
+            S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_wp_' + Date.now(), lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() };
+            try { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } catch (e) {}
+            resetUI(); showAIQuestion(S.aiQ);
         }
         // === BATCH AI GENERATION (per topic) ===
         let _batchCancelled = false;
@@ -793,44 +934,36 @@ Açıklama: [${isEs ? '2-3 oraciones en español' : '2-3 cümle Türkçe'}]
             _batchCancelled = false;
             _showBatchModal(topic, count);
             const grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
-            const focusCtx = focusContextForPrompt();
-            const focusLine = focusCtx ? ` Use a scenario ${focusCtx}.` : '';
             const isES = S.lang === 'es';
-            const nf = isES ? 'spanish' : 'turkish';
-            const kf = isES ? 'es' : 'tr';
             let generated = 0;
             let failed = 0;
             const existingEnglish = new Set(getCurSentences().map(s => (s.english || '').toLowerCase().trim()));
+            const recentSentences = []; // bu turda üretilenler — prompt'a "bunları tekrarlama" diye gider
             for (let i = 0; i < count; i++) {
                 if (_batchCancelled) break;
                 _updateBatchProgress(generated, count, 'Üretiliyor...');
-                const prompt = isES
-                    ? `English grammar topic: "${grammarTopic}". Level A2-B1.${focusLine} Generate 1 English sentence DIFFERENT from common examples. Return ONLY JSON: {"spanish":"...","english":"...","keywords":[{"es":"...","en":"..."},{"es":"...","en":"..."}]}`
-                    : `İngilizce gramer konusu: "${grammarTopic}". Seviye A2-B1.${focusLine ? ' Bağlam:' + focusLine : ''} Bu konuyu kullanan, ÖZGÜN ve önceki örneklerden farklı 1 İngilizce cümle üret. SADECE şu JSON: {"turkish":"...","english":"...","keywords":[{"tr":"...","en":"..."},{"tr":"...","en":"..."}]}`;
+                const prompt = buildSentenceGenPrompt(grammarTopic, { avoid: recentSentences.slice(-5) });
                 try {
-                    const txt = await geminiCall(prompt);
-                    if (!txt) { failed++; continue; }
-                    const j = JSON.parse(txt.match(/\{[\s\S]*\}/)[0]);
-                    const enText = (j.english || '').trim();
-                    if (!enText) { failed++; continue; }
+                    const v = await genValidatedSentence(prompt);
+                    if (!v) { failed++; continue; }
                     // Tekrar eden cümleleri atla
-                    if (existingEnglish.has(enText.toLowerCase())) { failed++; continue; }
-                    existingEnglish.add(enText.toLowerCase());
-                    const nv = j[nf] || j.turkish || j.spanish || '';
+                    if (existingEnglish.has(v.english.toLowerCase())) { failed++; continue; }
+                    existingEnglish.add(v.english.toLowerCase());
+                    recentSentences.push(v.english);
                     const sentence = {
                         topic,
                         level: 'AI',
-                        turkish: isES ? '' : nv,
-                        spanish: isES ? nv : '',
-                        english: enText,
-                        keywords: j.keywords || [],
+                        turkish: isES ? '' : v.native,
+                        spanish: isES ? v.native : '',
+                        english: v.english,
+                        keywords: v.keywords,
                         id: 'ai_batch_' + Date.now() + '_' + i,
                         lang: S.lang,
                         source: 'batch',
                         focus: getUserFocus().id,
                         createdAt: Date.now()
                     };
-                    const ca = JSON.parse(localStorage.getItem('custom_sentences') || '[]');
+                    const ca = getAISentences();
                     ca.push(sentence);
                     LS.set('custom_sentences', ca);
                     generated++;
@@ -979,7 +1112,12 @@ Açıklama: [${isEs ? '2-3 oraciones en español' : '2-3 cümle Türkçe'}]
         }
         function confirmReset() { document.getElementById('resetModal').classList.remove('hidden'); }
         function closeResetModal() { document.getElementById('resetModal').classList.add('hidden'); }
-        function resetAllData() { localStorage.removeItem('srs'); localStorage.removeItem('gstats'); localStorage.removeItem('verb_srs'); localStorage.removeItem('srs_es'); localStorage.removeItem('gstats_es'); localStorage.removeItem('verb_srs_es'); closeResetModal(); selectTab('all'); }
+        function resetAllData() {
+            ['srs', 'gstats', 'verb_srs', 'srs_es', 'gstats_es', 'verb_srs_es', 'custom_sentences', 'topics_tr', 'topics_es'].forEach(k => localStorage.removeItem(k));
+            // Buluttaki kopyayı da boş veriyle ez — yoksa sonraki açılışta eski veri geri yüklenir
+            triggerCloudSync();
+            closeResetModal(); updateAIPoolUI(); updateStreakUI(); selectTab('all');
+        }
 
 // =====================
 // CREATIVE MODES
@@ -1189,18 +1327,19 @@ async function getAIExample(topic, level) {
     box.innerHTML = '<p style="color:#6b7280;font-size:.8rem;animation:pulse 1s infinite">🤖 Örnek üretiliyor...</p>';
     const grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
     const _focusCtx = focusContextForPrompt();
-    const _focusLine = _focusCtx ? `\nBağlam: ${_focusCtx}.` : '';
-    const prompt = `İngilizce gramer konusu: "${grammarTopic}". Seviye: ${level}.${_focusLine}
-Bu konuyu kullanan 3 farklı İngilizce cümle üret.
-Her cümlenin altına Türkçe çevirisini yaz.
-Format:
-1. [İngilizce cümle]
-   → [Türkçe]
-2. [İngilizce cümle]
-   → [Türkçe]
-3. [İngilizce cümle]
-   → [Türkçe]
-BAŞKA HİÇBİR ŞEY YAZMA.`;
+    const _focusLine = _focusCtx ? `\nContext: write the sentences ${_focusCtx}.` : '';
+    const _exLang = S.lang === 'es' ? 'Spanish' : 'Turkish';
+    const prompt = `English grammar topic: "${grammarTopic}". CEFR level: ${level}.${_focusLine}
+Write 3 different natural English sentences that practice this grammar topic.
+Under each sentence write its fluent ${_exLang} translation.
+Use EXACTLY this format:
+1. [English sentence]
+   → [${_exLang} translation]
+2. [English sentence]
+   → [${_exLang} translation]
+3. [English sentence]
+   → [${_exLang} translation]
+Write nothing else.`;
     const txt = await geminiCall(prompt);
     box.innerHTML = txt
         ? `<div style="background:#0c1929;border:1px solid #1e3a5f;border-radius:12px;padding:12px;font-size:.85rem;line-height:1.8;color:#e5e5e5;white-space:pre-wrap">${txt}</div>`
@@ -1218,6 +1357,7 @@ BAŞKA HİÇBİR ŞEY YAZMA.`;
                 _gs.streak = 0;
                 saveGS(_gs);
             }
+            sanitizeAISentences(); // localStorage'da birikmiş bozuk AI cümlelerini ayıkla
             updateLangUI(); renderTabs(); updateStreakUI(); updateAIPoolUI(); updateLevelFilterBadge(); selectTab('all');
             // İlk giriş kontrolü — onboarding modal
             if (!isOnboardingDone()) {
@@ -1352,13 +1492,16 @@ BAŞKA HİÇBİR ŞEY YAZMA.`;
                 const doc = await db.collection('users').doc(CLOUD_UID).get();
                 if (doc.exists) {
                     const data = doc.data();
-                    if (data.srs) localStorage.setItem(srsKey(), JSON.stringify(data.srs));
-                    if (data.gs) localStorage.setItem(gsKey(), JSON.stringify(data.gs));
-                    if (data.vsrs) localStorage.setItem(verbSrsKey(), JSON.stringify(data.vsrs));
+                    // Bulut alanları her zaman TR verisini taşır — sabit anahtarlara yaz.
+                    // srsKey() aktif dile göre değişir: ES modunda girişte TR verisi ES anahtarlarını ezerdi.
+                    if (data.srs) localStorage.setItem('srs', JSON.stringify(data.srs));
+                    if (data.gs) localStorage.setItem('gstats', JSON.stringify(data.gs));
+                    if (data.vsrs) localStorage.setItem('verb_srs', JSON.stringify(data.vsrs));
                     if (data.srs_es) localStorage.setItem('srs_es', JSON.stringify(data.srs_es));
                     if (data.gstats_es) localStorage.setItem('gstats_es', JSON.stringify(data.gstats_es));
                     if (data.verb_srs_es) localStorage.setItem('verb_srs_es', JSON.stringify(data.verb_srs_es));
                     if (data.custom_sentences) localStorage.setItem('custom_sentences', JSON.stringify(data.custom_sentences));
+                    sanitizeAISentences(); // buluttan gelen bozuk/eksik AI cümlelerini ayıkla
                     console.log('Cloud Data Loaded');
                     const curTab = S.tab;
                     renderTabs(); updateStreakUI(); updateAIPoolUI(); selectTab(curTab);
