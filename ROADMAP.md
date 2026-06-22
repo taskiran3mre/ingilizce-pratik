@@ -34,20 +34,26 @@
 - [ ] Gemini hata sebebinin yutulması (index.html:794 — `lastApiError` set edilmiyor)
 - **Bitti tanımı:** AI üretimi tek seferlik sapmada düşmez; bozuk/yanlış-dil cümle havuza/buluta sızmaz.
 
-### Faz 1 — Veri katmanını sağlamlaştır ("kaydedilmiyor"u bitir)
-- [ ] `custom_sentences` ve SRS'i alt-koleksiyona taşı: `users/{uid}/sentences/{id}` (1 MB sınırından kurtul)
-- [ ] Sürüm/zaman-damgası ile merge — çok cihazlı last-write-wins veri kaybını gider (index.html:1438, 1477-1496)
-- [ ] `LS.set` kota guard'ı + kullanıcıya "depolama dolu" uyarısı (index.html:408-411)
-- [ ] Senkron hatasında görünür banner + retry/backoff (index.html:1441-1443)
-- [ ] `beforeunload` yerine `visibilitychange`→hidden flush (index.html:1450)
-- **Bitti tanımı:** Cümle/ilerleme kalıcı; çok cihaz çakışmıyor; hata kullanıcıya görünür.
+### Faz 1 — İstemci dayanıklılığı + görünürlük (sessiz kaybı görünür kıl) ✅
+- [x] `LS.set` kota guard'ı + "depolama dolu" uyarısı (showStorageWarning)
+- [x] Senkron hatasında görünür banner + üstel geri çekilmeli retry; geçici/kalıcı hata ayrımı (sessiz hata bitti)
+- [x] `visibilitychange`→hidden flush (mobilde güvenilir son-an kaydı)
+- **Bitti tanımı:** Senkron/depolama hatası artık kullanıcıya görünür; geçici kopmalarda otomatik tekrar denenir.
+- **Not — 1 MB tek-doküman bombası bilinçli olarak Faz 2'ye taşındı:** Faz 2'de sunucu (Cloud Function)
+  AI cümlesini üretip **doğrudan alt-koleksiyona** yazacağı için migration orada tek seferde ve test edilebilir
+  yapılır; şimdi istemcide yazmak Faz 2'de çöpe giderdi. Bomba mevcut veri boyutunda patlamıyor, banner sayesinde
+  patlarsa anında görünür.
 
-### Faz 2 — Sunucu AI proxy + kota (freemium'un kilit taşı)
+### Faz 2 — Sunucu AI proxy + kota + veri modeli (freemium'un kilit taşı)
 - [ ] Firebase Cloud Functions (mevcut Auth ile en sıkı entegrasyon) — sahip anahtarı serverda
 - [ ] Firebase ID token doğrulama + kullanıcı başına günlük/aylık kota (Firestore sayaç)
 - [ ] Yapısal çıktı + retry + dil doğrulama mantığını server'a taşı (tek yerde)
+- [ ] **1 MB bomba çözümü:** `custom_sentences` → `users/{uid}/sentences/{id}` alt-koleksiyonu — sunucu üretince
+  doğrudan oraya yazar, istemci okur. `firestore.rules` güncellenir + **deploy** (kullanıcı erişimi gerekli).
+- [ ] Sürümlü/zaman-damgalı merge — çok cihazlı last-write-wins veri kaybını gider
+- [ ] Var olan tek-doküman verisinin alt-koleksiyona güvenli (yıkıcı-olmayan) migration'ı + canlı Firebase testi
 - [ ] Kötüye kullanım izleme + ban; AI çıktısını `innerHTML` yerine `textContent`/sanitize (index.html:871,1333)
-- **Bitti tanımı:** İstemcide anahtar yok; ücretsiz/premium kotası server'da zorlanıyor.
+- **Bitti tanımı:** İstemcide anahtar yok; kota server'da zorlanıyor; veri alt-koleksiyonda, 1 MB sınırı tarihe karıştı.
 
 ### Faz 3 — Ürünleştirme: i18n + UX + öğrenme doğruluğu
 - [ ] ES dil sızıntıları: streak "gün"→"días" (434), geri bildirim/ipucu/hata etiketleri `t()`'ye (706,750-754,761,871,873)
