@@ -248,8 +248,8 @@
             </div>
             <div id="authErrorBox" class="hidden mb-3 p-3 rounded-lg text-xs" style="background:#2a0f0f;border:1px solid #dc2626;color:#f87171"></div>
             <div class="space-y-3 mb-4">
-                <input type="email" id="authEmail" placeholder="E-posta" class="w-full rounded-xl px-4 py-3 text-sm" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <input type="password" id="authPass" placeholder="Şifre" class="w-full rounded-xl px-4 py-3 text-sm" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <input type="email" id="authEmail" placeholder="E-posta" data-i18n-ph="emailPh" class="w-full rounded-xl px-4 py-3 text-sm" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
+                <input type="password" id="authPass" placeholder="Şifre" data-i18n-ph="passPh" class="w-full rounded-xl px-4 py-3 text-sm" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
             </div>
             <button onclick="handleEmailAuth()" id="authActionBtn" class="w-full py-3 rounded-xl font-semibold text-sm mb-3" style="background:#3B82F6;color:white">Giriş Yap</button>
             <p class="text-xs text-center text-gray-500 mt-4"><span id="authToggleText">Hesabın yok mu?</span><button onclick="toggleAuthMode()" class="text-blue-400 hover:underline inline-block ml-1" id="authToggleBtn">Kayıt Ol</button></p>
@@ -260,57 +260,57 @@
     <div id="settingsOverlay" class="hidden fixed inset-0 z-50 flex items-end justify-end p-4" style="background:rgba(0,0,0,0.6)" onclick="if(event.target===this)closeSettings()">
         <div class="settings-panel rounded-2xl p-5 w-full max-w-sm" style="background:#161616;border:1px solid #2a2a2a;max-height:90vh;overflow-y:auto">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-bold text-base">⚙️ Ayarlar</h3>
+                <h3 class="font-bold text-base" data-i18n="settingsTitle">⚙️ Ayarlar</h3>
                 <button onclick="closeSettings()" class="text-gray-500 hover:text-white">✕</button>
             </div>
             <div class="rounded-xl p-3 mb-3" style="background:#1a1a1a;border:1px solid #2a2a2a">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-gray-200">🎯 Hedef Alanım</span>
+                    <span class="text-sm font-bold text-gray-200" data-i18n="focusTitle">🎯 Hedef Alanım</span>
                 </div>
-                <p class="text-xs text-gray-500 mb-3">AI üretimi bu alana göre kişiselleştirilir.</p>
+                <p class="text-xs text-gray-500 mb-3" data-i18n="focusDesc">AI üretimi bu alana göre kişiselleştirilir.</p>
                 <div id="focusListSettings" class="space-y-2"></div>
             </div>
 
             <div class="rounded-xl p-3 mb-3" style="background:#1a1a1a;border:1px solid #2a2a2a">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-gray-200">🎚 Seviye Filtresi</span>
-                    <button onclick="resetLevelFilter()" class="text-xs text-gray-500 hover:text-blue-400">Sıfırla</button>
+                    <span class="text-sm font-bold text-gray-200" data-i18n="levelFilterTitle">🎚 Seviye Filtresi</span>
+                    <button onclick="resetLevelFilter()" class="text-xs text-gray-500 hover:text-blue-400" data-i18n="resetShort">Sıfırla</button>
                 </div>
-                <p class="text-xs text-gray-500 mb-2">Sadece seçili seviyedeki cümleler görünür. AI üretimi her zaman görünür.</p>
+                <p class="text-xs text-gray-500 mb-2" data-i18n="levelFilterDesc">Sadece seçili seviyedeki cümleler görünür. AI üretimi her zaman görünür.</p>
                 <div id="levelFilterChips" class="flex flex-wrap gap-2"></div>
             </div>
 
             <div class="rounded-xl p-3 mb-3" style="background:#0a1a28;border:1px solid #1a3a4f">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-sm font-bold text-blue-400">🧠 Gemini</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-400">1. Öncelik</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-400" data-i18n="priority1">1. Öncelik</span>
                 </div>
-                <p class="text-xs text-gray-500 mb-2">Gemini 2.5 Flash • 500 istek/gün • Ücretsiz</p>
+                <p class="text-xs text-gray-500 mb-2" data-i18n="geminiDesc">Gemini 2.5 Flash • 500 istek/gün • Ücretsiz</p>
                 <input type="password" id="apiKeyInput" placeholder="AIza..." class="w-full rounded-lg px-3 py-2 text-sm mb-2" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <p class="text-xs text-gray-600"><a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline">🔑 Key al (Gemini)</a></p>
+                <p class="text-xs text-gray-600"><a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline" data-i18n="getKeyGemini">🔑 Key al (Gemini)</a></p>
             </div>
             <div class="rounded-xl p-3 mb-3" style="background:#0a1628;border:1px solid #1e3a5f">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-sm font-bold text-orange-400">⚡ Groq</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-400">2. Yedek</span>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-400" data-i18n="priority2">2. Yedek</span>
                 </div>
-                <p class="text-xs text-gray-500 mb-2">Ultra hızlı • Ücretsiz</p>
+                <p class="text-xs text-gray-500 mb-2" data-i18n="groqDesc">Ultra hızlı • Ücretsiz</p>
                 <input type="password" id="groqKeyInput" placeholder="gsk_..." class="w-full rounded-lg px-3 py-2 text-sm mb-2" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <p class="text-xs text-gray-600"><a href="https://console.groq.com/keys" target="_blank" class="text-orange-400 underline">🔑 Key al (Groq)</a></p>
+                <p class="text-xs text-gray-600"><a href="https://console.groq.com/keys" target="_blank" class="text-orange-400 underline" data-i18n="getKeyGroq">🔑 Key al (Groq)</a></p>
             </div>
-            <button onclick="saveApiKeys()" class="w-full py-2.5 rounded-xl font-semibold text-sm mb-2" style="background:#3B82F6;color:white">Kaydet</button>
-            <p class="text-xs text-gray-600 text-center">Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.</p>
+            <button onclick="saveApiKeys()" class="w-full py-2.5 rounded-xl font-semibold text-sm mb-2" style="background:#3B82F6;color:white" data-i18n="saveBtn">Kaydet</button>
+            <p class="text-xs text-gray-600 text-center" data-i18n="apiHelp">Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.</p>
         </div>
     </div>
     
     <!-- Reset Modal -->
     <div id="resetModal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4" style="background:rgba(0,0,0,0.7)">
         <div class="rounded-2xl p-6 w-full max-w-sm" style="background:#161616;border:1px solid #2a2a2a">
-            <h3 class="font-bold text-base mb-2">Veriyi Sıfırla</h3>
-            <p class="text-sm text-gray-400 mb-5">Tüm ilerleme silinecek. Geri alınamaz.</p>
+            <h3 class="font-bold text-base mb-2" data-i18n="resetTitle">Veriyi Sıfırla</h3>
+            <p class="text-sm text-gray-400 mb-5" data-i18n="resetDesc">Tüm ilerleme silinecek. Geri alınamaz.</p>
             <div class="flex gap-3">
-                <button onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a">İptal</button>
-                <button onclick="resetAllData()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:#dc2626;color:white">Sıfırla</button>
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a" data-i18n="cancel">İptal</button>
+                <button onclick="resetAllData()" class="flex-1 py-2.5 rounded-xl text-sm font-semibold" style="background:#dc2626;color:white" data-i18n="resetConfirm">Sıfırla</button>
             </div>
         </div>
     </div>
@@ -346,15 +346,15 @@
         <div class="rounded-2xl w-full max-w-lg flex flex-col" style="background:#161616;border:1px solid #2a2a2a;max-height:85vh">
             <div class="flex justify-between items-center p-5 pb-3" style="border-bottom:1px solid #2a2a2a">
                 <div>
-                    <h3 class="font-bold text-base">🤖 AI Cümlelerim</h3>
-                    <p class="text-xs text-gray-500 mt-0.5"><span id="aiPoolModalCount">0</span> cümle havuzda</p>
+                    <h3 class="font-bold text-base" data-i18n="poolTitle">🤖 AI Cümlelerim</h3>
+                    <p class="text-xs text-gray-500 mt-0.5"><span id="aiPoolModalCount">0</span> <span data-i18n="poolCountSuffix">cümle havuzda</span></p>
                 </div>
                 <button onclick="closeAIPoolModal()" class="text-gray-500 hover:text-white text-lg">✕</button>
             </div>
             <div id="aiPoolList" class="flex-1 overflow-y-auto p-3 space-y-2"></div>
             <div class="p-4 flex gap-3" style="border-top:1px solid #2a2a2a">
-                <button onclick="closeAIPoolModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a">Kapat</button>
-                <button onclick="deleteAllAISentences()" class="px-4 py-2.5 rounded-xl text-sm font-semibold" style="background:#2a0f0f;border:1px solid #dc2626;color:#f87171">🗑️ Tümünü Sil</button>
+                <button onclick="closeAIPoolModal()" class="flex-1 py-2.5 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a" data-i18n="close">Kapat</button>
+                <button onclick="deleteAllAISentences()" class="px-4 py-2.5 rounded-xl text-sm font-semibold" style="background:#2a0f0f;border:1px solid #dc2626;color:#f87171" data-i18n="deleteAll">🗑️ Tümünü Sil</button>
             </div>
         </div>
     </div>
@@ -368,8 +368,8 @@
         // Data is now loaded from data.js
         // === LANGUAGE SYSTEM ===
         const UI = {
-            tr: { appTitle: 'İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → EN', dirLabelRev: 'EN → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', dayUnit: 'gün', yourLabel: 'Senin:', refLabel: 'Referans:', login: 'Giriş Yap', generating: '🤖 Üretiliyor...', weakGenerating: '🎯 Üretiliyor...', allDone: 'Tüm sorular tamamlandı!', evaluating: '🤖 Değerlendiriliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
-            es: { appTitle: 'Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: '🎲 Aleatorio', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → EN', dirLabelRev: 'EN → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', dayUnit: 'días', yourLabel: 'Tu respuesta:', refLabel: 'Referencia:', login: 'Iniciar sesión', generating: '🤖 Generando...', weakGenerating: '🎯 Generando...', allDone: '¡Todas las preguntas completadas!', evaluating: '🤖 Evaluando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
+            tr: { appTitle: 'İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → EN', dirLabelRev: 'EN → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', dayUnit: 'gün', yourLabel: 'Senin:', refLabel: 'Referans:', login: 'Giriş Yap', generating: '🤖 Üretiliyor...', weakGenerating: '🎯 Üretiliyor...', focusTitle: '🎯 Hedef Alanım', focusDesc: 'AI üretimi bu alana göre kişiselleştirilir.', levelFilterTitle: '🎚 Seviye Filtresi', resetShort: 'Sıfırla', levelFilterDesc: 'Sadece seçili seviyedeki cümleler görünür. AI üretimi her zaman görünür.', priority1: '1. Öncelik', geminiDesc: 'Gemini 2.5 Flash • 500 istek/gün • Ücretsiz', getKeyGemini: '🔑 Key al (Gemini)', priority2: '2. Yedek', groqDesc: 'Ultra hızlı • Ücretsiz', getKeyGroq: '🔑 Key al (Groq)', apiHelp: 'Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.', emailPh: 'E-posta', passPh: 'Şifre', resetTitle: 'Veriyi Sıfırla', resetDesc: 'Tüm ilerleme silinecek. Geri alınamaz.', cancel: 'İptal', resetConfirm: 'Sıfırla', poolTitle: '🤖 AI Cümlelerim', poolCountSuffix: 'cümle havuzda', close: 'Kapat', deleteAll: '🗑️ Tümünü Sil', authLogin: 'Giriş Yap', authSignup: 'Kayıt Ol', authNoAccount: 'Hesabın yok mu?', authHasAccount: 'Zaten hesabın var mı?', pleaseWait: 'Bekleniyor...', allDone: 'Tüm sorular tamamlandı!', evaluating: '🤖 Değerlendiriliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
+            es: { appTitle: 'Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: '🎲 Aleatorio', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → EN', dirLabelRev: 'EN → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', dayUnit: 'días', yourLabel: 'Tu respuesta:', refLabel: 'Referencia:', login: 'Iniciar sesión', generating: '🤖 Generando...', weakGenerating: '🎯 Generando...', focusTitle: '🎯 Mi área objetivo', focusDesc: 'La generación de IA se personaliza según esta área.', levelFilterTitle: '🎚 Filtro de nivel', resetShort: 'Restablecer', levelFilterDesc: 'Solo se muestran las frases del nivel seleccionado. La generación de IA siempre se muestra.', priority1: '1ª Prioridad', geminiDesc: 'Gemini 2.5 Flash • 500 solicitudes/día • Gratis', getKeyGemini: '🔑 Obtener clave (Gemini)', priority2: '2º Respaldo', groqDesc: 'Ultrarrápido • Gratis', getKeyGroq: '🔑 Obtener clave (Groq)', apiHelp: 'Gemini funciona como prioridad; si falla, se usa Groq como respaldo.', emailPh: 'Correo electrónico', passPh: 'Contraseña', resetTitle: 'Borrar datos', resetDesc: 'Se borrará todo el progreso. No se puede deshacer.', cancel: 'Cancelar', resetConfirm: 'Borrar', poolTitle: '🤖 Mis frases de IA', poolCountSuffix: 'frases en el banco', close: 'Cerrar', deleteAll: '🗑️ Borrar todo', authLogin: 'Iniciar sesión', authSignup: 'Registrarse', authNoAccount: '¿No tienes cuenta?', authHasAccount: '¿Ya tienes cuenta?', pleaseWait: 'Espere...', allDone: '¡Todas las preguntas completadas!', evaluating: '🤖 Evaluando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
         };
         // Dil etiketi yoksa topic prefix'inden çıkar (legacy AI cümleler için)
         function _inferSentenceLang(s) {
@@ -397,6 +397,11 @@
         function getCurVerbs() { return S.lang === 'es' ? VERBS_ES : VERBS; }
         function getCurTopics() { return [...new Set(getCurSentences().filter(s=>s&&s.topic&&typeof s.topic==='string').map(s => s.topic.split(':')[0].trim()))].sort(); }
         function t(key) { return UI[S.lang]?.[key] || UI.tr[key] || key; }
+        // data-i18n / data-i18n-ph taşıyan statik öğeleri aktif dile çevirir (tek noktadan)
+        function applyStaticI18n() {
+            document.querySelectorAll('[data-i18n]').forEach(el => { const v = t(el.getAttribute('data-i18n')); if (v) el.textContent = v; });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => { const v = t(el.getAttribute('data-i18n-ph')); if (v) el.placeholder = v; });
+        }
         function getNative(q) { return q[t('nativeField')] || q.turkish || q.spanish || ''; }
         function getKw(kw) { return kw[t('kwField')] || kw.tr || kw.es || ''; }
         function getVerbNative(v, n) { const f = S.lang === 'es' ? 'es' : 'tr'; return n ? v[f + n] : v[f]; }
@@ -413,7 +418,7 @@
             document.getElementById('dirLabel').textContent = S.lang === 'es' ? 'ES → 🇺🇸' : '🇹🇷 → 🇺🇸';
             const mapping = { loginBtn: 'login', sessionLabel: 'session', dirText: 'dirText', correctAnswerLabel: 'correctAnswer', teachMeLabel: 'teach', variationsLabel: 'variations', softTitle: 'softTitle', softRetryBtn: 'softRetry', checkBtnLabel: 'checkBtn', hintBtnLabel: 'hint', skipBtnLabel: 'skip', aiGenLabel: 'aiGen', weakBtnLabel: 'weakPoint', retryBtn: 'retry', nextBtn: 'next', reviewTitle: 'reviewTitle', statTotalLabel: 'statTotalLabel', statAccLabel: 'statAccLabel', statLearnedLabel: 'statLearnedLabel', statStreakLabel: 'statStreakLabel', topicPerfLabel: 'topicPerfLabel', weakReportLabel: 'weakReportLabel', weakReportDesc: 'weakReportDesc', resetBtn: 'resetBtn', verbTitle: 'verbTitle', verbSubtitle: 'verbSubtitle' };
             Object.entries(mapping).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
-            const inp = document.getElementById('answerInput'); if (inp) inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');
+            const inp = document.getElementById('answerInput'); if (inp) inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev'); applyStaticI18n();
         }
         const today = () => new Date().toISOString().split('T')[0];
         const LS = {
@@ -934,7 +939,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         // AI FEATURES
         async function generateAISentence() {
             if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; }
-            const btn = document.getElementById('aiGenBtn'); btn.textContent = t('generating'); btn.disabled = true;
+            const btn = document.getElementById('aiGenBtn'); const lbl = document.getElementById('aiGenLabel'); if (lbl) lbl.textContent = t('generating'); btn.disabled = true;
             const _allSubs = [...new Set(getCurSentences().filter(s => s.topic && s.topic.includes(':')).map(s => s.topic))];
             let topic;
             if (S.subtab && S.subtab.includes(':')) { topic = S.subtab; }
@@ -943,7 +948,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const _grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
             const prompt = buildSentenceGenPrompt(_grammarTopic);
             const v = await genValidatedSentence(prompt);
-            btn.textContent = t('aiGen'); btn.disabled = false;
+            if (lbl) lbl.textContent = t('aiGen'); btn.disabled = false;
             if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
             S.aiQ = { topic, level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_' + Date.now(), lang: S.lang, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme (havuz şişmesini önler)
@@ -957,7 +962,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]);
             if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; }
             const weakTag = sorted[0][0];
-            const btn = document.getElementById('weakBtn'); btn.textContent = t('weakGenerating'); btn.disabled = true;
+            const btn = document.getElementById('weakBtn'); const lbl = document.getElementById('weakBtnLabel'); if (lbl) lbl.textContent = t('weakGenerating'); btn.disabled = true;
             const tl = S.lang === 'es'
                 ? { preposition: 'preposiciones', past_tense: 'pasado simple', present_perfect: 'present perfect', article: 'artículos', word_order: 'orden de palabras', vocabulary: 'vocabulario', spelling: 'ortografía', other: 'general' }
                 : { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' };
@@ -965,7 +970,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const tlEn = { preposition: 'prepositions (in/on/at/to/for)', past_tense: 'past simple tense', present_perfect: 'present perfect tense', article: 'articles (a/an/the)', word_order: 'English word order', vocabulary: 'common vocabulary usage', spelling: 'commonly misspelled words', other: 'general grammar' };
             const prompt = buildSentenceGenPrompt(tlEn[weakTag] || weakTag);
             const v = await genValidatedSentence(prompt);
-            btn.textContent = t('weakPoint'); btn.disabled = false;
+            if (lbl) lbl.textContent = t('weakPoint'); btn.disabled = false;
             if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
             S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_wp_' + Date.now(), lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme
@@ -1612,16 +1617,19 @@ Write nothing else.`;
             } catch(e) { console.error('Cloud Load Error', e); }
         }
 
-        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function openAuthModal() { _setAuthTexts(); document.getElementById('authModal').classList.remove('hidden'); }
         function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); document.getElementById('authErrorBox').classList.add('hidden'); }
         
         let loginMode = true;
+        function _setAuthTexts() {
+            document.getElementById('authTitle').textContent = loginMode ? t('authLogin') : t('authSignup');
+            document.getElementById('authActionBtn').textContent = loginMode ? t('authLogin') : t('authSignup');
+            document.getElementById('authToggleText').textContent = loginMode ? t('authNoAccount') : t('authHasAccount');
+            document.getElementById('authToggleBtn').textContent = loginMode ? t('authSignup') : t('authLogin');
+        }
         function toggleAuthMode() {
             loginMode = !loginMode;
-            document.getElementById('authTitle').textContent = loginMode ? 'Giriş Yap' : 'Kayıt Ol';
-            document.getElementById('authActionBtn').textContent = loginMode ? 'Giriş Yap' : 'Kayıt Ol';
-            document.getElementById('authToggleText').textContent = loginMode ? 'Hesabın yok mu?' : 'Zaten hesabın var mı?';
-            document.getElementById('authToggleBtn').textContent = loginMode ? 'Kayıt Ol' : 'Giriş Yap';
+            _setAuthTexts();
             document.getElementById('authErrorBox').classList.add('hidden');
         }
 
@@ -1629,16 +1637,16 @@ Write nothing else.`;
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPass').value.trim();
             const errBox = document.getElementById('authErrorBox');
-            if (!email || !pass) { errBox.textContent = 'E-posta ve şifre gerekli.'; errBox.classList.remove('hidden'); return; }
+            if (!email || !pass) { errBox.textContent = S.lang === 'es' ? 'Correo y contraseña requeridos.' : 'E-posta ve şifre gerekli.'; errBox.classList.remove('hidden'); return; }
             errBox.classList.add('hidden');
             const btn = document.getElementById('authActionBtn');
-            btn.textContent = 'Bekleniyor...'; btn.disabled = true;
+            btn.textContent = t('pleaseWait'); btn.disabled = true;
             try {
                 if (loginMode) { await auth.signInWithEmailAndPassword(email, pass); } 
                 else { await auth.createUserWithEmailAndPassword(email, pass); }
                 closeAuthModal();
             } catch (e) { errBox.textContent = e.message; errBox.classList.remove('hidden'); }
-            btn.textContent = loginMode ? 'Giriş Yap' : 'Kayıt Ol'; btn.disabled = false;
+            btn.textContent = loginMode ? t('authLogin') : t('authSignup'); btn.disabled = false;
         }
 
         async function logout() {
