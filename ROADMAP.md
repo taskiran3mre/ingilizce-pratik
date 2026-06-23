@@ -61,8 +61,10 @@
 - [x] Pinch-zoom kilidini kaldır (a11y) — `c570b62`
 - [x] AI havuzu dile-özel sayım/silme + idx→ID tabanlı güvenli silme — `4ac122a`
 - [x] Onboarding: değer anlatan karşılama adımı + açık "Başla" (TR/ES) — `356e6c8`
-- [ ] (kalan) Min. erişilebilirlik: aria-label taraması (ikon butonlar) + kontrast (P2)
-- [ ] (kalan) İkincil ekran i18n taraması (havuz modalı chrome, ayarlar, istatistik metinleri)
+- [x] İkincil ekran i18n (ayarlar paneli, havuz modalı, reset modalı, auth modalı) — `201529e` (data-i18n sistemi)
+- [x] Canlı QA (Claude for Chrome) + bulguların düzeltilmesi: puanlayıcı hedef-dil, dil-değişiminde streak/sayaç/buton yenileme — `b730afb`, `201529e`
+- [ ] (kalan, P2) Min. erişilebilirlik: aria-label taraması (ikon butonlar) + kontrast
+- [ ] (kalan, P2) Firebase auth hata kodlarının lokalize map'i (e.message hâlâ İngilizce)
 - [ ] (ertelendi) Dile-duyarlı SRS anahtarı refactor — düşük gerçek etki, Faz 2 veri modeliyle birlikte
 - **Bitti tanımı:** ES kullanıcı çekirdek akışta baştan sona kendi dilinde ✅; havuz tutarlı ✅; temel a11y kısmen.
 
