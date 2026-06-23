@@ -465,11 +465,15 @@
                 updateAIPoolUI();
             }
         }
+        // Aktif dildeki AI cümleler — getCurSentences ile aynı filtre (lang===null tag-tabanlı her dilde görünür)
+        function getCurAISentences() {
+            return getAISentences().filter(s => { const lng = _inferSentenceLang(s); return lng === null || lng === S.lang; });
+        }
         function updateAIPoolUI() {
-            const all = getAISentences();
+            const cur = getCurAISentences();
             const badge = document.getElementById('aiPoolBadge');
             const count = document.getElementById('aiPoolCount');
-            if (all.length > 0) { badge.classList.remove('hidden'); count.textContent = all.length; }
+            if (cur.length > 0) { badge.classList.remove('hidden'); count.textContent = cur.length; }
             else badge.classList.add('hidden');
         }
         // === LEVEL FILTER ===
@@ -913,7 +917,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
             S.aiQ = { topic, level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_' + Date.now(), lang: S.lang, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme (havuz şişmesini önler)
-            try { const ca = getAISentences(); if (!ca.some(s => (s.english || '').toLowerCase() === v.english.toLowerCase())) { ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
+            try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
             resetUI(); showAIQuestion(S.aiQ);
         }
         async function practiceWeakPoint() {
@@ -935,7 +939,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
             S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_wp_' + Date.now(), lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme
-            try { const ca = getAISentences(); if (!ca.some(s => (s.english || '').toLowerCase() === v.english.toLowerCase())) { ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
+            try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
             resetUI(); showAIQuestion(S.aiQ);
         }
         // === BATCH AI GENERATION (per topic) ===
@@ -1065,17 +1069,18 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         }
         function closeAIPoolModal() { document.getElementById('aiPoolModal').classList.add('hidden'); }
         function renderAIPoolList() {
-            const all = getAISentences();
-            document.getElementById('aiPoolModalCount').textContent = all.length;
+            const cur = getCurAISentences();
+            document.getElementById('aiPoolModalCount').textContent = cur.length;
             const list = document.getElementById('aiPoolList');
-            if (!all.length) {
-                list.innerHTML = '<p class="text-center text-gray-500 text-sm py-8">Henüz AI ile cümle üretmedin.<br><span class="text-xs">Pratik ekranındaki 🤖 butonunu dene.</span></p>';
+            if (!cur.length) {
+                list.innerHTML = S.lang === 'es'
+                    ? '<p class="text-center text-gray-500 text-sm py-8">Aún no has generado oraciones con AI.<br><span class="text-xs">Prueba el botón 🤖 en la pantalla de práctica.</span></p>'
+                    : '<p class="text-center text-gray-500 text-sm py-8">Henüz AI ile cümle üretmedin.<br><span class="text-xs">Pratik ekranındaki 🤖 butonunu dene.</span></p>';
                 return;
             }
             // En yeni en üstte
-            const sorted = [...all].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-            list.innerHTML = sorted.map((s, i) => {
-                const origIdx = all.indexOf(s);
+            const sorted = [...cur].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            list.innerHTML = sorted.map((s) => {
                 const native = s.turkish || s.spanish || '';
                 const langTag = s.lang === 'es' ? 'ES' : (s.lang === 'tr' ? 'TR' : '—');
                 const srcTag = s.source === 'weakpoint' ? '🎯 Zayıf' : '🤖 AI';
@@ -1087,19 +1092,20 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
                             <span class="px-1.5 py-0.5 rounded" style="background:#0c1929;color:#93c5fd">${srcTag}</span>
                             <span class="px-1.5 py-0.5 rounded text-gray-500" style="background:#0f0f0f">${langTag}${date ? ' · ' + date : ''}</span>
                         </div>
-                        <button onclick="deleteAISentence(${origIdx})" class="text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="Sil">🗑️</button>
+                        <button onclick="deleteAISentence('${s.id}')" class="text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="Sil" aria-label="Sil">🗑️</button>
                     </div>
                     <p class="text-sm text-gray-200">${s.english || ''}</p>
                     ${native ? '<p class="text-xs text-gray-500 mt-1">' + native + '</p>' : ''}
                 </div>`;
             }).join('');
         }
-        function deleteAISentence(idx) {
+        function deleteAISentence(id) {
             const all = getAISentences();
-            if (idx < 0 || idx >= all.length) return;
+            const idx = all.findIndex(s => s && s.id === id);
+            if (idx === -1) return;
             const removed = all.splice(idx, 1)[0];
             LS.set('custom_sentences', all);
-            // SRS kaydını da temizle
+            // SRS kaydını da temizle — cümlenin kendi diline göre (canlı S.lang'a göre değil)
             if (removed && removed.id) {
                 const sk = removed.lang === 'es' ? 'srs_es' : 'srs';
                 const d = LS.get(sk, {});
@@ -1110,15 +1116,20 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         }
         function deleteAllAISentences() {
             const all = getAISentences();
-            if (!all.length) return;
-            if (!confirm(`${all.length} AI cümlesinin tümü silinecek. Emin misin?`)) return;
+            const cur = getCurAISentences();           // sadece aktif dildekiler
+            if (!cur.length) return;
+            const isEs = S.lang === 'es';
+            const msg = isEs ? `Se borrarán ${cur.length} oraciones de AI (español). ¿Seguro?` : `${cur.length} AI cümlesi (Türkçe) silinecek. Emin misin?`;
+            if (!confirm(msg)) return;
+            const removeIds = new Set(cur.map(s => s.id));
             // İlgili SRS kayıtlarını da temizle
             ['srs', 'srs_es'].forEach(sk => {
                 const d = LS.get(sk, {});
-                all.forEach(s => { if (s.id && d[s.id]) delete d[s.id]; });
+                cur.forEach(s => { if (s.id && d[s.id]) delete d[s.id]; });
                 LS.set(sk, d);
             });
-            LS.set('custom_sentences', []);
+            // Sadece aktif dildekileri çıkar, diğer dili koru
+            LS.set('custom_sentences', all.filter(s => !removeIds.has(s.id)));
             updateAIPoolUI();
             renderAIPoolList();
         }
