@@ -317,15 +317,26 @@
 
     <!-- Onboarding Modal (first visit) -->
     <div id="onboardingModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4" style="background:rgba(0,0,0,0.85)">
-        <div class="rounded-2xl w-full max-w-md flex flex-col" style="background:#161616;border:1px solid #2a2a2a;max-height:90vh">
-            <div class="p-5 pb-3">
-                <p class="text-3xl mb-2">🎯</p>
-                <h3 class="font-bold text-lg mb-1" id="onbTitle">Hangi alanda kullanacaksın?</h3>
-                <p class="text-xs text-gray-500" id="onbDesc">Bu seçim AI ile üretilen cümleleri sana özel yapar. Sonra ⚙️ Ayarlar'dan değiştirebilirsin.</p>
+        <div class="rounded-2xl w-full max-w-md" style="background:#161616;border:1px solid #2a2a2a;max-height:90vh">
+            <!-- Adım 1: Karşılama / tanıtım -->
+            <div id="onbStep1" class="p-6 text-center">
+                <p class="text-4xl mb-3">🇬🇧</p>
+                <h3 class="font-bold text-xl mb-2" id="onbWelcomeTitle">İngilizce Pratik'e hoş geldin! 👋</h3>
+                <p class="text-sm text-gray-400 mb-4" id="onbWelcomeDesc">Çeviri yaparak İngilizce gramer yapılarını öğren — yapay zeka desteğiyle.</p>
+                <div class="text-left text-sm text-gray-300 space-y-2 mb-5" id="onbWelcomeBullets"></div>
+                <button onclick="onboardingNext()" class="w-full py-3 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white" id="onbStartBtn">Başla →</button>
             </div>
-            <div id="onbList" class="flex-1 overflow-y-auto px-4 space-y-2"></div>
-            <div class="p-4 text-center" style="border-top:1px solid #2a2a2a">
-                <button onclick="skipOnboarding()" class="text-xs text-gray-500 hover:text-blue-400" id="onbSkip">Şimdilik geç →</button>
+            <!-- Adım 2: Odak alanı seçimi -->
+            <div id="onbStep2" class="hidden">
+                <div class="p-5 pb-3">
+                    <p class="text-3xl mb-2">🎯</p>
+                    <h3 class="font-bold text-lg mb-1" id="onbTitle">Hangi alanda kullanacaksın?</h3>
+                    <p class="text-xs text-gray-500" id="onbDesc">Bu seçim AI ile üretilen cümleleri sana özel yapar. Sonra ⚙️ Ayarlar'dan değiştirebilirsin.</p>
+                </div>
+                <div id="onbList" class="px-4 space-y-2" style="max-height:50vh;overflow-y:auto"></div>
+                <div class="p-4 text-center" style="border-top:1px solid #2a2a2a">
+                    <button onclick="skipOnboarding()" class="text-xs text-gray-500 hover:text-blue-400" id="onbSkip">Şimdilik geç →</button>
+                </div>
             </div>
         </div>
     </div>
@@ -570,14 +581,32 @@
             return f.prompt; // '' for general
         }
         function showOnboarding() {
-            renderFocusList('onbList', true);
-            // Dil bazlı başlık
-            if (S.lang === 'es') {
+            const isEs = S.lang === 'es';
+            // --- Adım 1: karşılama / tanıtım (lokalize) ---
+            document.getElementById('onbWelcomeTitle').textContent = isEs ? '¡Bienvenido a Práctica de Inglés! 👋' : "İngilizce Pratik'e hoş geldin! 👋";
+            document.getElementById('onbWelcomeDesc').textContent = isEs
+                ? 'Aprende estructuras gramaticales del inglés traduciendo, con ayuda de la IA.'
+                : 'Çeviri yaparak İngilizce gramer yapılarını öğren — yapay zeka desteğiyle.';
+            const bullets = isEs
+                ? ['🤖 La IA genera frases personalizadas para tu nivel', '🧠 Analiza tus errores y explica el porqué', '🔁 El sistema de repaso (SRS) fija lo aprendido']
+                : ['🤖 Yapay zeka seviyene uygun, sana özel cümleler üretir', '🧠 Hatalarını analiz edip nedenini açıklar', '🔁 Tekrar (SRS) sistemiyle öğrendiğin kalıcı olur'];
+            document.getElementById('onbWelcomeBullets').innerHTML = bullets.map(b => `<div>${b}</div>`).join('');
+            document.getElementById('onbStartBtn').textContent = isEs ? 'Comenzar →' : 'Başla →';
+            // --- Adım 2: odak alanı başlıkları (lokalize) ---
+            if (isEs) {
                 document.getElementById('onbTitle').textContent = '¿En qué área lo usarás?';
                 document.getElementById('onbDesc').textContent = 'Esta elección personalizará las frases generadas por IA. Puedes cambiarla luego en ⚙️ Ajustes.';
                 document.getElementById('onbSkip').textContent = 'Saltar por ahora →';
             }
+            // Adım 1'i göster, adım 2'yi gizle, modal'ı aç
+            document.getElementById('onbStep1').classList.remove('hidden');
+            document.getElementById('onbStep2').classList.add('hidden');
             document.getElementById('onboardingModal').classList.remove('hidden');
+        }
+        function onboardingNext() {
+            renderFocusList('onbList', true);
+            document.getElementById('onbStep1').classList.add('hidden');
+            document.getElementById('onbStep2').classList.remove('hidden');
         }
         function closeOnboarding() {
             localStorage.setItem('onboarding_done', 'true');
