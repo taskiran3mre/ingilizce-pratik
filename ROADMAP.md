@@ -1,7 +1,15 @@
 # EN Pratik — Ürünleştirme Yol Haritası
 
 > Tek doğru kaynak. Karar/ilerleme değiştikçe burası güncellenir.
-> Roller: ⚖️ Hukuk · 🔬 Ar-Ge · 🏗️ CTO · 📈 Pazarlama
+> Roller: ⚖️ Hukuk · 🔬 Ar-Ge · 🏗️ CTO · 📈 Pazarlama · 🛡️ Veri Güvenliği
+
+## 📍 KALDIĞIMIZ YER (2026-06-23)
+- **Tamamlanan:** Faz 0 (AI güvenilirlik), Faz 1 (senkron dayanıklılığı), Faz 3 (tüm ES i18n + UX, canlı QA'lı), **Faz 2 backend + istemci DEPLOY EDİLDİ & CANLI**. Hepsi `main`'e commit'li.
+- **Faz 2 canlı altyapı:** Cloud Function `ai` (us-central1) · secret `GEMINI_KEY` (Secret Manager) · kota 30/gün (`usage/{uid}`) · Blaze + $10/ay bütçe · temizlik politikası 3 gün. firebase CLI girişi: **taskiran3mre@gmail.com**. Proje: **english-app-b012f** (760623606825).
+- **⏳ ŞU AN:** Kullanıcı Claude for Chrome ile uçtan uca test ediyor (localhost:8088, sunucu arka planda). Test sorusu: *anahtarsız + girişle AI çalışıyor mu?* (= proxy çalışıyor, anahtar güvende mi?)
+- **SIRADAKİ (test geçerse):** Faz 2 kapanır. Tek kalan HIGH = **App Check** (lansman kapısı). Sonra Faz 4 (ödeme/IAP, Capacitor native kabuk, 1 MB alt-koleksiyon migration'ı).
+- **Açık işler:** GitHub'a push YOK (yerel, remote yok; sır taraması temiz — tek "anahtar" public Firebase web key; `gh` hazır). Yerel test sunucusu: `C:\Users\ETaskiran\AppData\Local\Temp\enpratik_devserver.js` → `node` ile çalıştır, localhost:8088.
+- **Güvenlik notu:** Sunucu Gemini anahtarı SADECE Secret Manager'da — koda/git'e/sohbete asla girmedi.
 
 ## Ürün kararları (2026-06-22)
 - **Platform:** Native — Google Play + App Store (PWA çekirdeği bir native kabuğa sarılacak).
@@ -44,16 +52,21 @@
   yapılır; şimdi istemcide yazmak Faz 2'de çöpe giderdi. Bomba mevcut veri boyutunda patlamıyor, banner sayesinde
   patlarsa anında görünür.
 
-### Faz 2 — Sunucu AI proxy + kota + veri modeli (freemium'un kilit taşı)
-- [ ] Firebase Cloud Functions (mevcut Auth ile en sıkı entegrasyon) — sahip anahtarı serverda
-- [ ] Firebase ID token doğrulama + kullanıcı başına günlük/aylık kota (Firestore sayaç)
-- [ ] Yapısal çıktı + retry + dil doğrulama mantığını server'a taşı (tek yerde)
-- [ ] **1 MB bomba çözümü:** `custom_sentences` → `users/{uid}/sentences/{id}` alt-koleksiyonu — sunucu üretince
-  doğrudan oraya yazar, istemci okur. `firestore.rules` güncellenir + **deploy** (kullanıcı erişimi gerekli).
-- [ ] Sürümlü/zaman-damgalı merge — çok cihazlı last-write-wins veri kaybını gider
-- [ ] Var olan tek-doküman verisinin alt-koleksiyona güvenli (yıkıcı-olmayan) migration'ı + canlı Firebase testi
-- [ ] Kötüye kullanım izleme + ban; AI çıktısını `innerHTML` yerine `textContent`/sanitize (index.html:871,1333)
-- **Bitti tanımı:** İstemcide anahtar yok; kota server'da zorlanıyor; veri alt-koleksiyonda, 1 MB sınırı tarihe karıştı.
+### Faz 2 — Sunucu AI proxy + kota (freemium'un kilit taşı) — ✅ DEPLOY EDİLDİ (test ediliyor)
+- [x] Firebase Cloud Function `ai` (onCall, Node 20, v2, **us-central1**) — CANLI — `4768542`
+- [x] Auth zorunlu + kullanıcı başına **30/gün** kota: ayrı `usage/{uid}` dokümanında ATOMİK transaction
+- [x] Gemini anahtarı **Secret Manager**'da (`GEMINI_KEY`), fonksiyona bağlı — istemciye/loga/yanıta düşmez
+- [x] `firestore.rules` deploy: `usage/` istemciye kapalı (kullanıcı kotasını sıfırlayamaz)
+- [x] Adversarial güvenlik denetimi (6 mercek, 22 bulgu) + düzeltmeler: **refund kota-bypass kapatıldı**,
+  maxOutputTokens=1024, anahtar `x-goog-api-key` header'ında, (users hasOnly güvenli olsun diye geri alındı)
+- [x] İstemci proxy'ye bağlandı (`callProxy` + `canUseAI`, BYOK power-user yedeği) + XSS escape (`escapeHtml`/`aiHtml`) — `b33eea5`
+- [x] Blaze + $10/ay bütçe alarmı + artifact temizlik politikası (3 gün)
+- [ ] **⏳ ŞU AN:** uçtan uca test (Claude for Chrome, localhost:8088) — *anahtarsız + sadece girişle AI çalışıyor mu?*
+- [ ] **(KALAN HIGH — lansman kapısı) App Check:** reCAPTCHA console + istemci SDK + `enforceAppCheck:true`;
+  + Anonim girişi kapat. Native'de (Faz 4) Play Integrity/App Attest farklı sağlayıcı.
+- [ ] (kalan, P2) Node 20 deprecation → Node 22 (Eki 2026'dan önce); `firebase-functions@latest`
+- [ ] (Faz 4'e taşındı) 1 MB alt-koleksiyon migration'ı (sunucu=writer) + sürümlü merge
+- **Bitti tanımı:** İstemcide anahtar yok ✅; kota server'da zorlanıyor ✅; (App Check lansman öncesi zorunlu).
 
 ### Faz 3 — Ürünleştirme: i18n + UX + öğrenme doğruluğu (büyük kısmı ✅)
 - [x] ES dil sızıntıları (çekirdek döngü): streak birimi, Senin/Referans, soft-check (kelime türleri dahil), tüm API hata + geri bildirim etiketleri — `ab7fad8`
