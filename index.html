@@ -17,6 +17,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-functions-compat.js"></script>
 
     <style>
         * { font-family: 'Inter', sans-serif }
@@ -434,6 +435,12 @@
         const getGeminiKey = () => { try { return localStorage.getItem('gemini_api_key') || ''; } catch { return ''; } };
         const getGroqKey = () => { try { return localStorage.getItem('groq_api_key') || ''; } catch { return ''; } };
         const getApiKey = () => getGroqKey() || getGeminiKey();
+        // AI kullanılabilir mi? Giriş yapmış (sunucu proxy) VEYA kendi anahtarını girmiş (BYOK) ise evet.
+        const canUseAI = () => !!getApiKey() || (CLOUD_SYNC_ACTIVE && !!CLOUD_UID);
+        function aiGateAlert() { alert(S.lang === 'es' ? 'Inicia sesión o añade tu propia clave API en Ajustes para usar la IA.' : 'AI için giriş yap — ya da Ayarlar\'dan kendi API anahtarını gir.'); }
+        // AI/dış metni innerHTML'e basmadan önce kaçışla (XSS koruması).
+        function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+        function aiHtml(txt) { return escapeHtml(txt).replace(/\n/g, '<br>'); }   // kaçışlı + satır-kırmalı AI metni
         const getGS = () => { const d = LS.get(gsKey(), {}); return { streak: 0, lastActiveDate: '', totalCorrect: 0, totalWrong: 0, ...d }; };
         const saveGS = s => LS.set(gsKey(), s);
         const saveSRS = e => { const d = LS.get(srsKey(), {}); d[e.id] = e; LS.set(srsKey(), d); };
@@ -744,9 +751,9 @@
         function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
-        function handleCorrect() { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('correct'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
-        function handleWrong(input) { S.nok++; if (S.q.id) updateSRS(S.q.id, false); updateGlobalStats(false); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('wrong'); fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; ft.style.color = '#f87171'; const correctText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').textContent = correctText; document.getElementById('answerInput').style.borderColor = '#dc2626'; document.getElementById('wrongButtons').classList.remove('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').classList.add('shake'); setTimeout(() => document.getElementById('answerInput').classList.remove('shake'), 500); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.remove('hidden'); document.getElementById('variationsBtn').classList.add('hidden'); } updateProgress(); callGeminiError(S.q, input); }
-        function handleAccepted(input) { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = t('accepted'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = t('yourLabel') + ' <span class="text-green-400">' + input + '</span><br>' + t('refLabel') + ' ' + refText; document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (getApiKey()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
+        function handleCorrect() { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('correct'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
+        function handleWrong(input) { S.nok++; if (S.q.id) updateSRS(S.q.id, false); updateGlobalStats(false); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('wrong'); fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; ft.style.color = '#f87171'; const correctText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').textContent = correctText; document.getElementById('answerInput').style.borderColor = '#dc2626'; document.getElementById('wrongButtons').classList.remove('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').classList.add('shake'); setTimeout(() => document.getElementById('answerInput').classList.remove('shake'), 500); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.remove('hidden'); document.getElementById('variationsBtn').classList.add('hidden'); } updateProgress(); callGeminiError(S.q, input); }
+        function handleAccepted(input) { S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = t('accepted'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = t('yourLabel') + ' <span class="text-green-400">' + input + '</span><br>' + t('refLabel') + ' ' + refText; document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
         // SOFT CHECK
         const SMALL_WORDS = new Set(['in', 'on', 'at', 'to', 'for', 'a', 'an', 'the', 'is', 'are', 'am', 'do', 'does', 'did', 'was', 'were', 'has', 'have', 'had', 'will', 'would', 'can', 'could', 'should', 'shall', 'may', 'might', 'must', 'been', 'being', 'of', 'by', 'with', 'from', 'up', 'out', 'off', 'it', 'its', 'not', 'no', 'so', 'very', 'than', 'then', 'just', 'also', 'too', 'but', 'and', 'or', 'nor', 'yet', 'if']);
         function getLevenshteinDistance(a, b) {
@@ -806,7 +813,7 @@
             // Soft Check - detect 1-2 small word differences locally
             const softHint = softCheck(input, correctText);
             if (softHint) { ['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').style.borderColor = '#d97706'; const box = document.getElementById('softCheckBox'); box.classList.remove('hidden'); document.getElementById('softCheckText').innerHTML = t('softMsg') + '<br>' + softHint; return; }
-            if (getApiKey()) {
+            if (canUseAI()) {
                 const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('evaluating'); fb.style.background = '#161616'; fb.style.border = '1px solid #333'; ft.style.color = '#9ca3af';['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); const prompt = `You are grading a translation exercise.
 Reference answer: "${correctText}"
 Student answer: "${input}"
@@ -839,10 +846,28 @@ Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); 
             if (!r.ok) { const e = await r.text(); console.error('Gemini error:', r.status, e); if (r.status === 429) throw 'quota'; if (r.status === 400 || r.status === 403) throw 'key'; throw 'http' + r.status; }
             const d = await r.json(); lastApiProvider = 'Gemini'; return d.candidates?.[0]?.content?.parts?.[0]?.text || null;
         }
+        // Sunucu proxy çağrısı — anahtar sunucuda, kota sunucuda. Giriş yapan kullanıcılar bunu kullanır.
+        async function callProxy(prompt, opts = {}) {
+            const callable = firebase.functions().httpsCallable('ai');
+            const res = await callable({ prompt, json: !!opts.json, temperature: opts.temperature });
+            return (res && res.data && res.data.text) || null;
+        }
         async function geminiCall(prompt, opts = {}) {
-            if (!getApiKey()) { lastApiError = 'nokey'; return null; }
+            const byok = getApiKey();                                   // kendi anahtarını giren power-user
+            const useProxy = !byok && CLOUD_SYNC_ACTIVE && !!CLOUD_UID;  // giriş yapan + anahtarı yok → sunucu proxy
+            if (!byok && !useProxy) { lastApiError = 'nokey'; return null; }
             const now = Date.now(); const wait = API_THROTTLE - (now - lastApiTime); if (wait > 0) await new Promise(r => setTimeout(r, wait)); lastApiTime = Date.now(); lastApiError = '';
-            // Try Gemini first, then Groq
+            if (useProxy) {
+                try { const r = await callProxy(prompt, opts); if (r) return r; lastApiError = 'network'; return null; }
+                catch (e) {
+                    const code = (e && e.code) || '';                   // ör. functions/resource-exhausted
+                    if (code.indexOf('resource-exhausted') !== -1) lastApiError = 'quota';
+                    else if (code.indexOf('unauthenticated') !== -1) lastApiError = 'key';
+                    else lastApiError = 'network';
+                    console.log('Proxy failed:', code || e); return null;
+                }
+            }
+            // BYOK yolu: Gemini sonra Groq
             try { const r = await callGemini(prompt, opts); if (r) return r; } catch (e) { console.log('Gemini failed:', e); lastApiError = e; }
             try { const r = await callGroq(prompt, opts); if (r) return r; } catch (e) { console.log('Groq failed:', e); lastApiError = e; }
             if (!lastApiError) lastApiError = 'network'; return null;
@@ -921,7 +946,7 @@ Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); 
             return p;
         }
         async function callGeminiError(q, student) {
-            document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!getApiKey()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const isEs = S.lang === 'es';
+            document.getElementById('apiLoading').classList.remove('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); if (!canUseAI()) { document.getElementById('apiLoading').classList.add('hidden'); showApiErr(); return; } const isEs = S.lang === 'es';
             const nativeText = isEs ? (q.spanish || q.turkish) : q.turkish;
             const prompt = `An English learner translated a sentence incorrectly.
 Source (${isEs ? 'Spanish' : 'Turkish'}): "${nativeText}"
@@ -933,12 +958,12 @@ Hata Türü: <choose ONE word from: preposition, past_tense, present_perfect, ar
 Hata: <${isEs ? 'short error name in Spanish' : 'hatanın kısa Türkçe adı'}>
 Açıklama: <${isEs ? '2-3 sentences in Spanish explaining the error' : 'hatayı açıklayan 2-3 Türkçe cümle'}>
 İpucu: <${isEs ? 'a short hint in Spanish that guides without revealing the answer' : 'cevabı vermeden yönlendiren kısa bir Türkçe ipucu'}>
-Write nothing else.`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>${isEs ? 'Error' : 'Hata'}:</strong> ${errorLabel || (isEs ? 'Error gramatical' : 'Gramer hatası')}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${explanation}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>${isEs ? 'Pista' : 'İpucu'}:</strong> ${hint || (isEs ? 'Revisa la respuesta correcta.' : 'Doğru cevabı incele.')}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
+Write nothing else.`; const txt = await geminiCall(prompt); document.getElementById('apiLoading').classList.add('hidden'); if (!txt) { showApiErr(); return; } try { const lines = txt.split('\n').filter(l => l.trim()); let errorTag = '', errorLabel = '', explanation = '', hint = ''; lines.forEach(l => { const lt = l.trim(); if (lt.match(/^hata t[uü]r[uü]/i)) { const v = lt.split(':').slice(1).join(':').trim().toLowerCase().replace(/[\[\]]/g, ''); errorTag = v.split('|')[0].trim() || v; } else if (lt.match(/^hata:/i)) { errorLabel = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^a[cç]ıklama/i)) { explanation = lt.split(':').slice(1).join(':').trim(); } else if (lt.match(/^[iİı]pucu/i)) { hint = lt.split(':').slice(1).join(':').trim(); } }); if (!errorLabel && !hint) { const parts = txt.split('-'); if (parts.length >= 2) { errorLabel = parts[0].replace(/hata\s*t[uü]r[uü]\s*:?/i, '').trim(); hint = parts.slice(1).join('-').replace(/[iİı]pucu\s*:?/i, '').trim(); } } document.getElementById('apiFeedback').classList.remove('hidden'); document.getElementById('apiErrorType').innerHTML = `🏷️ <strong>${isEs ? 'Error' : 'Hata'}:</strong> ${escapeHtml(errorLabel) || (isEs ? 'Error gramatical' : 'Gramer hatası')}`; document.getElementById('apiErrorType').style.color = '#fbbf24'; if (explanation) { document.getElementById('apiTopic').innerHTML = `📖 ${escapeHtml(explanation)}`; document.getElementById('apiTopic').classList.remove('hidden'); } else document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').innerHTML = `💡 <strong>${isEs ? 'Pista' : 'İpucu'}:</strong> ${escapeHtml(hint) || (isEs ? 'Revisa la respuesta correcta.' : 'Doğru cevabı incele.')}`; if (errorTag && q.id) { const tag = errorTag.replace(/[^a-z_]/g, ''); if (tag) { const e = getSRS(q.id); if (!e.errorTags.includes(tag)) { e.errorTags.push(tag); saveSRS(e); } } } } catch { showApiErr(); }
         }
-        function showApiErr() { document.getElementById('apiFeedback').classList.remove('hidden'); const el = document.getElementById('apiErrorType'); const isEs = S.lang === 'es'; if (lastApiError === 'quota') { el.innerHTML = isEs ? '⚠️ <strong>¡Límite de cuota alcanzado!</strong> Se superó el límite gratuito de la API. Espera unos minutos e inténtalo de nuevo.' : '⚠️ <strong>Kota limiti doldu!</strong> Ücretsiz API limiti aşıldı. Birkaç dakika bekleyip tekrar dene.'; el.style.color = '#fbbf24'; } else if (lastApiError === 'key') { el.innerHTML = isEs ? '❌ <strong>Clave API inválida.</strong> Revísala en Ajustes.' : '❌ <strong>API key geçersiz.</strong> Ayarlar\'dan kontrol et.'; el.style.color = '#f87171'; } else if (lastApiError === 'nokey') { el.innerHTML = isEs ? '🔑 No has introducido una clave API. Añádela en Ajustes.' : '🔑 API key girilmemiş. Ayarlar\'dan Gemini API key girin.'; el.style.color = '#60a5fa'; } else if (lastApiError === 'network') { el.innerHTML = isEs ? '🌐 Problema de conexión a internet. Revisa tu conexión.' : '🌐 İnternet bağlantısı sorunu. Bağlantını kontrol et.'; el.style.color = '#9ca3af'; } else { el.textContent = isEs ? '⚠️ No se pudo conectar con la API. Revisa la respuesta correcta.' : '⚠️ API bağlantısı kurulamadı. Doğru cevabı incele.'; el.style.color = '#9ca3af'; } document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').textContent = ''; }
+        function showApiErr() { document.getElementById('apiFeedback').classList.remove('hidden'); const el = document.getElementById('apiErrorType'); const isEs = S.lang === 'es'; if (lastApiError === 'quota') { el.innerHTML = isEs ? '⚠️ <strong>¡Límite de cuota alcanzado!</strong> Se superó el límite gratuito de la API. Espera unos minutos e inténtalo de nuevo.' : '⚠️ <strong>Kota limiti doldu!</strong> Ücretsiz API limiti aşıldı. Birkaç dakika bekleyip tekrar dene.'; el.style.color = '#fbbf24'; } else if (lastApiError === 'key') { el.innerHTML = isEs ? '❌ <strong>Clave API inválida.</strong> Revísala en Ajustes.' : '❌ <strong>API key geçersiz.</strong> Ayarlar\'dan kontrol et.'; el.style.color = '#f87171'; } else if (lastApiError === 'nokey') { el.innerHTML = isEs ? '🔑 Inicia sesión para usar la IA (o añade tu clave en Ajustes).' : '🔑 AI için giriş yap (veya Ayarlar\'dan kendi anahtarını gir).'; el.style.color = '#60a5fa'; } else if (lastApiError === 'network') { el.innerHTML = isEs ? '🌐 Problema de conexión a internet. Revisa tu conexión.' : '🌐 İnternet bağlantısı sorunu. Bağlantını kontrol et.'; el.style.color = '#9ca3af'; } else { el.textContent = isEs ? '⚠️ No se pudo conectar con la API. Revisa la respuesta correcta.' : '⚠️ API bağlantısı kurulamadı. Doğru cevabı incele.'; el.style.color = '#9ca3af'; } document.getElementById('apiTopic').classList.add('hidden'); document.getElementById('apiHint').textContent = ''; }
         // AI FEATURES
         async function generateAISentence() {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; }
+            if (!canUseAI()) { aiGateAlert(); return; }
             const btn = document.getElementById('aiGenBtn'); const lbl = document.getElementById('aiGenLabel'); if (lbl) lbl.textContent = t('generating'); btn.disabled = true;
             const _allSubs = [...new Set(getCurSentences().filter(s => s.topic && s.topic.includes(':')).map(s => s.topic))];
             let topic;
@@ -956,7 +981,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             resetUI(); showAIQuestion(S.aiQ);
         }
         async function practiceWeakPoint() {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; }
+            if (!canUseAI()) { aiGateAlert(); return; }
             const SS = getCurSentences(); const tags = {};
             SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); });
             const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]);
@@ -980,7 +1005,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         // === BATCH AI GENERATION (per topic) ===
         let _batchCancelled = false;
         async function generateBatchForTopic(topic, count) {
-            if (!getApiKey()) { alert('Önce Ayarlar\'dan API key girin.'); return; }
+            if (!canUseAI()) { aiGateAlert(); return; }
             count = count || 10;
             _batchCancelled = false;
             _showBatchModal(topic, count);
@@ -1070,9 +1095,9 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         }
 
         async function askTeachMe() {
-            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Hazırlanıyor...</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'You are an English teacher for Spanish speakers. Explain this ENGLISH grammar in Spanish using 3 English example sentences. Focus on English usage rules. Brief plain text.' : 'Sen bir İngilizce öğretmenisin. Bu İNGİLİZCE gramer kuralını Türkçe açıkla. 3 İngilizce örnek cümle ver ve Türkçe açıkla. Kısa, net, düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>';
+            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Hazırlanıyor...</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'You are an English teacher for Spanish speakers. Explain this ENGLISH grammar in Spanish using 3 English example sentences. Focus on English usage rules. Brief plain text.' : 'Sen bir İngilizce öğretmenisin. Bu İNGİLİZCE gramer kuralını Türkçe açıkla. 3 İngilizce örnek cümle ver ve Türkçe açıkla. Kısa, net, düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>';
         }
-        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 Hazırlanıyor...</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 Alternatif Söyleniş</p><p>${txt.replace(/\n/g, '<br>')}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>'; }
+        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 Hazırlanıyor...</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 Alternatif Söyleniş</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>'; }
         // REVIEW
         function showReview() { showScreen('reviewScreen'); const SS = getCurSentences(); 
             const tDate = new Date(); tDate.setDate(tDate.getDate() - 1);
@@ -1283,7 +1308,7 @@ function showCreativeQuestion() {
 async function checkCreative() {
     const input = document.getElementById('creativeInput').value.trim();
     if (!input) return;
-    if (!getApiKey()) { alert('Ayarlar\'dan API key girin.'); return; }
+    if (!canUseAI()) { aiGateAlert(); return; }
 
     const btn = document.getElementById('creativeCheckBtn');
     btn.textContent = t('evaluating'); btn.disabled = true;
@@ -1338,7 +1363,7 @@ Verilen kelime: "${item}"
 
     const fb = document.getElementById('creativeFeedback');
     fb.classList.remove('hidden');
-    fb.innerHTML = txt ? txt.replace(/\n/g, '<br>') : 'Bağlantı hatası. Tekrar dene.';
+    fb.innerHTML = txt ? aiHtml(txt) : 'Bağlantı hatası. Tekrar dene.';
     
     document.getElementById('creativeNextBtn').classList.remove('hidden');
     document.getElementById('creativeCheckBtn').classList.add('hidden');
@@ -1383,7 +1408,7 @@ function closeTopicSummary() {
 
 async function getAIExample(topic, level) {
     const box = document.getElementById('aiExampleBox');
-    if (!getApiKey()) { box.innerHTML = '<p style="color:#f87171;font-size:.8rem">API key gerekli.</p>'; return; }
+    if (!canUseAI()) { box.innerHTML = '<p style="color:#f87171;font-size:.8rem">' + (S.lang === 'es' ? 'Inicia sesión para usar la IA.' : 'AI için giriş yap.') + '</p>'; return; }
     box.innerHTML = '<p style="color:#6b7280;font-size:.8rem;animation:pulse 1s infinite">🤖 Örnek üretiliyor...</p>';
     const grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
     const _focusCtx = focusContextForPrompt();
@@ -1402,7 +1427,7 @@ Use EXACTLY this format:
 Write nothing else.`;
     const txt = await geminiCall(prompt);
     box.innerHTML = txt
-        ? `<div style="background:#0c1929;border:1px solid #1e3a5f;border-radius:12px;padding:12px;font-size:.85rem;line-height:1.8;color:#e5e5e5;white-space:pre-wrap">${txt}</div>`
+        ? `<div style="background:#0c1929;border:1px solid #1e3a5f;border-radius:12px;padding:12px;font-size:.85rem;line-height:1.8;color:#e5e5e5;white-space:pre-wrap">${escapeHtml(txt)}</div>`
         : '<p style="color:#f87171;font-size:.8rem">Bağlantı hatası.</p>';
 }
 
