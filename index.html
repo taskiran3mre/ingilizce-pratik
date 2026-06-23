@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -912,7 +912,8 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             btn.textContent = '🤖 AI ile Yeni Cümle'; btn.disabled = false;
             if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
             S.aiQ = { topic, level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_' + Date.now(), lang: S.lang, createdAt: Date.now() };
-            try { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } catch (e) {}
+            // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme (havuz şişmesini önler)
+            try { const ca = getAISentences(); if (!ca.some(s => (s.english || '').toLowerCase() === v.english.toLowerCase())) { ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
             resetUI(); showAIQuestion(S.aiQ);
         }
         async function practiceWeakPoint() {
@@ -933,7 +934,8 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             btn.textContent = '🎯 Zayıf Noktam'; btn.disabled = false;
             if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
             S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_wp_' + Date.now(), lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() };
-            try { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } catch (e) {}
+            // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme
+            try { const ca = getAISentences(); if (!ca.some(s => (s.english || '').toLowerCase() === v.english.toLowerCase())) { ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
             resetUI(); showAIQuestion(S.aiQ);
         }
         // === BATCH AI GENERATION (per topic) ===
