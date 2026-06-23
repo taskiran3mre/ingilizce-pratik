@@ -55,13 +55,16 @@
 - [ ] Kötüye kullanım izleme + ban; AI çıktısını `innerHTML` yerine `textContent`/sanitize (index.html:871,1333)
 - **Bitti tanımı:** İstemcide anahtar yok; kota server'da zorlanıyor; veri alt-koleksiyonda, 1 MB sınırı tarihe karıştı.
 
-### Faz 3 — Ürünleştirme: i18n + UX + öğrenme doğruluğu
-- [ ] ES dil sızıntıları: streak "gün"→"días" (434), geri bildirim/ipucu/hata etiketleri `t()`'ye (706,750-754,761,871,873)
-- [ ] Onboarding: değer anlatan giriş adımı + açık "devam" (563-590)
-- [ ] Dile-duyarlı SRS anahtarı (392,871,1080) + havuz sayım/silme tutarlılığı (435-438,1087)
-- [ ] Üretimde dedupe (891,912 ↔ batch 938)
-- [ ] Min. erişilebilirlik: aria-label'lar, pinch-zoom kilidini kaldır (5), kontrast (P2)
-- **Bitti tanımı:** ES kullanıcı baştan sona kendi dilinde; SRS bozulmuyor; temel a11y barajı geçildi.
+### Faz 3 — Ürünleştirme: i18n + UX + öğrenme doğruluğu (büyük kısmı ✅)
+- [x] ES dil sızıntıları (çekirdek döngü): streak birimi, Senin/Referans, soft-check (kelime türleri dahil), tüm API hata + geri bildirim etiketleri — `ab7fad8`
+- [x] Üretimde dedupe (tekli üretim, dile duyarlı) — `c570b62`, `4ac122a`
+- [x] Pinch-zoom kilidini kaldır (a11y) — `c570b62`
+- [x] AI havuzu dile-özel sayım/silme + idx→ID tabanlı güvenli silme — `4ac122a`
+- [x] Onboarding: değer anlatan karşılama adımı + açık "Başla" (TR/ES) — `356e6c8`
+- [ ] (kalan) Min. erişilebilirlik: aria-label taraması (ikon butonlar) + kontrast (P2)
+- [ ] (kalan) İkincil ekran i18n taraması (havuz modalı chrome, ayarlar, istatistik metinleri)
+- [ ] (ertelendi) Dile-duyarlı SRS anahtarı refactor — düşük gerçek etki, Faz 2 veri modeliyle birlikte
+- **Bitti tanımı:** ES kullanıcı çekirdek akışta baştan sona kendi dilinde ✅; havuz tutarlı ✅; temel a11y kısmen.
 
 ### Faz 4 — Monetizasyon + Store hazırlığı
 - [ ] IAP: RevenueCat (Apple+Google makbuz/entitlement tek çatı altında)
