@@ -13,8 +13,20 @@ service cloud.firestore {
 
     // Her kullanıcı sadece kendi profil dokümanına okuyabilir/yazabilir
     match /users/{userId} {
-      allow read, write: if request.auth != null
-                        && request.auth.uid == userId;
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // Yazımda yalnızca bilinen senkron alanlarına izin ver — istemci keyfi alan
+      // (ör. ileride isPremium/plan) yazıp kendini yetkilendiremesin (defense-in-depth).
+      // Yetki/abonelik alanları Faz 4'te AYRI, istemciye-kapalı koleksiyonda tutulacak.
+      allow write: if request.auth != null
+                   && request.auth.uid == userId
+                   && request.resource.data.keys().hasOnly(
+                        ['srs','gs','vsrs','srs_es','gstats_es','verb_srs_es','custom_sentences','lastSync']);
+    }
+
+    // AI kullanım kotası — YALNIZCA sunucu (Admin SDK) erişir; istemci asla okuyamaz/yazamaz.
+    // (Kullanıcı kendi kotasını sıfırlayamasın diye users/ dışında, ayrı koleksiyonda tutulur.)
+    match /usage/{userId} {
+      allow read, write: if false;
     }
 
     // Diğer her şey kapalı (ileride başka koleksiyon eklersek burayı güncelleriz)
