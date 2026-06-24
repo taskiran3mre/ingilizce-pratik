@@ -6,7 +6,9 @@
 ## 📍 KALDIĞIMIZ YER (2026-06-23)
 - **Tamamlanan:** Faz 0 (AI güvenilirlik), Faz 1 (senkron dayanıklılığı), Faz 3 (tüm ES i18n + UX, canlı QA'lı), **Faz 2 backend + istemci DEPLOY EDİLDİ & CANLI**. Hepsi `main`'e commit'li.
 - **Faz 2 canlı altyapı:** Cloud Function `ai` (us-central1) · secret `GEMINI_KEY` (Secret Manager) · kota 30/gün (`usage/{uid}`) · Blaze + $10/ay bütçe · temizlik politikası 3 gün. firebase CLI girişi: **taskiran3mre@gmail.com**. Proje: **english-app-b012f** (760623606825).
-- **⏳ ŞU AN:** Kullanıcı Claude for Chrome ile uçtan uca test ediyor (localhost:8088, sunucu arka planda). Test sorusu: *anahtarsız + girişle AI çalışıyor mu?* (= proxy çalışıyor, anahtar güvende mi?)
+- **✅ PROXY DOĞRULANDI (loglarla):** Fonksiyon logları `auth: VALID` + `Callable request verification passed` gösterdi → anahtarsız+girişle çağrı sunucuya ulaşıyor, kimlik doğrulanıyor, anahtar sunucuda. Mimari testi GEÇTİ. Tek "hata" `Gemini HTTP 429` = Gemini **ücretsiz katman** kotası dar (~250/gün toplam, $0 harcama; tavan dolunca durur). Kod 429'u zaten zarif yönetiyor + kotayı iade ediyor.
+- **✅ Groq YEDEK eklendi + DEPLOY EDİLDİ (`0ff340d`):** Sunucu proxy artık çift-sağlayıcı. `PRIMARY` sabiti sırayı belirler — **test boyunca `'groq'`** (ücretsiz, bol kota, Gemini free kotasını korur), diğeri her durumda yedek. 429/5xx/ağ/boş'ta otomatik geçiş. Kota-bypass koruması korundu (iade SADECE hiçbir sağlayıcı HTTP 200 dönmediyse). `GROQ_KEY` Secret Manager'da. **Lansman: `PRIMARY='gemini'` (tek satır).** Groq modeli: `llama-3.3-70b-versatile`.
+- **⏳ ŞU AN:** Manuel uçtan-uca test (localhost:8088): giriş yap → 🤖 → Groq'tan cümle gelmeli. Ben loglardan sağlayıcıyı doğrularım.
 - **SIRADAKİ (test geçerse):** Faz 2 kapanır. Tek kalan HIGH = **App Check** (lansman kapısı). Sonra Faz 4 (ödeme/IAP, Capacitor native kabuk, 1 MB alt-koleksiyon migration'ı).
 - **Açık işler:** GitHub'a push YOK (yerel, remote yok; sır taraması temiz — tek "anahtar" public Firebase web key; `gh` hazır). Yerel test sunucusu: `C:\Users\ETaskiran\AppData\Local\Temp\enpratik_devserver.js` → `node` ile çalıştır, localhost:8088.
 - **i18n (devam ediyor):** 2-ajanlı kapsamlı denetim ES modunda **53 TR sızıntısı** buldu. Yüksek-görünürlük olanlar düzeltildi (`f68387b` wave-3 statik HTML + altyapı: `L(tr,es)` helper + `data-i18n-title`; `c0de7c1` wave-4 dinamik: alert'ler, banner'lar, filtre-boş, konu özeti, getAIExample). **KALAN ~25 düşük-trafik sızıntı** (audit çıktısında satır satır belgeli): batch üretim modalı (1067-1093), teach/variations etiketleri (1098/1100), checkRev review geri bildirimi (1113), istatistik zayıf-alan raporu (1116), havuz "🎯 Zayıf"/"Sil" (1146/1155), yaratıcı mod iç metinleri (1289-1366) + CREATIVE_DATA ES hint'leri (veri değişikliği gerek), alt-konu seçici (690-702), sync-dot tooltip'leri (1612). Hepsi `L()`/`data-i18n` ile bitirilecek (wave-5).
@@ -62,7 +64,9 @@
   maxOutputTokens=1024, anahtar `x-goog-api-key` header'ında, (users hasOnly güvenli olsun diye geri alındı)
 - [x] İstemci proxy'ye bağlandı (`callProxy` + `canUseAI`, BYOK power-user yedeği) + XSS escape (`escapeHtml`/`aiHtml`) — `b33eea5`
 - [x] Blaze + $10/ay bütçe alarmı + artifact temizlik politikası (3 gün)
-- [ ] **⏳ ŞU AN:** uçtan uca test (Claude for Chrome, localhost:8088) — *anahtarsız + sadece girişle AI çalışıyor mu?*
+- [x] **Proxy DOĞRULANDI (loglar):** `auth: VALID` + verification passed → anahtarsız+girişle çağrı sunucuya ulaşıyor, anahtar güvende. Gemini free 429 = ücretsiz katman kotası dar.
+- [x] **Çift sağlayıcı: Groq YEDEK** (`PRIMARY` sabiti; test='groq', lansman='gemini'; 429/5xx/ağ/boş'ta otomatik geçiş; bypass koruması korundu) — DEPLOY `0ff340d`
+- [ ] **⏳ ŞU AN:** manuel uçtan uca test (localhost:8088) — *girişle Groq'tan cümle geliyor mu?*
 - [ ] **(KALAN HIGH — lansman kapısı) App Check:** reCAPTCHA console + istemci SDK + `enforceAppCheck:true`;
   + Anonim girişi kapat. Native'de (Faz 4) Play Integrity/App Attest farklı sağlayıcı.
 - [ ] (kalan, P2) Node 20 deprecation → Node 22 (Eki 2026'dan önce); `firebase-functions@latest`
