@@ -438,7 +438,8 @@
         const getApiKey = () => getGroqKey() || getGeminiKey();
         // AI kullanılabilir mi? Giriş yapmış (sunucu proxy) VEYA kendi anahtarını girmiş (BYOK) ise evet.
         const canUseAI = () => !!getApiKey() || (CLOUD_SYNC_ACTIVE && !!CLOUD_UID);
-        function aiGateAlert() { alert(S.lang === 'es' ? 'Inicia sesión o añade tu propia clave API en Ajustes para usar la IA.' : 'AI için giriş yap — ya da Ayarlar\'dan kendi API anahtarını gir.'); }
+        // AI için giriş gerekiyor (anahtar da yok) → engelleyici alert yerine giriş modalını aç.
+        function aiGateAlert() { try { openAuthModal(); } catch (e) {} }
         // AI/dış metni innerHTML'e basmadan önce kaçışla (XSS koruması).
         function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
         function aiHtml(txt) { return escapeHtml(txt).replace(/\n/g, '<br>'); }   // kaçışlı + satır-kırmalı AI metni

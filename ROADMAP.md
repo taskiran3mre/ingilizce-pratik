@@ -1,7 +1,7 @@
 # EN Pratik — Ürünleştirme Yol Haritası
 
 > Tek doğru kaynak. Karar/ilerleme değiştikçe burası güncellenir.
-> Roller: ⚖️ Hukuk · 🔬 Ar-Ge · 🏗️ CTO · 📈 Pazarlama · 🛡️ Veri Güvenliği
+> Roller: ⚖️ Hukuk · 🔬 Ar-Ge · 🏗️ CTO · 📈 Pazarlama · 🛡️ Veri Güvenliği · 🧪 Test
 
 ## 📍 KALDIĞIMIZ YER (2026-06-23)
 - **Tamamlanan:** Faz 0 (AI güvenilirlik), Faz 1 (senkron dayanıklılığı), Faz 3 (tüm ES i18n + UX, canlı QA'lı), **Faz 2 backend + istemci DEPLOY EDİLDİ & CANLI**. Hepsi `main`'e commit'li.
