@@ -28,6 +28,10 @@ const MAX_PROMPT_CHARS = 4000;   // maliyet / DoS koruması
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
+// Birincil sağlayıcı. TEST sürecinde 'groq' (ücretsiz, daha bol kota; Gemini free kotasını korur).
+// Lansman önerisi: 'gemini' (TR kalite + AB uyum). Diğeri her durumda YEDEK olarak devreye girer.
+const PRIMARY = 'groq';
+
 setGlobalOptions({ region: 'us-central1', maxInstances: 10 });
 
 function todayStr() {
@@ -139,20 +143,25 @@ exports.ai = onCall(
       } catch (_) { /* iade best-effort */ }
     };
 
-    // 4) Üretim — Gemini birincil, başarısızsa Groq yedek. (Anahtarlar header'da, URL'de DEĞİL.)
+    // 4) Üretim — PRIMARY birincil, başarısızsa diğeri yedek. (Anahtarlar header'da, URL'de DEĞİL.)
     const gc = { temperature, maxOutputTokens: 1024 };   // çıktı maliyeti tavanı (sunucu sabiti)
     if (wantJson) gc.responseMimeType = 'application/json';
 
+    const callGeminiP = () => callGemini(prompt, gc);
+    const callGroqP = () => callGroq(prompt, temperature, wantJson);
+    const primary = PRIMARY === 'groq' ? callGroqP : callGeminiP;
+    const backup = PRIMARY === 'groq' ? callGeminiP : callGroqP;
+
     let anyBilled = false;
 
-    const g = await callGemini(prompt, gc);
-    anyBilled = anyBilled || g.billed;
-    if (g.text) return { text: g.text };
+    const p = await primary();
+    anyBilled = anyBilled || p.billed;
+    if (p.text) return { text: p.text };
 
-    // Gemini metin vermedi (429/5xx/ağ/boş) → Groq yedeğine düş
-    const q = await callGroq(prompt, temperature, wantJson);
-    anyBilled = anyBilled || q.billed;
-    if (q.text) return { text: q.text };
+    // Birincil metin vermedi (429/5xx/ağ/boş) → yedeğe düş
+    const b = await backup();
+    anyBilled = anyBilled || b.billed;
+    if (b.text) return { text: b.text };
 
     // İki sağlayıcı da kullanılabilir metin vermedi
     if (!anyBilled) {
