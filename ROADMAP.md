@@ -9,6 +9,7 @@
 - **⏳ ŞU AN:** Kullanıcı Claude for Chrome ile uçtan uca test ediyor (localhost:8088, sunucu arka planda). Test sorusu: *anahtarsız + girişle AI çalışıyor mu?* (= proxy çalışıyor, anahtar güvende mi?)
 - **SIRADAKİ (test geçerse):** Faz 2 kapanır. Tek kalan HIGH = **App Check** (lansman kapısı). Sonra Faz 4 (ödeme/IAP, Capacitor native kabuk, 1 MB alt-koleksiyon migration'ı).
 - **Açık işler:** GitHub'a push YOK (yerel, remote yok; sır taraması temiz — tek "anahtar" public Firebase web key; `gh` hazır). Yerel test sunucusu: `C:\Users\ETaskiran\AppData\Local\Temp\enpratik_devserver.js` → `node` ile çalıştır, localhost:8088.
+- **i18n (devam ediyor):** 2-ajanlı kapsamlı denetim ES modunda **53 TR sızıntısı** buldu. Yüksek-görünürlük olanlar düzeltildi (`f68387b` wave-3 statik HTML + altyapı: `L(tr,es)` helper + `data-i18n-title`; `c0de7c1` wave-4 dinamik: alert'ler, banner'lar, filtre-boş, konu özeti, getAIExample). **KALAN ~25 düşük-trafik sızıntı** (audit çıktısında satır satır belgeli): batch üretim modalı (1067-1093), teach/variations etiketleri (1098/1100), checkRev review geri bildirimi (1113), istatistik zayıf-alan raporu (1116), havuz "🎯 Zayıf"/"Sil" (1146/1155), yaratıcı mod iç metinleri (1289-1366) + CREATIVE_DATA ES hint'leri (veri değişikliği gerek), alt-konu seçici (690-702), sync-dot tooltip'leri (1612). Hepsi `L()`/`data-i18n` ile bitirilecek (wave-5).
 - **Güvenlik notu:** Sunucu Gemini anahtarı SADECE Secret Manager'da — koda/git'e/sohbete asla girmedi.
 
 ## Ürün kararları (2026-06-22)
