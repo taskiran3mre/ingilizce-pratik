@@ -520,7 +520,7 @@
             if (idx >= 0) cur.splice(idx, 1);
             else cur.push(lvl);
             // En az bir tane kalsın
-            if (cur.length === 0) { alert('En az bir seviye seçili olmalı.'); return; }
+            if (cur.length === 0) { alert(L('En az bir seviye seçili olmalı.', 'Debe haber al menos un nivel seleccionado.')); return; }
             saveLevelFilter(cur);
             renderLevelChips();
             updateLevelFilterBadge();
@@ -743,9 +743,9 @@
             cd.classList.remove('hidden');
             cd.innerHTML = `<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222">
                 <p class="text-3xl mb-3">🎚</p>
-                <p class="text-gray-300 font-medium mb-1">Bu sekmede seçili seviyelerde cümle yok</p>
-                <p class="text-xs text-gray-500 mb-4">${hiddenCount} cümle filtreden geçemedi — daha fazla seviye seçmeyi dene</p>
-                <button onclick="openSettings()" class="px-4 py-2 rounded-xl text-sm font-semibold" style="background:#3B82F6;color:white">⚙️ Filtreyi Aç</button>
+                <p class="text-gray-300 font-medium mb-1">${L('Bu sekmede seçili seviyelerde cümle yok', 'No hay frases de los niveles seleccionados en esta pestaña')}</p>
+                <p class="text-xs text-gray-500 mb-4">${hiddenCount} ${L('cümle filtreden geçemedi — daha fazla seviye seçmeyi dene', 'frases no pasaron el filtro — intenta seleccionar más niveles')}</p>
+                <button onclick="openSettings()" class="px-4 py-2 rounded-xl text-sm font-semibold" style="background:#3B82F6;color:white">${L('⚙️ Filtreyi Aç', '⚙️ Abrir filtro')}</button>
             </div>`;
         }
         function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); const _spd2=document.getElementById('subTopicPickerDiv'); if(_spd2)_spd2.classList.add('hidden'); document.getElementById('questionCard').classList.add('hidden'); let _cd=document.getElementById('completionDiv'); if(!_cd){_cd=document.createElement('div');_cd.id='completionDiv'; const _qcr=document.getElementById('questionCard'); _qcr.parentNode.insertBefore(_cd,_qcr);} _cd.classList.remove('hidden'); _cd.innerHTML='<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">'+t('allDone')+'</p></div>'; ['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
@@ -977,7 +977,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const prompt = buildSentenceGenPrompt(_grammarTopic);
             const v = await genValidatedSentence(prompt);
             if (lbl) lbl.textContent = t('aiGen'); btn.disabled = false;
-            if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
+            if (!v) { alert(L('AI geçerli bir cümle üretemedi, tekrar dene.', 'La IA no pudo generar una frase válida, inténtalo de nuevo.')); return; }
             S.aiQ = { topic, level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_' + Date.now(), lang: S.lang, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme (havuz şişmesini önler)
             try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
@@ -988,7 +988,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const SS = getCurSentences(); const tags = {};
             SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); });
             const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]);
-            if (!sorted.length) { alert('Henüz hata kaydınız yok. Biraz pratik yapın!'); return; }
+            if (!sorted.length) { alert(L('Henüz hata kaydınız yok. Biraz pratik yapın!', 'Aún no tienes registros de errores. ¡Practica un poco!')); return; }
             const weakTag = sorted[0][0];
             const btn = document.getElementById('weakBtn'); const lbl = document.getElementById('weakBtnLabel'); if (lbl) lbl.textContent = t('weakGenerating'); btn.disabled = true;
             const tl = S.lang === 'es'
@@ -999,7 +999,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const prompt = buildSentenceGenPrompt(tlEn[weakTag] || weakTag);
             const v = await genValidatedSentence(prompt);
             if (lbl) lbl.textContent = t('weakPoint'); btn.disabled = false;
-            if (!v) { alert('AI geçerli bir cümle üretemedi, tekrar dene.'); return; }
+            if (!v) { alert(L('AI geçerli bir cümle üretemedi, tekrar dene.', 'La IA no pudo generar una frase válida, inténtalo de nuevo.')); return; }
             S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_wp_' + Date.now(), lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme
             try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
@@ -1124,7 +1124,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         // SETTINGS
         function openSettings() { document.getElementById('apiKeyInput').value = getGeminiKey(); document.getElementById('groqKeyInput').value = getGroqKey(); renderLevelChips(); renderFocusList('focusListSettings', false); document.getElementById('settingsOverlay').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settingsOverlay').classList.add('hidden'); }
-        function saveApiKeys() { const gKey = document.getElementById('apiKeyInput').value.trim(); const qKey = document.getElementById('groqKeyInput').value.trim(); try { localStorage.setItem('gemini_api_key', gKey); localStorage.setItem('groq_api_key', qKey); } catch (e) { alert('API key kaydedilemedi!'); return; } if (!gKey && !qKey) { alert('En az bir API key girin.'); return; } closeSettings(); }
+        function saveApiKeys() { const gKey = document.getElementById('apiKeyInput').value.trim(); const qKey = document.getElementById('groqKeyInput').value.trim(); try { localStorage.setItem('gemini_api_key', gKey); localStorage.setItem('groq_api_key', qKey); } catch (e) { alert(L('API key kaydedilemedi!', '¡No se pudo guardar la clave API!')); return; } if (!gKey && !qKey) { alert(L('En az bir API key girin.', 'Introduce al menos una clave API.')); return; } closeSettings(); }
         // AI Pool Modal
         function openAIPoolModal() {
             renderAIPoolList();
@@ -1366,7 +1366,7 @@ Verilen kelime: "${item}"
 
     const fb = document.getElementById('creativeFeedback');
     fb.classList.remove('hidden');
-    fb.innerHTML = txt ? aiHtml(txt) : 'Bağlantı hatası. Tekrar dene.';
+    fb.innerHTML = txt ? aiHtml(txt) : L('Bağlantı hatası. Tekrar dene.', 'Error de conexión. Inténtalo de nuevo.');
     
     document.getElementById('creativeNextBtn').classList.remove('hidden');
     document.getElementById('creativeCheckBtn').classList.add('hidden');
@@ -1386,7 +1386,7 @@ function showTopicSummary(topic) {
         modal.onclick = function(e) { if(e.target===this) closeTopicSummary(); };
         document.body.appendChild(modal);
     }
-    const content = data ? data.summary : 'Bu konu için özet henüz eklenmemiş.';
+    const content = data ? data.summary : L('Bu konu için özet henüz eklenmemiş.', 'Aún no se ha añadido un resumen para este tema.');
     modal.innerHTML = `
         <div style="background:#161616;border:1px solid #2a2a2a;border-radius:20px;padding:24px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -1396,8 +1396,8 @@ function showTopicSummary(topic) {
             <pre style="white-space:pre-wrap;font-family:Inter,sans-serif;font-size:.85rem;line-height:1.7;color:#e5e5e5;margin-bottom:16px">${content}</pre>
             <div id="aiExampleBox" style="margin-bottom:12px"></div>
             <div style="display:flex;gap:8px">
-                <button onclick="getAIExample('${topic.replace(/'/g,"\\'")}','${data?.level||'A2'}')" style="flex:1;padding:10px;border-radius:12px;font-size:.85rem;font-weight:600;background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa;cursor:pointer">🤖 AI'dan Örnek Cümle</button>
-                <button onclick="closeTopicSummary();buildQueue('${topic.replace(/'/g,"\\'")}');" style="flex:1;padding:10px;border-radius:12px;font-size:.85rem;font-weight:600;background:#3B82F6;color:white;cursor:pointer">Pratik Yap →</button>
+                <button onclick="getAIExample('${topic.replace(/'/g,"\\'")}','${data?.level||'A2'}')" style="flex:1;padding:10px;border-radius:12px;font-size:.85rem;font-weight:600;background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa;cursor:pointer">${L("🤖 AI'dan Örnek Cümle", "🤖 Frase de ejemplo con IA")}</button>
+                <button onclick="closeTopicSummary();buildQueue('${topic.replace(/'/g,"\\'")}');" style="flex:1;padding:10px;border-radius:12px;font-size:.85rem;font-weight:600;background:#3B82F6;color:white;cursor:pointer">${L('Pratik Yap →', 'Practicar →')}</button>
             </div>
         </div>`;
     modal.classList.remove('hidden');
@@ -1412,7 +1412,7 @@ function closeTopicSummary() {
 async function getAIExample(topic, level) {
     const box = document.getElementById('aiExampleBox');
     if (!canUseAI()) { box.innerHTML = '<p style="color:#f87171;font-size:.8rem">' + (S.lang === 'es' ? 'Inicia sesión para usar la IA.' : 'AI için giriş yap.') + '</p>'; return; }
-    box.innerHTML = '<p style="color:#6b7280;font-size:.8rem;animation:pulse 1s infinite">🤖 Örnek üretiliyor...</p>';
+    box.innerHTML = '<p style="color:#6b7280;font-size:.8rem;animation:pulse 1s infinite">' + L('🤖 Örnek üretiliyor...', '🤖 Generando ejemplo...') + '</p>';
     const grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
     const _focusCtx = focusContextForPrompt();
     const _focusLine = _focusCtx ? `\nContext: write the sentences ${_focusCtx}.` : '';
@@ -1431,7 +1431,7 @@ Write nothing else.`;
     const txt = await geminiCall(prompt);
     box.innerHTML = txt
         ? `<div style="background:#0c1929;border:1px solid #1e3a5f;border-radius:12px;padding:12px;font-size:.85rem;line-height:1.8;color:#e5e5e5;white-space:pre-wrap">${escapeHtml(txt)}</div>`
-        : '<p style="color:#f87171;font-size:.8rem">Bağlantı hatası.</p>';
+        : '<p style="color:#f87171;font-size:.8rem">' + L('Bağlantı hatası.', 'Error de conexión.') + '</p>';
 }
 
         // INIT
@@ -1532,7 +1532,7 @@ Write nothing else.`;
             b.classList.remove('hidden');
         }
         function hideAppBanner() { const b = document.getElementById('appBanner'); if (b) b.classList.add('hidden'); }
-        function showStorageWarning() { showAppBanner('⚠️ Cihaz depolaması dolu — yeni veriler kaydedilemiyor. Havuzdan bazı AI cümlelerini silmeyi dene.', 'warn'); }
+        function showStorageWarning() { showAppBanner(L('⚠️ Cihaz depolaması dolu — yeni veriler kaydedilemiyor. Havuzdan bazı AI cümlelerini silmeyi dene.', '⚠️ El almacenamiento del dispositivo está lleno — no se pueden guardar nuevos datos. Intenta borrar algunas frases de IA del banco.'), 'warn'); }
 
         function triggerCloudSync() {
             if (!CLOUD_SYNC_ACTIVE || !CLOUD_UID) return;
@@ -1580,10 +1580,10 @@ Write nothing else.`;
             if (transient && _syncRetries < _SYNC_MAX_RETRIES) {
                 _syncRetries++;
                 const delay = Math.min(60000, 4000 * Math.pow(2, _syncRetries - 1)); // 4s, 8s, 16s, 32s, 60s
-                showAppBanner('🔄 Kaydedilemedi (bağlantı sorunu) — ' + Math.round(delay / 1000) + ' sn içinde tekrar denenecek…', 'warn');
+                showAppBanner(L('🔄 Kaydedilemedi (bağlantı sorunu) — ' + Math.round(delay / 1000) + ' sn içinde tekrar denenecek…', '🔄 No se pudo guardar (problema de conexión) — se reintentará en ' + Math.round(delay / 1000) + ' s…'), 'warn');
                 setTimeout(triggerCloudSync, delay);
             } else {
-                showAppBanner('⚠️ Veriler buluta kaydedilemiyor' + (code ? ' (' + code + ')' : '') + '. Bağlantını kontrol et veya tekrar giriş yap.', 'error');
+                showAppBanner(L('⚠️ Veriler buluta kaydedilemiyor', '⚠️ No se pueden guardar los datos en la nube') + (code ? ' (' + code + ')' : '') + L('. Bağlantını kontrol et veya tekrar giriş yap.', '. Comprueba tu conexión o vuelve a iniciar sesión.'), 'error');
             }
         }
 
