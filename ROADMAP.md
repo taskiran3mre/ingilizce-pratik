@@ -66,9 +66,12 @@
 - [x] Blaze + $10/ay bütçe alarmı + artifact temizlik politikası (3 gün)
 - [x] **Proxy DOĞRULANDI (loglar):** `auth: VALID` + verification passed → anahtarsız+girişle çağrı sunucuya ulaşıyor, anahtar güvende. Gemini free 429 = ücretsiz katman kotası dar.
 - [x] **Çift sağlayıcı: Groq YEDEK** (`PRIMARY` sabiti; test='groq', lansman='gemini'; 429/5xx/ağ/boş'ta otomatik geçiş; bypass koruması korundu) — DEPLOY `0ff340d`
-- [ ] **⏳ ŞU AN:** manuel uçtan uca test (localhost:8088) — *girişle Groq'tan cümle geliyor mu?*
-- [ ] **(KALAN HIGH — lansman kapısı) App Check:** reCAPTCHA console + istemci SDK + `enforceAppCheck:true`;
-  + Anonim girişi kapat. Native'de (Faz 4) Play Integrity/App Attest farklı sağlayıcı.
+- [x] **Manuel uçtan-uca test GEÇTİ:** girişle Groq'tan geçerli cümle üretiyor; loglar `auth: VALID`, sağlayıcı hatası yok.
+- [x] **🛡️🧪 CANLI SALDIRGAN GÜVENLİK DENETİMİ GEÇTİ (ampirik, canlı proxy'ye):** Auth zorunlu (401), girdi sınırları (3–4000, kotadan önce), çıktı maliyet tavanı (1024 token kesiyor), temperature clamp, grading prompt-injection tutmadı (NO), model küfür/jailbreak'i REDDETTİ, **kota 30/gün tam 31.'de durdu**, **25 eşzamanlı yarış 30'u AŞMADI** (atomik tx). Çıktı HTML-escape'li (XSS yok), anahtar sunucuda. Test scriptleri scratchpad'de (abuse/quota/race-test.js).
+- [ ] **BULGU F1 (App Check'i ZORUNLU yapar):** signUp e-posta DOĞRULAMASIZ açık → hesap-çiftçiliği (N hesap × 30 bedava çağrı). Halka açılmadan App Check + e-posta doğrulama şart. (Kapalı testte sömürülemez; her hesap 30 ile sınırlı.)
+- [ ] **BULGU F2 (düşük, kabul):** proxy herhangi promptu kabul eder (genel-LLM kullanımı mümkün) ama 30/gün + auth ile sınırlı; içerik güvenliğini sağlayıcı (Gemini/Llama) filtreliyor — denetimde reddetti.
+- [ ] **(KALAN HIGH — lansman kapısı, F1 ZORUNLU kıldı) App Check + e-posta doğrulama:** reCAPTCHA console + istemci SDK + `enforceAppCheck:true`;
+  + **e-posta doğrulaması zorunlu** (hesap-çiftçiliğini kır) + Anonim girişi kapat. Native'de (Faz 4) Play Integrity/App Attest farklı sağlayıcı.
 - [ ] (kalan, P2) Node 20 deprecation → Node 22 (Eki 2026'dan önce); `firebase-functions@latest`
 - [ ] (Faz 4'e taşındı) 1 MB alt-koleksiyon migration'ı (sunucu=writer) + sürümlü merge
 - **Bitti tanımı:** İstemcide anahtar yok ✅; kota server'da zorlanıyor ✅; (App Check lansman öncesi zorunlu).
