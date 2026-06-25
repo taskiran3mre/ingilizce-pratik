@@ -691,19 +691,19 @@
             html += '<h3 style="font-weight:700;font-size:1rem;color:#60a5fa;margin-bottom:12px">' + main + '</h3>';
             html += '<p style="font-size:.75rem;color:#6b7280;margin-bottom:12px">' + lbl + '</p>';
             html += '<div style="display:grid;gap:8px">';
-            html += '<button onclick="buildQueue(\'' + main + '\')" style="text-align:left;padding:12px 16px;border-radius:12px;font-weight:600;font-size:.875rem;background:#1e2a3a;border:1px solid #3B82F6;color:#60a5fa;cursor:pointer">Karisik &mdash; ' + main + '</button>';
+            html += '<button onclick="buildQueue(\'' + main + '\')" style="text-align:left;padding:12px 16px;border-radius:12px;font-weight:600;font-size:.875rem;background:#1e2a3a;border:1px solid #3B82F6;color:#60a5fa;cursor:pointer">' + L('Karışık', 'Mixto') + ' &mdash; ' + main + '</button>';
             subs.forEach(function(st) {
                 const short = st.split(':').slice(1).join(':').trim();
                 const safe = st.replace(/'/g, "\\'");
                 html += '<div style="display:flex;gap:8px">';
                 html += '<button onclick="buildQueue(\'' + safe + '\')" style="flex:1;text-align:left;padding:12px 16px;border-radius:12px;font-weight:500;font-size:.875rem;background:#1a1a1a;border:1px solid #2a2a2a;color:#e5e5e5;cursor:pointer">' + short + '</button>';
-                html += '<button onclick="showTopicSummary(\'' + safe + '\')" style="padding:12px 16px;border-radius:12px;font-size:.875rem;background:#1a1a1a;border:1px solid #1e3a5f;color:#60a5fa;cursor:pointer" title="Konu Özeti">📖</button>';
-                html += '<button onclick="generateBatchForTopic(\'' + safe + '\', 10)" style="padding:12px 16px;border-radius:12px;font-size:.875rem;background:#0c2a1e;border:1px solid #166534;color:#4ade80;cursor:pointer" title="Bu konuya 10 AI cümlesi ekle">🌱</button>';
+                html += '<button onclick="showTopicSummary(\'' + safe + '\')" style="padding:12px 16px;border-radius:12px;font-size:.875rem;background:#1a1a1a;border:1px solid #1e3a5f;color:#60a5fa;cursor:pointer" title="' + L('Konu Özeti', 'Resumen del tema') + '">📖</button>';
+                html += '<button onclick="generateBatchForTopic(\'' + safe + '\', 10)" style="padding:12px 16px;border-radius:12px;font-size:.875rem;background:#0c2a1e;border:1px solid #166534;color:#4ade80;cursor:pointer" title="' + L('Bu konuya 10 AI cümlesi ekle', 'Añade 10 frases de IA a este tema') + '">🌱</button>';
                 html += '</div>';
             });
             html += '</div></div>';
             pd.innerHTML = html;
-            document.getElementById('progressText').textContent = subs.length + ' konu';
+            document.getElementById('progressText').textContent = subs.length + L(' konu', ' temas');
         }
         function hideAll() { ['practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen', 'creativeScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
         function showScreen(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
@@ -1068,12 +1068,12 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             m.style.display = 'flex';
             m.innerHTML = `<div class="rounded-2xl p-6 w-full max-w-sm text-center" style="background:#161616;border:1px solid #2a2a2a">
                 <p class="text-3xl mb-2">🌱</p>
-                <p class="font-bold text-base mb-1">Cümleler üretiliyor</p>
+                <p class="font-bold text-base mb-1">${L('Cümleler üretiliyor', 'Generando oraciones')}</p>
                 <p class="text-xs text-gray-500 mb-4 truncate">${topic}</p>
                 <div class="rounded-full h-2 mb-2" style="background:#0f0f0f"><div id="batchBar" class="h-2 rounded-full transition-all" style="background:#3B82F6;width:0%"></div></div>
                 <p id="batchText" class="text-sm text-gray-300 mb-1">0 / ${total}</p>
-                <p id="batchSub" class="text-xs text-gray-500 mb-4">Her cümle için ~3 saniye (rate limit)</p>
-                <button onclick="_batchCancelled=true" class="px-4 py-2 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">İptal</button>
+                <p id="batchSub" class="text-xs text-gray-500 mb-4">${L('Her cümle için ~3 saniye (rate limit)', '~3 s por oración (rate limit)')}</p>
+                <button onclick="_batchCancelled=true" class="px-4 py-2 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${L('İptal', 'Cancelar')}</button>
             </div>`;
         }
         function _updateBatchProgress(done, total, sub) {
@@ -1087,21 +1087,21 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         function _showBatchDone(generated, failed, cancelled) {
             const m = document.getElementById('batchModal');
             if (!m) return;
-            const status = cancelled ? '⏸️ İptal edildi' : (failed > 0 ? '✅ Tamamlandı (kısmen)' : '✅ Tamamlandı');
-            const failMsg = failed > 0 ? `<p class="text-xs text-gray-500 mt-1">${failed} cümle üretilemedi veya tekrar eden çıktı</p>` : '';
+            const status = cancelled ? L('⏸️ İptal edildi', '⏸️ Cancelado') : (failed > 0 ? L('✅ Tamamlandı (kısmen)', '✅ Completado (parcial)') : L('✅ Tamamlandı', '✅ Completado'));
+            const failMsg = failed > 0 ? `<p class="text-xs text-gray-500 mt-1">${L(failed + ' cümle üretilemedi veya tekrar eden çıktı', failed + ' oraciones no se generaron o se repitieron')}</p>` : '';
             m.innerHTML = `<div class="rounded-2xl p-6 w-full max-w-sm text-center" style="background:#161616;border:1px solid #2a2a2a">
                 <p class="text-3xl mb-2">${cancelled ? '⏸️' : '✅'}</p>
                 <p class="font-bold text-base mb-1">${status}</p>
-                <p class="text-sm text-gray-300 mb-1">${generated} yeni cümle havuza eklendi</p>
+                <p class="text-sm text-gray-300 mb-1">${L(generated + ' yeni cümle havuza eklendi', generated + ' oraciones nuevas añadidas')}</p>
                 ${failMsg}
-                <button onclick="document.getElementById('batchModal').remove()" class="w-full py-2.5 rounded-xl text-sm font-semibold mt-4" style="background:#3B82F6;color:white">Tamam</button>
+                <button onclick="document.getElementById('batchModal').remove()" class="w-full py-2.5 rounded-xl text-sm font-semibold mt-4" style="background:#3B82F6;color:white">${L('Tamam', 'Hecho')}</button>
             </div>`;
         }
 
         async function askTeachMe() {
-            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 Hazırlanıyor...</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'You are an English teacher for Spanish speakers. Explain this ENGLISH grammar in Spanish using 3 English example sentences. Focus on English usage rules. Brief plain text.' : 'Sen bir İngilizce öğretmenisin. Bu İNGİLİZCE gramer kuralını Türkçe açıkla. 3 İngilizce örnek cümle ver ve Türkçe açıkla. Kısa, net, düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 Mini Ders</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>';
+            if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 ' + L('Hazırlanıyor...', 'Preparando...') + '</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'You are an English teacher for Spanish speakers. Explain this ENGLISH grammar in Spanish using 3 English example sentences. Focus on English usage rules. Brief plain text.' : 'Sen bir İngilizce öğretmenisin. Bu İNGİLİZCE gramer kuralını Türkçe açıkla. 3 İngilizce örnek cümle ver ve Türkçe açıkla. Kısa, net, düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 ${L('Mini Ders', 'Mini Lección')}</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">' + L('Yüklenemedi.', 'No se pudo cargar.') + '</p>';
         }
-        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 Hazırlanıyor...</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 Alternatif Söyleniş</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">Yüklenemedi.</p>'; }
+        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 ' + L('Hazırlanıyor...', 'Preparando...') + '</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 ${L('Alternatif Söyleniş', 'Formas alternativas')}</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">' + L('Yüklenemedi.', 'No se pudo cargar.') + '</p>'; }
         // REVIEW
         function showReview() { showScreen('reviewScreen'); const SS = getCurSentences(); 
             const tDate = new Date(); tDate.setDate(tDate.getDate() - 1);
@@ -1114,10 +1114,10 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         function showReviewQ() { if (S.rIdx >= S.rQueue.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-400 py-12">✅</p>'; return; } const q = S.rQueue[S.rIdx], words = q.english.split(' '); shuffle(words); S.rSel = []; const nativeText = getNative(q); document.getElementById('reviewModeArea').innerHTML = `<div class="rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6">${q.topic}</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1a1a1a;color:#666">${q.level}</span></div><p class="text-lg font-medium text-gray-200 mb-1">${nativeText}</p><p class="text-xs text-gray-500 mb-4">${t('orderWords')}</p><div id="rAns" class="min-h-12 rounded-xl p-3 mb-3 flex flex-wrap gap-2" style="background:#0f0f0f;border:1px dashed #333"></div><div id="rBank" class="flex flex-wrap gap-2 mb-4">${words.map((w, i) => `<button class="word-chip px-3 py-1.5 rounded-lg text-sm font-medium" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e5e5e5" data-idx="${i}" onclick="selRW(this,'${w.replace(/'/g, "\\'")}',${i})">${w}</button>`).join('')}</div><div id="rFb" class="hidden rounded-xl p-3 mb-3 text-sm"></div><div class="flex gap-3"><button onclick="checkRev()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="clearRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('clear')}</button><button onclick="nextRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; }
         function selRW(btn, w, idx) { if (btn.classList.contains('placed')) return; btn.classList.add('placed'); S.rSel.push({ word: w, idx }); const c = document.createElement('button'); c.className = 'word-chip px-3 py-1.5 rounded-lg text-sm font-medium'; c.style.background = '#3B82F6'; c.style.color = 'white'; c.textContent = w; c.onclick = () => { c.remove(); S.rSel = S.rSel.filter(x => x.idx !== idx); document.querySelector(`#rBank [data-idx="${idx}"]`)?.classList.remove('placed'); }; document.getElementById('rAns').appendChild(c); }
         function clearRev() { S.rSel = []; document.getElementById('rAns').innerHTML = ''; document.querySelectorAll('#rBank .word-chip').forEach(b => b.classList.remove('placed')); }
-        function checkRev() { const q = S.rQueue[S.rIdx], built = S.rSel.map(x => x.word).join(' '), fb = document.getElementById('rFb'); fb.classList.remove('hidden'); if (norm(built) === norm(q.english)) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.textContent = '✅ Doğru!'; updateSRS(q.id, true); setTimeout(nextRev, 1500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = `❌ Doğru: <strong>${q.english}</strong>`; updateSRS(q.id, false); } }
+        function checkRev() { const q = S.rQueue[S.rIdx], built = S.rSel.map(x => x.word).join(' '), fb = document.getElementById('rFb'); fb.classList.remove('hidden'); if (norm(built) === norm(q.english)) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.textContent = L('✅ Doğru!', '✅ ¡Correcto!'); updateSRS(q.id, true); setTimeout(nextRev, 1500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = L('❌ Doğru: ', '❌ Correcto: ') + `<strong>${q.english}</strong>`; updateSRS(q.id, false); } }
         function nextRev() { S.rIdx++; showReviewQ(); }
         // STATS
-        function showStats() { showScreen('statsScreen'); const SS = getCurSentences(); const TT = getCurTopics(); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SS.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SS.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); const _aiAll = getAISentences(); const _aiInLang = _aiAll.filter(s => !s.lang || s.lang === S.lang).length; const _baseLen = (S.lang === 'es' ? SENTENCES_ES : SENTENCES).length; document.getElementById('poolBase').textContent = _baseLen; document.getElementById('poolAI').textContent = _aiInLang; document.getElementById('poolTotal').textContent = _baseLen + _aiInLang; document.getElementById('topicStats').innerHTML = TT.map(tp => { const ss = SS.filter(s => s.topic === tp), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${tp}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SS.forEach(s => getSRS(s.id).errorTags.forEach(tg => { tf[tg] = (tf[tg] || 0) + 1; })); const tl = { preposition: 'Edat Kullanımı (to/for/from)', past_tense: 'Geçmiş Zaman', present_perfect: 'Present Perfect', article: 'Article (a/an/the)', word_order: 'Kelime Sırası', vocabulary: 'Kelime Bilgisi', spelling: 'Yazım Hatası', other: 'Diğer' }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${cnt} hata</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">Odaklan</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">Henüz hata kaydı yok.</p>'; }
+        function showStats() { showScreen('statsScreen'); const SS = getCurSentences(); const TT = getCurTopics(); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SS.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SS.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); const _aiAll = getAISentences(); const _aiInLang = _aiAll.filter(s => !s.lang || s.lang === S.lang).length; const _baseLen = (S.lang === 'es' ? SENTENCES_ES : SENTENCES).length; document.getElementById('poolBase').textContent = _baseLen; document.getElementById('poolAI').textContent = _aiInLang; document.getElementById('poolTotal').textContent = _baseLen + _aiInLang; document.getElementById('topicStats').innerHTML = TT.map(tp => { const ss = SS.filter(s => s.topic === tp), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${tp}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SS.forEach(s => getSRS(s.id).errorTags.forEach(tg => { tf[tg] = (tf[tg] || 0) + 1; })); const tl = { preposition: L('Edat Kullanımı (to/for/from)', 'Preposiciones (to/for/from)'), past_tense: L('Geçmiş Zaman', 'Pasado'), present_perfect: 'Present Perfect', article: L('Article (a/an/the)', 'Artículo (a/an/the)'), word_order: L('Kelime Sırası', 'Orden de palabras'), vocabulary: L('Kelime Bilgisi', 'Vocabulario'), spelling: L('Yazım Hatası', 'Ortografía'), other: L('Diğer', 'Otro') }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${L(cnt + ' hata', cnt + ' errores')}</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">${L('Odaklan', 'Enfocar')}</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">' + L('Henüz hata kaydı yok.', 'Aún no hay registro de errores.') + '</p>'; }
         // VERBS (getVerbSRS/saveVerbSRS defined above in STATE section)
         function showVerbs() { showScreen('verbScreen'); const VV = getCurVerbs(); const td = today(); const due = VV.filter(v => getVerbSRS(v.v1).nextReview <= td); const notStarted = VV.filter(v => { const e = getVerbSRS(v.v1); return e.streak === 0 && e.wrong === 0; }); const learned = VV.filter(v => getVerbSRS(v.v1).streak >= 3).length; document.getElementById('verbProgress').textContent = learned + '/' + VV.length; let daily = [...due]; if (daily.length < 5) { const extra = notStarted.filter(v => !daily.find(d => d.v1 === v.v1)).slice(0, 5 - daily.length); daily = [...daily, ...extra]; } daily = daily.slice(0, 5); if (!daily.length) { document.getElementById('verbDailyArea').innerHTML = `<p class="text-center text-gray-400 py-12">${t('verbDone')}</p>`; return; } S.verbIdx = 0; S.verbList = daily; showVerbCard(); }
         function showVerbCard() { if (S.verbIdx >= S.verbList.length) { document.getElementById('verbDailyArea').innerHTML = `<div class="text-center py-12 fade-in"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">${t('verbDone')}</p></div>`; return; } const v = S.verbList[S.verbIdx]; const nv = getVerbNative(v); document.getElementById('verbDailyArea').innerHTML = `<div class="verb-card rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex justify-between mb-4"><span class="text-blue-400 text-sm font-medium">${S.verbIdx + 1} / ${S.verbList.length}</span><span class="text-xs text-gray-600">${nv}</span></div><p class="text-center text-2xl font-bold mb-1 text-white">${v.v1}</p><p class="text-center text-sm text-gray-500 mb-6">${t('verbV2label')} + ${t('verbV3label')}</p><div class="grid grid-cols-2 gap-3 mb-4"><div><label class="block text-xs text-gray-500 mb-1">${t('verbV2label')}</label><input type="text" id="v2Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')document.getElementById('v3Input').focus()"></div><div><label class="block text-xs text-gray-500 mb-1">${t('verbV3label')}</label><input type="text" id="v3Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')checkVerb()"></div></div><div id="verbFb" class="hidden rounded-xl p-3 mb-4 text-sm"></div><div class="flex gap-3"><button onclick="checkVerb()" id="verbCheckBtn" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="S.verbIdx++;showVerbCard()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; document.getElementById('v2Input').focus(); }
@@ -1147,7 +1147,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             list.innerHTML = sorted.map((s) => {
                 const native = s.turkish || s.spanish || '';
                 const langTag = s.lang === 'es' ? 'ES' : (s.lang === 'tr' ? 'TR' : '—');
-                const srcTag = s.source === 'weakpoint' ? '🎯 Zayıf' : '🤖 AI';
+                const srcTag = s.source === 'weakpoint' ? L('🎯 Zayıf', '🎯 Débil') : '🤖 AI';
                 const date = s.createdAt ? new Date(s.createdAt).toLocaleDateString('tr-TR', {day:'2-digit',month:'short'}) : '';
                 return `<div class="rounded-xl p-3" style="background:#1a1a1a;border:1px solid #2a2a2a">
                     <div class="flex justify-between items-start gap-2 mb-1.5">
@@ -1156,7 +1156,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
                             <span class="px-1.5 py-0.5 rounded" style="background:#0c1929;color:#93c5fd">${srcTag}</span>
                             <span class="px-1.5 py-0.5 rounded text-gray-500" style="background:#0f0f0f">${langTag}${date ? ' · ' + date : ''}</span>
                         </div>
-                        <button onclick="deleteAISentence('${s.id}')" class="text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="Sil" aria-label="Sil">🗑️</button>
+                        <button onclick="deleteAISentence('${s.id}')" class="text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="${L('Sil','Eliminar')}" aria-label="${L('Sil','Eliminar')}">🗑️</button>
                     </div>
                     <p class="text-sm text-gray-200">${s.english || ''}</p>
                     ${native ? '<p class="text-xs text-gray-500 mt-1">' + native + '</p>' : ''}
@@ -1213,36 +1213,36 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
 // Sabit veri havuzları — API ücreti yok
 const CREATIVE_DATA = {
     roleplay: [
-        { prompt: "Your neighbor Mike asks if you can watch his dog for the weekend. What do you say?", hint: "Kabul et veya kibarca reddet, neden söyle." },
-        { prompt: "You're at a coffee shop and the barista gave you the wrong order. How do you handle it?", hint: "Kibarca durumu açıkla ve çözüm iste." },
-        { prompt: "Your coworker asks you to cover their shift next Friday. You already have plans. What do you say?", hint: "Planlarını açıkla, belki alternatif sun." },
-        { prompt: "You're at the supermarket and can't find the pasta aisle. You ask a store employee.", hint: "Nerede olduğunu sor." },
-        { prompt: "A friend invites you to a party but you're feeling tired. How do you respond?", hint: "Neden gidemeyeceğini veya gideceğini söyle." },
-        { prompt: "You ordered food online and it arrived cold. You call the restaurant.", hint: "Sorunu açıkla ve çözüm talep et." },
-        { prompt: "Your boss asks if you can finish the report by tomorrow. It's a lot of work. What do you say?", hint: "Samimi ol — yapabilir misin, yapamaz mısın?" }
+        { prompt: "Your neighbor Mike asks if you can watch his dog for the weekend. What do you say?", hint: "Kabul et veya kibarca reddet, neden söyle.", hintEs: "Acepta o rechaza con cortesía, y di por qué." },
+        { prompt: "You're at a coffee shop and the barista gave you the wrong order. How do you handle it?", hint: "Kibarca durumu açıkla ve çözüm iste.", hintEs: "Explica la situación con cortesía y pide una solución." },
+        { prompt: "Your coworker asks you to cover their shift next Friday. You already have plans. What do you say?", hint: "Planlarını açıkla, belki alternatif sun.", hintEs: "Explica tus planes, quizás ofrece una alternativa." },
+        { prompt: "You're at the supermarket and can't find the pasta aisle. You ask a store employee.", hint: "Nerede olduğunu sor.", hintEs: "Pregunta dónde está." },
+        { prompt: "A friend invites you to a party but you're feeling tired. How do you respond?", hint: "Neden gidemeyeceğini veya gideceğini söyle.", hintEs: "Di por qué puedes o no puedes ir." },
+        { prompt: "You ordered food online and it arrived cold. You call the restaurant.", hint: "Sorunu açıkla ve çözüm talep et.", hintEs: "Explica el problema y solicita una solución." },
+        { prompt: "Your boss asks if you can finish the report by tomorrow. It's a lot of work. What do you say?", hint: "Samimi ol — yapabilir misin, yapamaz mısın?", hintEs: "Sé sincero: ¿puedes o no puedes?" }
     ],
     taboo: [
-        { word: "Refrigerator", hint: "Türkçesi: Buzdolabı" },
-        { word: "Umbrella", hint: "Türkçesi: Şemsiye" },
-        { word: "Elevator", hint: "Türkçesi: Asansör" },
-        { word: "Thunderstorm", hint: "Türkçesi: Fırtına" },
-        { word: "Scissors", hint: "Türkçesi: Makas" },
-        { word: "Toothbrush", hint: "Türkçesi: Diş fırçası" },
-        { word: "Supermarket", hint: "Türkçesi: Süpermarket" },
-        { word: "Midnight", hint: "Türkçesi: Gece yarısı" },
-        { word: "Passport", hint: "Türkçesi: Pasaport" },
-        { word: "Jealous", hint: "Türkçesi: Kıskanç" },
-        { word: "Disappointed", hint: "Türkçesi: Hayal kırıklığına uğramış" },
-        { word: "Crowded", hint: "Türkçesi: Kalabalık" }
+        { word: "Refrigerator", hint: "Türkçesi: Buzdolabı", hintEs: "Español: Refrigerador" },
+        { word: "Umbrella", hint: "Türkçesi: Şemsiye", hintEs: "Español: Paraguas" },
+        { word: "Elevator", hint: "Türkçesi: Asansör", hintEs: "Español: Ascensor" },
+        { word: "Thunderstorm", hint: "Türkçesi: Fırtına", hintEs: "Español: Tormenta" },
+        { word: "Scissors", hint: "Türkçesi: Makas", hintEs: "Español: Tijeras" },
+        { word: "Toothbrush", hint: "Türkçesi: Diş fırçası", hintEs: "Español: Cepillo de dientes" },
+        { word: "Supermarket", hint: "Türkçesi: Süpermarket", hintEs: "Español: Supermercado" },
+        { word: "Midnight", hint: "Türkçesi: Gece yarısı", hintEs: "Español: Medianoche" },
+        { word: "Passport", hint: "Türkçesi: Pasaport", hintEs: "Español: Pasaporte" },
+        { word: "Jealous", hint: "Türkçesi: Kıskanç", hintEs: "Español: Celoso" },
+        { word: "Disappointed", hint: "Türkçesi: Hayal kırıklığına uğramış", hintEs: "Español: Decepcionado" },
+        { word: "Crowded", hint: "Türkçesi: Kalabalık", hintEs: "Español: Lleno de gente" }
     ],
     story: [
-        { prompt: "Yesterday, I went to the supermarket, but...", hint: "Ne oldu? Devam ettir." },
-        { prompt: "I was about to leave the house when suddenly...", hint: "Ne yaşandı?" },
-        { prompt: "My phone died in the middle of the city, so...", hint: "Ne yaptın?" },
-        { prompt: "I tried to cook dinner for the first time, but...", hint: "Nasıl gitti?" },
-        { prompt: "We planned a picnic for the weekend, however...", hint: "Ne değişti?" },
-        { prompt: "I got on the wrong bus, and...", hint: "Sonra ne oldu?" },
-        { prompt: "She called me at 2 AM because...", hint: "Neden aradı?" }
+        { prompt: "Yesterday, I went to the supermarket, but...", hint: "Ne oldu? Devam ettir.", hintEs: "¿Qué pasó? Continúa." },
+        { prompt: "I was about to leave the house when suddenly...", hint: "Ne yaşandı?", hintEs: "¿Qué ocurrió?" },
+        { prompt: "My phone died in the middle of the city, so...", hint: "Ne yaptın?", hintEs: "¿Qué hiciste?" },
+        { prompt: "I tried to cook dinner for the first time, but...", hint: "Nasıl gitti?", hintEs: "¿Cómo fue?" },
+        { prompt: "We planned a picnic for the weekend, however...", hint: "Ne değişti?", hintEs: "¿Qué cambió?" },
+        { prompt: "I got on the wrong bus, and...", hint: "Sonra ne oldu?", hintEs: "¿Y después qué pasó?" },
+        { prompt: "She called me at 2 AM because...", hint: "Neden aradı?", hintEs: "¿Por qué llamó?" }
     ],
     wordassoc: [
         "Ocean", "Library", "Airport", "Kitchen", "Morning", 
@@ -1290,16 +1290,16 @@ function showCreativeQuestion() {
     
     if (creativeMode === 'wordassoc') {
         document.getElementById('creativePromptText').textContent = item;
-        document.getElementById('creativePromptHint').textContent = 'Bu kelimeyle aklına gelen 3 şeyi İngilizce yaz (virgülle ayır)';
+        document.getElementById('creativePromptHint').textContent = L('Bu kelimeyle aklına gelen 3 şeyi İngilizce yaz (virgülle ayır)', 'Escribe en inglés 3 cosas que te evoque esta palabra (sepáralas con comas)');
         document.getElementById('creativeInput').placeholder = 'Example: wave, fish, boat';
     } else if (creativeMode === 'taboo') {
         document.getElementById('creativePromptText').textContent = '🚫 ' + item.word;
-        document.getElementById('creativePromptHint').textContent = item.hint + ' — ama Türkçe yazmadan İngilizce açıkla!';
+        document.getElementById('creativePromptHint').textContent = (S.lang === 'es' ? item.hintEs : item.hint) + L(' — ama Türkçe yazmadan İngilizce açıkla!', ' — ¡pero explícalo en inglés sin escribir en español!');
         document.getElementById('creativeInput').placeholder = 'It is a... / We use it to...';
     } else {
         document.getElementById('creativePromptText').textContent = item.prompt;
-        document.getElementById('creativePromptHint').textContent = item.hint;
-        document.getElementById('creativeInput').placeholder = 'İngilizce cevabınızı yazın...';
+        document.getElementById('creativePromptHint').textContent = S.lang === 'es' ? item.hintEs : item.hint;
+        document.getElementById('creativeInput').placeholder = L('İngilizce cevabınızı yazın...', 'Escribe tu respuesta en inglés...');
     }
     
     document.getElementById('creativeInput').value = '';
@@ -1318,10 +1318,19 @@ async function checkCreative() {
     btn.textContent = t('evaluating'); btn.disabled = true;
 
     const item = creativePool[creativeIdx];
+    const isEs = S.lang === 'es';
     let prompt = '';
 
     if (creativeMode === 'roleplay') {
-        prompt = `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
+        prompt = isEs ? `Eres un profesor de inglés experimentado. Enseñas a estudiantes hispanohablantes.
+Situación: "${item.prompt}"
+Respuesta del estudiante: "${input}"
+
+Evalúa EN ESPAÑOL usando estos apartados:
+🔍 Evaluación general: ¿La respuesta encaja con la situación? ¿Por qué?
+❌ Errores: Explica uno por uno los errores de gramática o vocabulario, si los hay.
+✅ Expresión más natural: ¿Cómo dirías lo mismo de forma más natural?
+💡 Nota del profesor: Enseña 1-2 expresiones útiles para este tipo de situaciones.` : `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
 Durum: "${item.prompt}"
 Öğrencinin cevabı: "${input}"
 
@@ -1331,7 +1340,15 @@ Durum: "${item.prompt}"
 ✅ Daha Doğal İfade: Aynı anlamı nasıl daha doğal söylerdin?
 💡 Öğretmen Notu: Bu tür durumlarda kullanılabilecek 1-2 kalıp ifade öğret.`;
     } else if (creativeMode === 'taboo') {
-        prompt = `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
+        prompt = isEs ? `Eres un profesor de inglés experimentado. Enseñas a estudiantes hispanohablantes.
+Palabra objetivo: "${item.word}"
+Explicación en inglés del estudiante: "${input}"
+
+Evalúa EN ESPAÑOL usando estos apartados:
+🔍 Suficiencia de la explicación: ¿La explicación describe la palabra?
+❌ Errores: Explica los errores de gramática, si los hay.
+✅ Mejor explicación: ¿Cómo definirías la palabra con más claridad?
+💡 Nota del profesor: Enseña 1-2 expresiones en inglés que conviene aprender sobre esta palabra.` : `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
 Hedef kelime: "${item.word}"
 Öğrencinin İngilizce açıklaması: "${input}"
 
@@ -1341,7 +1358,15 @@ Hedef kelime: "${item.word}"
 ✅ Daha İyi Açıklama: Kelimeyi nasıl daha net tanımlayabilirdin?
 💡 Öğretmen Notu: Bu kelimeyle ilgili öğrenmesi gereken 1-2 İngilizce ifade öğret.`;
     } else if (creativeMode === 'story') {
-        prompt = `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
+        prompt = isEs ? `Eres un profesor de inglés experimentado. Enseñas a estudiantes hispanohablantes.
+Inicio de la historia: "${item.prompt}"
+Continuación del estudiante: "${input}"
+
+Evalúa EN ESPAÑOL usando estos apartados:
+🔍 Evaluación general: ¿El flujo de la frase es natural?
+❌ Errores: Explica los errores de gramática o de concordancia de tiempos, si los hay.
+✅ Versión corregida: Escribe la versión completa y natural en inglés.
+💡 Nota del profesor: Explica brevemente la estructura temporal usada en esta frase.` : `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
 Hikaye başlangıcı: "${item.prompt}"
 Öğrencinin devamı: "${input}"
 
@@ -1351,7 +1376,15 @@ Hikaye başlangıcı: "${item.prompt}"
 ✅ Düzeltilmiş Versiyon: Tam ve doğal İngilizce halini yaz.
 💡 Öğretmen Notu: Bu cümlede kullanılan zaman yapısını kısaca açıkla.`;
     } else if (creativeMode === 'wordassoc') {
-        prompt = `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
+        prompt = isEs ? `Eres un profesor de inglés experimentado. Enseñas a estudiantes hispanohablantes.
+Palabra dada: "${item}"
+Asociaciones del estudiante: "${input}"
+
+Evalúa EN ESPAÑOL usando estos apartados:
+🔍 Evaluación: ¿Las palabras son correctas y apropiadas?
+❌ Errores: Explica los errores de ortografía o de uso, si los hay.
+✅ Alternativas más ricas: Sugiere 3-4 asociaciones más interesantes.
+💡 Nota del profesor: Enseña 1-2 expresiones en inglés frecuentes con la palabra "${item}".` : `Sen deneyimli bir İngilizce öğretmenisin. Türk öğrencilere ders veriyorsun.
 Verilen kelime: "${item}"
 Öğrencinin çağrışımları: "${input}"
 
@@ -1363,7 +1396,7 @@ Verilen kelime: "${item}"
     }
 
     const txt = await geminiCall(prompt);
-    btn.textContent = 'Gönder →'; btn.disabled = false;
+    btn.textContent = L('Gönder →', 'Enviar →'); btn.disabled = false;
 
     const fb = document.getElementById('creativeFeedback');
     fb.classList.remove('hidden');
@@ -1613,11 +1646,11 @@ Write nothing else.`;
             dot.classList.remove('hidden');
             dot.classList.remove('animate-pulse');
             const map = {
-                idle:    { color: '#22c55e', title: 'Senkron' },
-                pending: { color: '#eab308', title: 'Değişiklik bekliyor...' },
-                saving:  { color: '#3B82F6', title: 'Kaydediliyor...' },
-                saved:   { color: '#22c55e', title: '✓ Kaydedildi' },
-                error:   { color: '#ef4444', title: '⚠️ Senkron hatası — bağlantını kontrol et' }
+                idle:    { color: '#22c55e', title: L('Senkron', 'Sincronizado') },
+                pending: { color: '#eab308', title: L('Değişiklik bekliyor...', 'Cambios pendientes...') },
+                saving:  { color: '#3B82F6', title: L('Kaydediliyor...', 'Guardando...') },
+                saved:   { color: '#22c55e', title: L('✓ Kaydedildi', '✓ Guardado') },
+                error:   { color: '#ef4444', title: L('⚠️ Senkron hatası — bağlantını kontrol et', '⚠️ Error de sincronización — revisa tu conexión') }
             };
             const c = map[_syncState] || map.idle;
             dot.style.background = c.color;
