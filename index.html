@@ -49,19 +49,13 @@
 </head>
 <body class="min-h-screen">
     <div id="app" class="max-w-2xl mx-auto px-4 pb-20">
-        <!-- Header -->
-        <div class="flex items-center justify-between py-4 sticky top-0 z-40" style="background:#0f0f0f">
-            <div class="flex items-center gap-3">
-                <span class="text-xl font-bold tracking-tight">🇺🇸 EN Pratik</span>
-                <span id="streakBadge" class="hidden text-sm font-semibold px-2 py-0.5 rounded-full" style="background:#1a1a1a;border:1px solid #333">🔥 <span id="streakCount">0</span></span>
-                <button id="aiPoolBadge" onclick="openAIPoolModal()" class="hidden text-sm font-semibold px-2 py-0.5 rounded-full transition hover:opacity-80" title="AI ile ürettiğin cümleler" data-i18n-title="aiPoolTip" style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa">🤖 <span id="aiPoolCount">0</span></button>
-                <button id="levelFilterBadge" onclick="openSettings()" class="hidden text-xs font-bold px-2 py-0.5 rounded-full transition hover:opacity-80" title="Aktif seviye filtresi — değiştirmek için tıkla" data-i18n-title="levelFilterTip" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#9ca3af">🎚 <span id="levelFilterBadgeText"></span></button>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right text-sm"><span class="text-green-400 font-bold" id="scoreCorrect">0</span><span class="text-gray-500 mx-1">/</span><span class="text-red-400 font-bold" id="scoreWrong">0</span></div>
-                <div id="userBadge" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl" style="background:#1a2a1a;border:1px solid #2a4a2a">
+        <!-- Header (üst satır: her zaman sığar; rozetler alt kompakt satıra) -->
+        <div class="flex flex-wrap items-center justify-between gap-2 py-3 sticky top-0 z-40" style="background:#0f0f0f">
+            <span class="text-xl font-bold tracking-tight whitespace-nowrap">🇺🇸 EN Pratik</span>
+            <div class="flex items-center gap-2 flex-shrink-0">
+                <div id="userBadge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-xl" style="background:#1a2a1a;border:1px solid #2a4a2a">
                     <span id="syncDot" class="hidden w-2 h-2 rounded-full" title="Senkron durumu" data-i18n-title="syncTip" style="background:#6b7280"></span>
-                    <span class="text-xs font-medium text-green-400 max-w-[80px] truncate" id="userEmail"></span>
+                    <span class="text-xs font-medium text-green-400 max-w-[72px] truncate" id="userEmail"></span>
                     <button onclick="logout()" class="text-xs text-gray-500 hover:text-white" data-i18n="logout">Çıkış</button>
                 </div>
                 <button id="loginBtn" onclick="openAuthModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold transition hover:opacity-80" style="background:#3B82F6;color:white">Giriş Yap</button>
@@ -69,7 +63,14 @@
                 <button onclick="openSettings()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-800 transition text-gray-400 hover:text-white">⚙️</button>
             </div>
         </div>
-        
+        <!-- Durum çubuğu: skor + rozetler (kompakt, sığmazsa alta sarar) -->
+        <div class="flex flex-wrap items-center gap-2 mb-3 mt-1">
+            <div class="text-sm"><span class="text-green-400 font-bold" id="scoreCorrect">0</span><span class="text-gray-500 mx-1">/</span><span class="text-red-400 font-bold" id="scoreWrong">0</span></div>
+            <span id="streakBadge" class="hidden text-sm font-semibold px-2 py-0.5 rounded-full" style="background:#1a1a1a;border:1px solid #333">🔥 <span id="streakCount">0</span></span>
+            <button id="aiPoolBadge" onclick="openAIPoolModal()" class="hidden text-sm font-semibold px-2 py-0.5 rounded-full transition hover:opacity-80" title="AI ile ürettiğin cümleler" data-i18n-title="aiPoolTip" style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa">🤖 <span id="aiPoolCount">0</span></button>
+            <button id="levelFilterBadge" onclick="openSettings()" class="hidden text-xs font-bold px-2 py-0.5 rounded-full transition hover:opacity-80" title="Aktif seviye filtresi — değiştirmek için tıkla" data-i18n-title="levelFilterTip" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#9ca3af">🎚 <span id="levelFilterBadgeText"></span></button>
+        </div>
+
         <!-- Progress -->
         <div class="mb-4">
             <div class="flex justify-between text-xs text-gray-500 mb-1"><span id="sessionLabel">Oturum</span><span id="progressText">0/0</span></div>
@@ -81,17 +82,17 @@
 
         <!-- Today / Bugün Screen -->
         <div id="todayScreen" class="hidden fade-in">
-            <div class="rounded-2xl p-5 mb-4" style="background:#161616;border:1px solid #222">
+            <div class="rounded-2xl p-4 mb-3" style="background:#161616;border:1px solid #222">
                 <div class="flex justify-between items-center mb-1">
                     <h2 class="text-lg font-bold text-gray-100" id="todayTitle">📅 Bugün</h2>
                     <span class="text-sm font-semibold" id="todayStreakChip" style="color:#fbbf24"></span>
                 </div>
-                <p class="text-xs text-gray-500 mb-3" id="todayGoalText"></p>
+                <p class="text-xs text-gray-500 mb-2" id="todayGoalText"></p>
                 <div class="rounded-full h-2 mb-1" style="background:#0f0f0f"><div id="todayBar" class="h-2 rounded-full transition-all" style="background:#3B82F6;width:0%"></div></div>
                 <p class="text-xs text-gray-500" id="todayProgressText"></p>
             </div>
             <div id="todayPlan"></div>
-            <button onclick="startTodayPlan()" id="todayStartBtn" class="w-full py-3.5 rounded-xl font-bold text-sm mt-2 transition hover:opacity-90" style="background:#3B82F6;color:white"></button>
+            <button onclick="startTodayPlan()" id="todayStartBtn" class="w-full py-3 rounded-xl font-bold text-sm mt-1 transition hover:opacity-90" style="background:#3B82F6;color:white"></button>
         </div>
 
         <!-- Yol Haritası / Roadmap Screen -->
@@ -165,7 +166,7 @@
             
             <div id="wrongButtons" class="hidden flex gap-3">
                 <button onclick="retryQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5" id="retryBtn">Tekrar Dene</button>
-                <button onclick="nextQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white" id="nextBtn">Sonraki →</button>
+                <button onclick="S.aiQ=null;nextQuestion()" class="flex-1 py-3 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white" id="nextBtn">Sonraki →</button>
             </div>
             
             <div id="hintBox" class="hidden rounded-xl p-3 mt-2 text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa"><span class="text-yellow-400 font-medium">💡 </span><span id="hintText"></span></div>
@@ -314,26 +315,9 @@
                 <div id="levelFilterChips" class="flex flex-wrap gap-2"></div>
             </div>
 
-            <div class="rounded-xl p-3 mb-3" style="background:#0a1a28;border:1px solid #1a3a4f">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-bold text-blue-400">🧠 Gemini</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-blue-900 text-blue-400" data-i18n="priority1">1. Öncelik</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2" data-i18n="geminiDesc">Gemini 2.5 Flash • 500 istek/gün • Ücretsiz</p>
-                <input type="password" id="apiKeyInput" placeholder="AIza..." class="w-full rounded-lg px-3 py-2 text-sm mb-2" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <p class="text-xs text-gray-600"><a href="https://aistudio.google.com/apikey" target="_blank" class="text-blue-400 underline" data-i18n="getKeyGemini">🔑 Key al (Gemini)</a></p>
+            <div class="rounded-xl p-3" style="background:#0c1929;border:1px solid #1e3a5f">
+                <p class="text-xs text-gray-400">🤖 <span data-i18n="aiInfo">AI özellikleri giriş yaptığında otomatik çalışır — ayar gerekmez.</span></p>
             </div>
-            <div class="rounded-xl p-3 mb-3" style="background:#0a1628;border:1px solid #1e3a5f">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-bold text-orange-400">⚡ Groq</span>
-                    <span class="text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-400" data-i18n="priority2">2. Yedek</span>
-                </div>
-                <p class="text-xs text-gray-500 mb-2" data-i18n="groqDesc">Ultra hızlı • Ücretsiz</p>
-                <input type="password" id="groqKeyInput" placeholder="gsk_..." class="w-full rounded-lg px-3 py-2 text-sm mb-2" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5">
-                <p class="text-xs text-gray-600"><a href="https://console.groq.com/keys" target="_blank" class="text-orange-400 underline" data-i18n="getKeyGroq">🔑 Key al (Groq)</a></p>
-            </div>
-            <button onclick="saveApiKeys()" class="w-full py-2.5 rounded-xl font-semibold text-sm mb-2" style="background:#3B82F6;color:white" data-i18n="saveBtn">Kaydet</button>
-            <p class="text-xs text-gray-600 text-center" data-i18n="apiHelp">Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.</p>
         </div>
     </div>
     
@@ -352,9 +336,20 @@
     <!-- Onboarding Modal (first visit) -->
     <div id="onboardingModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center px-4" style="background:rgba(0,0,0,0.85)">
         <div class="rounded-2xl w-full max-w-md" style="background:#161616;border:1px solid #2a2a2a;max-height:90vh">
+            <!-- Adım 0: Dil seçimi (ilk açılış) -->
+            <div id="onbStep0" class="hidden p-6 text-center">
+                <p class="text-4xl mb-3">🗣️</p>
+                <h3 class="font-bold text-lg mb-1">Choose your language</h3>
+                <p class="text-xs text-gray-500 mb-5">Hangi dili konuşuyorsun? · ¿Qué idioma hablas?</p>
+                <div class="space-y-3">
+                    <button onclick="selectOnbLang('tr')" class="w-full py-3 rounded-xl font-semibold text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5">🇹🇷 Türkçe</button>
+                    <button onclick="selectOnbLang('es')" class="w-full py-3 rounded-xl font-semibold text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f5f5f5">🇪🇸 Español</button>
+                </div>
+                <p class="text-[11px] text-gray-600 mt-4">🇺🇸 You'll learn American English</p>
+            </div>
             <!-- Adım 1: Karşılama / tanıtım -->
             <div id="onbStep1" class="p-6 text-center">
-                <p class="text-4xl mb-3">🇬🇧</p>
+                <p class="text-4xl mb-3">🇺🇸</p>
                 <h3 class="font-bold text-xl mb-2" id="onbWelcomeTitle">İngilizce Pratik'e hoş geldin! 👋</h3>
                 <p class="text-sm text-gray-400 mb-4" id="onbWelcomeDesc">Çeviri yaparak İngilizce gramer yapılarını öğren — yapay zeka desteğiyle.</p>
                 <div class="text-left text-sm text-gray-300 space-y-2 mb-5" id="onbWelcomeBullets"></div>
@@ -402,8 +397,8 @@
         // Data is now loaded from data.js
         // === LANGUAGE SYSTEM ===
         const UI = {
-            tr: { appTitle: 'İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → EN', dirLabelRev: 'EN → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', dayUnit: 'gün', yourLabel: 'Senin:', refLabel: 'Referans:', login: 'Giriş Yap', generating: '🤖 Üretiliyor...', weakGenerating: '🎯 Üretiliyor...', focusTitle: '🎯 Hedef Alanım', focusDesc: 'AI üretimi bu alana göre kişiselleştirilir.', levelFilterTitle: '🎚 Seviye Filtresi', resetShort: 'Sıfırla', levelFilterDesc: 'Sadece seçili seviyedeki cümleler görünür. AI üretimi her zaman görünür.', priority1: '1. Öncelik', geminiDesc: 'Gemini 2.5 Flash • 500 istek/gün • Ücretsiz', getKeyGemini: '🔑 Key al (Gemini)', priority2: '2. Yedek', groqDesc: 'Ultra hızlı • Ücretsiz', getKeyGroq: '🔑 Key al (Groq)', apiHelp: 'Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.', emailPh: 'E-posta', passPh: 'Şifre', resetTitle: 'Veriyi Sıfırla', resetDesc: 'Tüm ilerleme silinecek. Geri alınamaz.', cancel: 'İptal', resetConfirm: 'Sıfırla', poolTitle: '🤖 AI Cümlelerim', poolCountSuffix: 'cümle havuzda', close: 'Kapat', deleteAll: '🗑️ Tümünü Sil', authLogin: 'Giriş Yap', authSignup: 'Kayıt Ol', authNoAccount: 'Hesabın yok mu?', authHasAccount: 'Zaten hesabın var mı?', pleaseWait: 'Bekleniyor...', extraModesTitle: '🎮 Ekstra Modlar', extraModesDesc: 'İngilizce düşünme alıştırmaları', modeRoleplay: '🎭 Senaryo / Rol Yapma', modeRoleplayDesc: 'Gerçek bir duruma İngilizce cevap ver', modeTaboo: '🚫 Tabu — Kelime Açıkla', modeTabooDesc: 'Türkçeye kaçmadan İngilizce tarif et', modeStory: '📖 Hikayeyi Tamamla', modeStoryDesc: 'Yarım cümleyi spontane İngilizce bitir', modeWordassoc: '💡 Kelime Çağrışım', modeWordassocDesc: 'Kelimeyle aklına gelen 3 şeyi İngilizce yaz', logout: 'Çıkış', topicBtn: '📖 Konu', poolBoxTitle: '📚 Cümle Havuzu', backToModes: '← Mod seçimine dön', submitBtn: 'Gönder →', aiPoolTip: 'AI ile ürettiğin cümleler', levelFilterTip: 'Aktif seviye filtresi — değiştirmek için tıkla', syncTip: 'Senkron durumu', deleteTip: 'Sil', poolFixed: 'sabit', poolGen: 'AI üretimi', creativePh: 'İngilizce cevabınızı yazın...', allDone: 'Tüm sorular tamamlandı!', evaluating: '🤖 Değerlendiriliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
-            es: { appTitle: 'Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: '🎲 Aleatorio', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → EN', dirLabelRev: 'EN → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', dayUnit: 'días', yourLabel: 'Tu respuesta:', refLabel: 'Referencia:', login: 'Iniciar sesión', generating: '🤖 Generando...', weakGenerating: '🎯 Generando...', focusTitle: '🎯 Mi área objetivo', focusDesc: 'La generación de IA se personaliza según esta área.', levelFilterTitle: '🎚 Filtro de nivel', resetShort: 'Restablecer', levelFilterDesc: 'Solo se muestran las frases del nivel seleccionado. La generación de IA siempre se muestra.', priority1: '1ª Prioridad', geminiDesc: 'Gemini 2.5 Flash • 500 solicitudes/día • Gratis', getKeyGemini: '🔑 Obtener clave (Gemini)', priority2: '2º Respaldo', groqDesc: 'Ultrarrápido • Gratis', getKeyGroq: '🔑 Obtener clave (Groq)', apiHelp: 'Gemini funciona como prioridad; si falla, se usa Groq como respaldo.', emailPh: 'Correo electrónico', passPh: 'Contraseña', resetTitle: 'Borrar datos', resetDesc: 'Se borrará todo el progreso. No se puede deshacer.', cancel: 'Cancelar', resetConfirm: 'Borrar', poolTitle: '🤖 Mis frases de IA', poolCountSuffix: 'frases en el banco', close: 'Cerrar', deleteAll: '🗑️ Borrar todo', authLogin: 'Iniciar sesión', authSignup: 'Registrarse', authNoAccount: '¿No tienes cuenta?', authHasAccount: '¿Ya tienes cuenta?', pleaseWait: 'Espere...', extraModesTitle: '🎮 Modos Extra', extraModesDesc: 'Ejercicios para pensar en inglés', modeRoleplay: '🎭 Escenario / Juego de rol', modeRoleplayDesc: 'Responde a una situación real en inglés', modeTaboo: '🚫 Tabú — Describe la palabra', modeTabooDesc: 'Descríbelo en inglés sin recurrir al español', modeStory: '📖 Completa la historia', modeStoryDesc: 'Termina en inglés la frase a medias, de forma espontánea', modeWordassoc: '💡 Asociación de palabras', modeWordassocDesc: 'Escribe en inglés 3 cosas que te evoque la palabra', logout: 'Salir', topicBtn: '📖 Tema', poolBoxTitle: '📚 Banco de frases', backToModes: '← Volver a la selección de modos', submitBtn: 'Enviar →', aiPoolTip: 'Frases que generaste con IA', levelFilterTip: 'Filtro de nivel activo — toca para cambiar', syncTip: 'Estado de sincronización', deleteTip: 'Eliminar', poolFixed: 'fijas', poolGen: 'generadas por IA', creativePh: 'Escribe tu respuesta en inglés...', allDone: '¡Todas las preguntas completadas!', evaluating: '🤖 Evaluando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
+            tr: { appTitle: 'İngilizce Pratik', session: 'Oturum', checkBtn: 'Kontrol Et', hint: '💡 İpucu', skip: 'Atla', retry: 'Tekrar Dene', next: 'Sonraki', correct: 'Tebrikler! 🎉', wrong: 'Yanlış ❌', accepted: 'Kabul! ✅', aiGen: '🤖 AI ile Yeni Cümle', weakPoint: '🎯 Zayıf Noktam', teach: '📖 Bu konuyu bana öğret', variations: '🔄 Bu cümleyi başka nasıl kurarım?', tabAll: 'Tümü', tabReview: '⏰ Tekrar', tabStats: '📊 İstatistik', tabVerbs: '📝 Fiiller', inputPh: 'İngilizce çevirinizi yazın...', inputPhRev: 'Türkçe çevirinizi yazın...', softTitle: '🌟 Neredeyse kusursuz!', softMsg: 'Gözünden ufak bir kelime kaçmış olabilir mi? 🙊', softRetry: '🔄 Tekrar Dene', dirLabel: 'TR → EN', dirLabelRev: 'EN → TR', dirText: 'Çeviri Yönü:', reviewTitle: '⏰ Tekrar Zamanı', reviewDone: '🎉 Bugün tekrar yok!', verbTitle: '📝 Düzensiz Fiiller', verbDone: 'Günlük fiiller tamamlandı!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'turkish', kwField: 'tr', saving: 'Kaydediliyor...', dayUnit: 'gün', yourLabel: 'Senin:', refLabel: 'Referans:', login: 'Giriş Yap', generating: '🤖 Üretiliyor...', weakGenerating: '🎯 Üretiliyor...', focusTitle: '🎯 Hedef Alanım', focusDesc: 'AI üretimi bu alana göre kişiselleştirilir.', levelFilterTitle: '🎚 Seviye Filtresi', resetShort: 'Sıfırla', levelFilterDesc: 'Sadece seçili seviyedeki cümleler görünür. AI üretimi her zaman görünür.', priority1: '1. Öncelik', geminiDesc: 'Gemini 2.5 Flash • 500 istek/gün • Ücretsiz', getKeyGemini: '🔑 Key al (Gemini)', priority2: '2. Yedek', groqDesc: 'Ultra hızlı • Ücretsiz', getKeyGroq: '🔑 Key al (Groq)', apiHelp: 'Gemini öncelikli çalışır, başarısız olursa Groq yedek olarak denenir.', emailPh: 'E-posta', passPh: 'Şifre', resetTitle: 'Veriyi Sıfırla', resetDesc: 'Tüm ilerleme silinecek. Geri alınamaz.', cancel: 'İptal', resetConfirm: 'Sıfırla', poolTitle: '🤖 AI Cümlelerim', poolCountSuffix: 'cümle havuzda', close: 'Kapat', deleteAll: '🗑️ Tümünü Sil', authLogin: 'Giriş Yap', authSignup: 'Kayıt Ol', authNoAccount: 'Hesabın yok mu?', authHasAccount: 'Zaten hesabın var mı?', pleaseWait: 'Bekleniyor...', extraModesTitle: '🎮 Ekstra Modlar', extraModesDesc: 'İngilizce düşünme alıştırmaları', modeRoleplay: '🎭 Senaryo / Rol Yapma', modeRoleplayDesc: 'Gerçek bir duruma İngilizce cevap ver', modeTaboo: '🚫 Tabu — Kelime Açıkla', modeTabooDesc: 'Türkçeye kaçmadan İngilizce tarif et', modeStory: '📖 Hikayeyi Tamamla', modeStoryDesc: 'Yarım cümleyi spontane İngilizce bitir', modeWordassoc: '💡 Kelime Çağrışım', modeWordassocDesc: 'Kelimeyle aklına gelen 3 şeyi İngilizce yaz', logout: 'Çıkış', topicBtn: '📖 Konu', poolBoxTitle: '📚 Cümle Havuzu', backToModes: '← Mod seçimine dön', submitBtn: 'Gönder →', aiPoolTip: 'AI ile ürettiğin cümleler', levelFilterTip: 'Aktif seviye filtresi — değiştirmek için tıkla', syncTip: 'Senkron durumu', deleteTip: 'Sil', poolFixed: 'sabit', poolGen: 'AI üretimi', creativePh: 'İngilizce cevabınızı yazın...', allDone: 'Tüm sorular tamamlandı!', evaluating: '🤖 Değerlendiriliyor...', correctAnswer: 'Doğru cevap:', orderWords: 'Kelimeleri doğru sıraya koy:', clear: 'Temizle', settingsTitle: '⚙️ Ayarlar', saveBtn: 'Kaydet', aiInfo: 'AI özellikleri giriş yaptığında otomatik çalışır — ayar gerekmez.', statTotalLabel: 'Toplam Soru', statAccLabel: 'Doğruluk', statLearnedLabel: 'Öğrenildi', statStreakLabel: 'Günlük Seri', topicPerfLabel: 'Konu Bazında Performans', weakReportLabel: '⚠️ Zayıf Alan Raporu', weakReportDesc: 'En çok hata yaptığın konular', resetBtn: '🗑️ Tüm Veriyi Sıfırla', verbSubtitle: 'Günde 5 fiil, her gün tekrarla' },
+            es: { appTitle: 'Práctica de Inglés', session: 'Sesión', checkBtn: 'Verificar', hint: '💡 Pista', skip: 'Saltar', retry: 'Intentar de nuevo', next: 'Siguiente', correct: '¡Felicidades! 🎉', wrong: 'Incorrecto ❌', accepted: '¡Aceptado! ✅', aiGen: '🤖 Oración con AI', weakPoint: '🎯 Punto débil', teach: '📖 Enséñame este tema', variations: '🔄 ¿De qué otra forma digo esto?', tabAll: '🎲 Aleatorio', tabReview: '⏰ Repaso', tabStats: '📊 Estadísticas', tabVerbs: '📝 Verbos', inputPh: 'Escribe tu traducción en inglés...', inputPhRev: 'Escribe tu traducción en español...', softTitle: '🌟 ¡Casi perfecto!', softMsg: '¿Se te escapó una pequeña palabra? 🙊', softRetry: '🔄 Intentar de nuevo', dirLabel: 'ES → EN', dirLabelRev: 'EN → ES', dirText: 'Dirección:', reviewTitle: '⏰ Hora de repasar', reviewDone: '🎉 ¡No hay repaso hoy!', verbTitle: '📝 Verbos Irregulares', verbDone: '¡Verbos del día completados!', verbV2label: 'V2 (Past Simple)', verbV3label: 'V3 (Past Participle)', nativeField: 'spanish', kwField: 'es', saving: 'Guardando...', dayUnit: 'días', yourLabel: 'Tu respuesta:', refLabel: 'Referencia:', login: 'Iniciar sesión', generating: '🤖 Generando...', weakGenerating: '🎯 Generando...', focusTitle: '🎯 Mi área objetivo', focusDesc: 'La generación de IA se personaliza según esta área.', levelFilterTitle: '🎚 Filtro de nivel', resetShort: 'Restablecer', levelFilterDesc: 'Solo se muestran las frases del nivel seleccionado. La generación de IA siempre se muestra.', priority1: '1ª Prioridad', geminiDesc: 'Gemini 2.5 Flash • 500 solicitudes/día • Gratis', getKeyGemini: '🔑 Obtener clave (Gemini)', priority2: '2º Respaldo', groqDesc: 'Ultrarrápido • Gratis', getKeyGroq: '🔑 Obtener clave (Groq)', apiHelp: 'Gemini funciona como prioridad; si falla, se usa Groq como respaldo.', emailPh: 'Correo electrónico', passPh: 'Contraseña', resetTitle: 'Borrar datos', resetDesc: 'Se borrará todo el progreso. No se puede deshacer.', cancel: 'Cancelar', resetConfirm: 'Borrar', poolTitle: '🤖 Mis frases de IA', poolCountSuffix: 'frases en el banco', close: 'Cerrar', deleteAll: '🗑️ Borrar todo', authLogin: 'Iniciar sesión', authSignup: 'Registrarse', authNoAccount: '¿No tienes cuenta?', authHasAccount: '¿Ya tienes cuenta?', pleaseWait: 'Espere...', extraModesTitle: '🎮 Modos Extra', extraModesDesc: 'Ejercicios para pensar en inglés', modeRoleplay: '🎭 Escenario / Juego de rol', modeRoleplayDesc: 'Responde a una situación real en inglés', modeTaboo: '🚫 Tabú — Describe la palabra', modeTabooDesc: 'Descríbelo en inglés sin recurrir al español', modeStory: '📖 Completa la historia', modeStoryDesc: 'Termina en inglés la frase a medias, de forma espontánea', modeWordassoc: '💡 Asociación de palabras', modeWordassocDesc: 'Escribe en inglés 3 cosas que te evoque la palabra', logout: 'Salir', topicBtn: '📖 Tema', poolBoxTitle: '📚 Banco de frases', backToModes: '← Volver a la selección de modos', submitBtn: 'Enviar →', aiPoolTip: 'Frases que generaste con IA', levelFilterTip: 'Filtro de nivel activo — toca para cambiar', syncTip: 'Estado de sincronización', deleteTip: 'Eliminar', poolFixed: 'fijas', poolGen: 'generadas por IA', creativePh: 'Escribe tu respuesta en inglés...', allDone: '¡Todas las preguntas completadas!', evaluating: '🤖 Evaluando...', correctAnswer: 'Respuesta correcta:', orderWords: 'Ordena las palabras:', clear: 'Limpiar', settingsTitle: '⚙️ Ajustes', saveBtn: 'Guardar', aiInfo: 'Las funciones de IA se activan al iniciar sesión — sin configuración.', statTotalLabel: 'Total Preguntas', statAccLabel: 'Precisión', statLearnedLabel: 'Aprendido', statStreakLabel: 'Racha Diaria', topicPerfLabel: 'Rendimiento por Tema', weakReportLabel: '⚠️ Reporte de Áreas Débiles', weakReportDesc: 'Los temas con más errores', resetBtn: '🗑️ Borrar Todos los Datos', verbSubtitle: '5 verbos diarios, repasa cada día' }
         };
         // Dil etiketi yoksa topic prefix'inden çıkar (legacy AI cümleler için)
         function _inferSentenceLang(s) {
@@ -445,8 +440,16 @@
         function verbSrsKey() { return S.lang === 'es' ? 'verb_srs_es' : 'verb_srs'; }
 
         // === STATE ===
-        let S = { tab: 'all', q: null, queue: [], done: 0, ok: 0, nok: 0, answered: false, rQueue: [], rIdx: 0, rSel: [], filterTag: null, aiQ: null, verbIdx: 0, verbList: [], dir: 'tr2en', lang: localStorage.getItem('app_lang') || 'tr' };
-        function switchLang() { S.lang = S.lang === 'tr' ? 'es' : 'tr'; localStorage.setItem('app_lang', S.lang); S.dir = 'tr2en'; updateLangUI(); updateStreakUI(); updateAIPoolUI(); renderTabs(); selectTab('today'); }
+        // İlk açılışta cihaz/tarayıcı diline göre varsayılan dili tahmin et (es/tr).
+        function _detectLang() {
+            try {
+                const navs = (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || '']).map(s => (s || '').toLowerCase());
+                for (const l of navs) { if (l.startsWith('es')) return 'es'; if (l.startsWith('tr')) return 'tr'; }
+            } catch (e) {}
+            return 'tr';
+        }
+        let S = { tab: 'all', q: null, queue: [], done: 0, ok: 0, nok: 0, answered: false, rQueue: [], rIdx: 0, rSel: [], filterTag: null, aiQ: null, verbIdx: 0, verbList: [], dir: 'tr2en', lang: localStorage.getItem('app_lang') || _detectLang() };
+        function switchLang() { S.lang = S.lang === 'tr' ? 'es' : 'tr'; try { localStorage.setItem('app_lang', S.lang); } catch (e) {} S.dir = 'tr2en'; document.documentElement.lang = S.lang; updateLangUI(); updateStreakUI(); updateAIPoolUI(); renderTabs(); selectTab('today'); }
         function updateLangUI() {
             const btn = document.getElementById('langToggle'); btn.textContent = S.lang === 'tr' ? 'ES' : 'TR'; btn.style.background = S.lang === 'es' ? '#1e3a1a' : '#1a1a1a'; btn.style.color = S.lang === 'es' ? '#4ade80' : '#e5e5e5';
             document.querySelector('#app .text-xl').textContent = t('appTitle');
@@ -653,7 +656,7 @@
             return FOCUS_AREAS.find(f => f.id === id) || FOCUS_AREAS[0];
         }
         function saveUserFocus(id) {
-            localStorage.setItem('user_focus', id);
+            try { localStorage.setItem('user_focus', id); } catch (e) {}
             triggerCloudSync && triggerCloudSync();
         }
         function isOnboardingDone() {
@@ -663,7 +666,7 @@
             const f = getUserFocus();
             return f.prompt; // '' for general
         }
-        function showOnboarding() {
+        function _localizeOnbWelcome() {
             const isEs = S.lang === 'es';
             // --- Adım 1: karşılama / tanıtım (lokalize) ---
             document.getElementById('onbWelcomeTitle').textContent = isEs ? '¡Bienvenido a Práctica de Inglés! 👋' : "İngilizce Pratik'e hoş geldin! 👋";
@@ -673,18 +676,33 @@
             const bullets = isEs
                 ? ['🤖 La IA genera frases personalizadas para tu nivel', '🧠 Analiza tus errores y explica el porqué', '🔁 El sistema de repaso (SRS) fija lo aprendido']
                 : ['🤖 Yapay zeka seviyene uygun, sana özel cümleler üretir', '🧠 Hatalarını analiz edip nedenini açıklar', '🔁 Tekrar (SRS) sistemiyle öğrendiğin kalıcı olur'];
-            document.getElementById('onbWelcomeBullets').innerHTML = bullets.map(b => `<div>${b}</div>`).join('');
+            document.getElementById('onbWelcomeBullets').innerHTML = bullets.map(b => `<div>${escapeHtml(b)}</div>`).join('');
             document.getElementById('onbStartBtn').textContent = isEs ? 'Comenzar →' : 'Başla →';
             // --- Adım 2: odak alanı başlıkları (lokalize) ---
             if (isEs) {
                 document.getElementById('onbTitle').textContent = '¿En qué área lo usarás?';
                 document.getElementById('onbDesc').textContent = 'Esta elección personalizará las frases generadas por IA. Puedes cambiarla luego en ⚙️ Ajustes.';
                 document.getElementById('onbSkip').textContent = 'Saltar por ahora →';
+            } else {
+                document.getElementById('onbTitle').textContent = 'Hangi alanda kullanacaksın?';
+                document.getElementById('onbDesc').textContent = 'Bu seçim AI ile üretilen cümleleri sana özel yapar. Sonra ⚙️ Ayarlar\'dan değiştirebilirsin.';
+                document.getElementById('onbSkip').textContent = 'Şimdilik geç →';
             }
-            // Adım 1'i göster, adım 2'yi gizle, modal'ı aç
-            document.getElementById('onbStep1').classList.remove('hidden');
+        }
+        function showOnboarding() {
+            // İlk açılış: önce dil seçimi (Adım 0), sonra karşılama (1), sonra odak (2).
+            document.getElementById('onbStep0').classList.remove('hidden');
+            document.getElementById('onbStep1').classList.add('hidden');
             document.getElementById('onbStep2').classList.add('hidden');
             document.getElementById('onboardingModal').classList.remove('hidden');
+        }
+        function selectOnbLang(lang) {
+            S.lang = (lang === 'es') ? 'es' : 'tr';
+            try { localStorage.setItem('app_lang', S.lang); } catch (e) {}
+            updateLangUI(); renderTabs(); updateStreakUI(); updateAIPoolUI(); updateLevelFilterBadge();
+            _localizeOnbWelcome();
+            document.getElementById('onbStep0').classList.add('hidden');
+            document.getElementById('onbStep1').classList.remove('hidden');
         }
         function onboardingNext() {
             renderFocusList('onbList', true);
@@ -692,7 +710,7 @@
             document.getElementById('onbStep2').classList.remove('hidden');
         }
         function closeOnboarding() {
-            localStorage.setItem('onboarding_done', 'true');
+            try { localStorage.setItem('onboarding_done', 'true'); } catch (e) {}
             document.getElementById('onboardingModal').classList.add('hidden');
         }
         function skipOnboarding() {
@@ -802,8 +820,8 @@
             const click = active ? ('onclick="' + onclick + '"') : '';
             const cursor = active ? 'cursor:pointer' : 'cursor:default';
             const right = active ? '<span style="color:#3B82F6;font-size:1.25rem">&rsaquo;</span>' : (done ? '<span style="color:#22c55e">✓</span>' : '');
-            return '<div ' + click + ' class="rounded-2xl p-4 flex items-center justify-between transition hover:opacity-90 mb-3" style="background:#161616;border:1px solid #2a2a2a;' + op + cursor + '">'
-                + '<div class="flex items-center gap-3"><span style="font-size:1.5rem">' + icon + '</span>'
+            return '<div ' + click + ' class="rounded-2xl p-3 flex items-center justify-between transition hover:opacity-90 mb-2" style="background:#161616;border:1px solid #2a2a2a;' + op + cursor + '">'
+                + '<div class="flex items-center gap-3"><span style="font-size:1.35rem">' + icon + '</span>'
                 + '<div><p class="font-semibold text-sm text-gray-100">' + title + '</p><p class="text-xs text-gray-500">' + sub + '</p></div></div>'
                 + right + '</div>';
         }
@@ -831,7 +849,7 @@
                 plan.verbsDue > 0 ? L(plan.verbsDue + ' fiil tekrarı', plan.verbsDue + ' verbos para repasar') : L('Günlük fiil pratiği', 'Práctica diaria de verbos'),
                 true, "selectTab('verbs')", false));
             const cur = currentStep();
-            const reminder = '<div onclick="selectTab(\'roadmap\')" class="rounded-2xl p-3 mb-3 flex items-center justify-between transition hover:opacity-90" style="background:#0c1929;border:1px solid #1e3a5f;cursor:pointer">'
+            const reminder = '<div onclick="selectTab(\'roadmap\')" class="rounded-2xl p-3 mb-2 flex items-center justify-between transition hover:opacity-90" style="background:#0c1929;border:1px solid #1e3a5f;cursor:pointer">'
                 + '<div class="flex items-center gap-2"><span style="font-size:1.15rem">📚</span><div><p class="text-xs text-gray-500">' + L('Yol haritası — sıradaki', 'Ruta — siguiente') + '</p><p class="text-sm font-semibold text-blue-300">' + escapeHtml(stepDisplay(cur)) + '</p></div></div>'
                 + '<span style="color:#3B82F6;font-size:1.1rem">&rsaquo;</span></div>';
             document.getElementById('todayPlan').innerHTML = reminder + blocks.join('');
@@ -1001,13 +1019,13 @@
         }
         function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); const _spd2=document.getElementById('subTopicPickerDiv'); if(_spd2)_spd2.classList.add('hidden'); document.getElementById('questionCard').classList.add('hidden'); let _cd=document.getElementById('completionDiv'); if(!_cd){_cd=document.createElement('div');_cd.id='completionDiv'; const _qcr=document.getElementById('questionCard'); _qcr.parentNode.insertBefore(_cd,_qcr);} _cd.classList.remove('hidden'); _cd.innerHTML='<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">'+t('allDone')+'</p></div>'; ['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
         function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox', 'softCheckBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
-        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = topicShort(q.topic); document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); if (!kwNative || !kwNative.trim()) return; const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered + (isReverse ? ' ' + speakBtn(q.english) : ''); if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
+        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = topicShort(q.topic); document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = escapeHtml(showText); if (kws) kws.forEach(kw => { const kwNative = getKw(kw); if (!kwNative || !kwNative.trim()) return; const kwEsc = escapeHtml(kwNative); const rx = new RegExp(kwEsc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwEsc}</u><span class="tip">${escapeHtml(kw.en)}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered + (isReverse ? ' ' + speakBtn(q.english) : ''); if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${escapeHtml(getKw(k))}</span> = ${escapeHtml(k.en)}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
         function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
         function handleCorrect() { setAiGenLocked(false); S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = escapeHtml(t('correct')) + (S.dir === 'tr2en' ? ' ' + speakBtn(S.q.english) : ''); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
         function handleWrong(input) { setAiGenLocked(false); S.nok++; if (S.q.id) updateSRS(S.q.id, false); updateGlobalStats(false); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.textContent = t('wrong'); fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; ft.style.color = '#f87171'; const correctText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = escapeHtml(correctText) + (S.dir === 'tr2en' ? ' ' + speakBtn(S.q.english) : ''); document.getElementById('answerInput').style.borderColor = '#dc2626'; document.getElementById('wrongButtons').classList.remove('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); document.getElementById('answerInput').classList.add('shake'); setTimeout(() => document.getElementById('answerInput').classList.remove('shake'), 500); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.remove('hidden'); document.getElementById('variationsBtn').classList.add('hidden'); } updateProgress(); callGeminiError(S.q, input); }
-        function handleAccepted(input) { setAiGenLocked(false); S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = t('accepted'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = t('yourLabel') + ' <span class="text-green-400">' + input + '</span><br>' + t('refLabel') + ' ' + refText + (S.dir === 'tr2en' ? ' ' + speakBtn(S.q.english) : ''); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
+        function handleAccepted(input) { setAiGenLocked(false); S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = t('accepted'); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #22863a'; ft.style.color = '#4ade80'; const refText = S.dir === 'en2tr' ? getNative(S.q) : S.q.english; document.getElementById('correctAnswerBox').classList.remove('hidden'); document.getElementById('correctAnswerText').innerHTML = t('yourLabel') + ' <span class="text-green-400">' + escapeHtml(input) + '</span><br>' + t('refLabel') + ' ' + escapeHtml(refText) + (S.dir === 'tr2en' ? ' ' + speakBtn(S.q.english) : ''); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#22863a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 3000); }
         // SOFT CHECK
         const SMALL_WORDS = new Set(['in', 'on', 'at', 'to', 'for', 'a', 'an', 'the', 'is', 'are', 'am', 'do', 'does', 'did', 'was', 'were', 'has', 'have', 'had', 'will', 'would', 'can', 'could', 'should', 'shall', 'may', 'might', 'must', 'been', 'being', 'of', 'by', 'with', 'from', 'up', 'out', 'off', 'it', 'its', 'not', 'no', 'so', 'very', 'than', 'then', 'just', 'also', 'too', 'but', 'and', 'or', 'nor', 'yet', 'if']);
         function getLevenshteinDistance(a, b) {
@@ -1077,7 +1095,7 @@ Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); 
             } else { handleWrong(input); }
         }
         function retryQuestion() { S.answered = false; resetUI(); renderQuestion(S.q, !!S.aiQ); }
-        function skipQuestion() { S.done++; S.aiQ = null; updateProgress(); nextQuestion(); }
+        function skipQuestion() { setAiGenLocked(false); S.done++; S.aiQ = null; updateProgress(); nextQuestion(); }
         function getHint() { if (!S.q) return; const isReverse = S.dir === 'en2tr'; const hintSource = isReverse ? getNative(S.q) : S.q.english; const w = hintSource.split(' '), n = Math.max(1, Math.floor(w.length / 3)); document.getElementById('hintText').textContent = w.slice(0, n).join(' ') + '...'; document.getElementById('hintBox').classList.remove('hidden'); }
         // AI API (Groq first, Gemini fallback)
         let lastApiError = '';
@@ -1158,6 +1176,7 @@ Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); 
             const nv = (typeof j[nf] === 'string' ? j[nf] : '').trim();
             if (en.length < 3 || nv.length < 3) return null;
             if (en.toLowerCase() === nv.toLowerCase()) return null;
+            if (/[<>]/.test(en) || /[<>]/.test(nv)) return null;   // HTML enjeksiyon karakteri → reddet (XSS savunma derinliği)
             if (NON_ENGLISH_RX.test(en)) return null;   // İngilizce alanına dil sızıntısı → reddet
             const keywords = Array.isArray(j.keywords)
                 ? j.keywords.filter(k => k && typeof k.en === 'string' && k.en.trim()).slice(0, 3)
@@ -1270,7 +1289,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         async function askTeachMe() {
             if (!S.q) return; const box = document.getElementById('aiTeachBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">📖 ' + L('Hazırlanıyor...', 'Preparando...') + '</p>'; const nText = getNative(S.q); const langInstr = S.lang === 'es' ? 'You are an English teacher for Spanish speakers. Explain this ENGLISH grammar in Spanish using 3 English example sentences. Focus on English usage rules. Brief plain text.' : 'Sen bir İngilizce öğretmenisin. Bu İNGİLİZCE gramer kuralını Türkçe açıkla. 3 İngilizce örnek cümle ver ve Türkçe açıkla. Kısa, net, düz metin.'; const prompt = `Native:"${nText}" EN:"${S.q.english}"\n${langInstr}`; const txt = await geminiCall(prompt); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">📖 ${L('Mini Ders', 'Mini Lección')}</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">' + L('Yüklenemedi.', 'No se pudo cargar.') + '</p>';
         }
-        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 ' + L('Hazırlanıyor...', 'Preparando...') + '</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = txt ? `<p class="text-blue-300 font-medium mb-2">🔄 ${L('Alternatif Söyleniş', 'Formas alternativas')}</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">' + L('Yüklenemedi.', 'No se pudo cargar.') + '</p>'; }
+        async function askVariations() { if (!S.q) return; const box = document.getElementById('aiVariationsBox'); box.classList.remove('hidden'); box.innerHTML = '<p class="animate-pulse">🔄 ' + L('Hazırlanıyor...', 'Preparando...') + '</p>'; const langInstr = S.lang === 'es' ? `3 formas diferentes de decir "${S.q.english}" en inglés. Lista numerada, breve explicación en español. Texto plano.` : `"${S.q.english}" cümlesinin 3 farklı İngilizce söylenişi. Numaralı liste, kısa Türkçe açıklama. Düz metin.`; const txt = await geminiCall(langInstr); box.innerHTML = (txt ? `<p class="text-blue-300 font-medium mb-2">🔄 ${L('Alternatif Söyleniş', 'Formas alternativas')}</p><p>${aiHtml(txt)}</p>` : '<p class="text-gray-500">' + L('Yüklenemedi.', 'No se pudo cargar.') + '</p>') + '<button onclick="S.aiQ=null;nextQuestion()" class="mt-3 w-full py-2 rounded-lg text-sm font-semibold" style="background:#3B82F6;color:white">' + L('Sonraki →', 'Siguiente →') + '</button>'; }
         // REVIEW
         function showReview() { showScreen('reviewScreen'); const SS = getCurSentences(); 
             const tDate = new Date(); tDate.setDate(tDate.getDate() - 1);
@@ -1280,10 +1299,10 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             const due = SS.filter(s => { const e = getSRS(s.id); return (e.correctStreak > 0 || e.wrongCount > 0) && e.nextReview <= today(); });
 
  document.getElementById('reviewCount').textContent = S.lang === 'es' ? `Hoy ${due.length} oraciones para repasar.` : `Bugün ${due.length} cümle tekrar zamanı.`; if (!due.length) { document.getElementById('reviewModeArea').innerHTML = `<p class="text-center text-gray-500 py-12">${t('reviewDone')}</p>`; return; } S.rQueue = [...due]; shuffle(S.rQueue); S.rIdx = 0; showReviewQ(); }
-        function showReviewQ() { if (S.rIdx >= S.rQueue.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-400 py-12">✅</p>'; return; } const q = S.rQueue[S.rIdx], words = q.english.split(' '); shuffle(words); S.rSel = []; const nativeText = getNative(q); document.getElementById('reviewModeArea').innerHTML = `<div class="rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6">${q.topic}</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1a1a1a;color:#666">${q.level}</span></div><p class="text-lg font-medium text-gray-200 mb-1">${nativeText}</p><p class="text-xs text-gray-500 mb-4">${t('orderWords')}</p><div id="rAns" class="min-h-12 rounded-xl p-3 mb-3 flex flex-wrap gap-2" style="background:#0f0f0f;border:1px dashed #333"></div><div id="rBank" class="flex flex-wrap gap-2 mb-4">${words.map((w, i) => `<button class="word-chip px-3 py-1.5 rounded-lg text-sm font-medium" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e5e5e5" data-idx="${i}" onclick="selRW(this,'${w.replace(/'/g, "\\'")}',${i})">${w}</button>`).join('')}</div><div id="rFb" class="hidden rounded-xl p-3 mb-3 text-sm"></div><div class="flex gap-3"><button onclick="checkRev()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="clearRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('clear')}</button><button onclick="nextRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; }
-        function selRW(btn, w, idx) { if (btn.classList.contains('placed')) return; btn.classList.add('placed'); S.rSel.push({ word: w, idx }); const c = document.createElement('button'); c.className = 'word-chip px-3 py-1.5 rounded-lg text-sm font-medium'; c.style.background = '#3B82F6'; c.style.color = 'white'; c.textContent = w; c.onclick = () => { c.remove(); S.rSel = S.rSel.filter(x => x.idx !== idx); document.querySelector(`#rBank [data-idx="${idx}"]`)?.classList.remove('placed'); }; document.getElementById('rAns').appendChild(c); }
+        function showReviewQ() { if (S.rIdx >= S.rQueue.length) { document.getElementById('reviewModeArea').innerHTML = '<p class="text-center text-gray-400 py-12">✅</p>'; return; } const q = S.rQueue[S.rIdx], words = q.english.split(' '); shuffle(words); S.rSel = []; const nativeText = getNative(q); document.getElementById('reviewModeArea').innerHTML = `<div class="rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex gap-2 mb-3"><span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:#1e2a3a;color:#3B82F6">${escapeHtml(q.topic)}</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1a1a1a;color:#666">${escapeHtml(q.level)}</span></div><p class="text-lg font-medium text-gray-200 mb-1">${escapeHtml(nativeText)}</p><p class="text-xs text-gray-500 mb-4">${t('orderWords')}</p><div id="rAns" class="min-h-12 rounded-xl p-3 mb-3 flex flex-wrap gap-2" style="background:#0f0f0f;border:1px dashed #333"></div><div id="rBank" class="flex flex-wrap gap-2 mb-4">${words.map((w, i) => `<button class="word-chip px-3 py-1.5 rounded-lg text-sm font-medium" style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e5e5e5" data-idx="${i}" onclick="selRW(this,${i})">${escapeHtml(w)}</button>`).join('')}</div><div id="rFb" class="hidden rounded-xl p-3 mb-3 text-sm"></div><div class="flex gap-3"><button onclick="checkRev()" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="clearRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('clear')}</button><button onclick="nextRev()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; }
+        function selRW(btn, idx) { if (btn.classList.contains('placed')) return; const w = btn.textContent; btn.classList.add('placed'); S.rSel.push({ word: w, idx }); const c = document.createElement('button'); c.className = 'word-chip px-3 py-1.5 rounded-lg text-sm font-medium'; c.style.background = '#3B82F6'; c.style.color = 'white'; c.textContent = w; c.onclick = () => { c.remove(); S.rSel = S.rSel.filter(x => x.idx !== idx); document.querySelector(`#rBank [data-idx="${idx}"]`)?.classList.remove('placed'); }; document.getElementById('rAns').appendChild(c); }
         function clearRev() { S.rSel = []; document.getElementById('rAns').innerHTML = ''; document.querySelectorAll('#rBank .word-chip').forEach(b => b.classList.remove('placed')); }
-        function checkRev() { const q = S.rQueue[S.rIdx], built = S.rSel.map(x => x.word).join(' '), fb = document.getElementById('rFb'); fb.classList.remove('hidden'); bumpDaily(); if (norm(built) === norm(q.english)) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.textContent = L('✅ Doğru!', '✅ ¡Correcto!'); updateSRS(q.id, true); setTimeout(nextRev, 1500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = L('❌ Doğru: ', '❌ Correcto: ') + `<strong>${q.english}</strong>` + ' ' + speakBtn(q.english); updateSRS(q.id, false); } }
+        function checkRev() { const q = S.rQueue[S.rIdx], built = S.rSel.map(x => x.word).join(' '), fb = document.getElementById('rFb'); fb.classList.remove('hidden'); bumpDaily(); if (norm(built) === norm(q.english)) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.textContent = L('✅ Doğru!', '✅ ¡Correcto!'); updateSRS(q.id, true); setTimeout(nextRev, 1500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = L('❌ Doğru: ', '❌ Correcto: ') + `<strong>${escapeHtml(q.english)}</strong>` + ' ' + speakBtn(q.english); updateSRS(q.id, false); } }
         function nextRev() { S.rIdx++; showReviewQ(); }
         // STATS
         function showStats() { showScreen('statsScreen'); const SS = getCurSentences(); const TT = getCurTopics(); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SS.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SS.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); const _aiAll = getAISentences(); const _aiInLang = _aiAll.filter(s => !s.lang || s.lang === S.lang).length; const _baseLen = (S.lang === 'es' ? SENTENCES_ES : SENTENCES).length; document.getElementById('poolBase').textContent = _baseLen; document.getElementById('poolAI').textContent = _aiInLang; document.getElementById('poolTotal').textContent = _baseLen + _aiInLang; document.getElementById('topicStats').innerHTML = TT.map(tp => { const ss = SS.filter(s => s.topic === tp), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${escapeHtml(_phaseNum(tp) < 99 ? phaseName(_phaseNum(tp)) : tp)}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SS.forEach(s => getSRS(s.id).errorTags.forEach(tg => { tf[tg] = (tf[tg] || 0) + 1; })); const tl = { preposition: L('Edat Kullanımı (to/for/from)', 'Preposiciones (to/for/from)'), past_tense: L('Geçmiş Zaman', 'Pasado'), present_perfect: 'Present Perfect', article: L('Article (a/an/the)', 'Artículo (a/an/the)'), word_order: L('Kelime Sırası', 'Orden de palabras'), vocabulary: L('Kelime Bilgisi', 'Vocabulario'), spelling: L('Yazım Hatası', 'Ortografía'), other: L('Diğer', 'Otro') }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${L(cnt + ' hata', cnt + ' errores')}</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">${L('Odaklan', 'Enfocar')}</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">' + L('Henüz hata kaydı yok.', 'Aún no hay registro de errores.') + '</p>'; }
@@ -1292,9 +1311,8 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         function showVerbCard() { if (S.verbIdx >= S.verbList.length) { document.getElementById('verbDailyArea').innerHTML = `<div class="text-center py-12 fade-in"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">${t('verbDone')}</p></div>`; return; } const v = S.verbList[S.verbIdx]; const nv = getVerbNative(v); document.getElementById('verbDailyArea').innerHTML = `<div class="verb-card rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex justify-between mb-4"><span class="text-blue-400 text-sm font-medium">${S.verbIdx + 1} / ${S.verbList.length}</span><span class="text-xs text-gray-600">${nv}</span></div><p class="text-center text-2xl font-bold mb-1 text-white">${v.v1}</p><p class="text-center text-sm text-gray-500 mb-6">${t('verbV2label')} + ${t('verbV3label')}</p><div class="grid grid-cols-2 gap-3 mb-4"><div><label class="block text-xs text-gray-500 mb-1">${t('verbV2label')}</label><input type="text" id="v2Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')document.getElementById('v3Input').focus()"></div><div><label class="block text-xs text-gray-500 mb-1">${t('verbV3label')}</label><input type="text" id="v3Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')checkVerb()"></div></div><div id="verbFb" class="hidden rounded-xl p-3 mb-4 text-sm"></div><div class="flex gap-3"><button onclick="checkVerb()" id="verbCheckBtn" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="S.verbIdx++;showVerbCard()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; document.getElementById('v2Input').focus(); }
         function checkVerb() { const v = S.verbList[S.verbIdx], v2 = document.getElementById('v2Input').value.trim().toLowerCase(), v3 = document.getElementById('v3Input').value.trim().toLowerCase(); if (!v2 || !v3) return; bumpDaily(); const ok2 = v2 === v.v2.toLowerCase(), ok3 = v3 === v.v3.toLowerCase(), allOk = ok2 && ok3; const fb = document.getElementById('verbFb'); fb.classList.remove('hidden'); const e = getVerbSRS(v.v1); const nv = getVerbNative(v); const nv2 = getVerbNative(v, '2'); const nv3 = getVerbNative(v, '3'); const tenseHtml = `<div class="mt-3 pt-3 text-gray-300" style="border-top:1px solid ${allOk ? '#1a3a1a' : '#3a1a1a'}"><p class="text-xs text-gray-500 mb-2">📖</p><p class="mb-1"><span class="text-blue-400">Present Simple:</span> I <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v1}</strong><span class="tip">${nv}</span></span> every day.</p><p class="mb-1"><span class="text-yellow-400">Past Simple:</span> I <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v2}</strong><span class="tip">${nv2}</span></span> yesterday.</p><p><span class="text-purple-400">Present Perfect:</span> I have <span class="tooltip" onclick="this.classList.toggle('active')" style="cursor:pointer"><strong>${v.v3}</strong><span class="tip">${nv3}</span></span> before.</p></div>`; if (allOk) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.innerHTML = `✅ <strong>${v.v1} → ${v.v2} → ${v.v3}</strong> (${nv})` + tenseHtml; e.streak++; e.nextReview = new Date(Date.now() + 86400000 * Math.min(e.streak * 2, 14)).toISOString().split('T')[0]; if (e.streak >= 3) e.learned = true; saveVerbSRS(e); updateStreak(); document.getElementById('verbCheckBtn').classList.add('hidden'); setTimeout(() => { S.verbIdx++; showVerbCard(); }, 4500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = `❌ <strong>${v.v1} → <span style="color:${ok2 ? '#4ade80' : '#fbbf24'}">${v.v2}</span> → <span style="color:${ok3 ? '#4ade80' : '#fbbf24'}">${v.v3}</span></strong> (${nv})` + tenseHtml; e.streak = 0; e.wrong++; e.nextReview = new Date(Date.now() + 86400000).toISOString().split('T')[0]; e.learned = false; saveVerbSRS(e); } }
         // SETTINGS
-        function openSettings() { document.getElementById('apiKeyInput').value = getGeminiKey(); document.getElementById('groqKeyInput').value = getGroqKey(); renderLevelChips(); renderFocusList('focusListSettings', false); document.getElementById('settingsOverlay').classList.remove('hidden'); }
+        function openSettings() { renderLevelChips(); renderFocusList('focusListSettings', false); document.getElementById('settingsOverlay').classList.remove('hidden'); }
         function closeSettings() { document.getElementById('settingsOverlay').classList.add('hidden'); }
-        function saveApiKeys() { const gKey = document.getElementById('apiKeyInput').value.trim(); const qKey = document.getElementById('groqKeyInput').value.trim(); try { localStorage.setItem('gemini_api_key', gKey); localStorage.setItem('groq_api_key', qKey); } catch (e) { alert(L('API key kaydedilemedi!', '¡No se pudo guardar la clave API!')); return; } if (!gKey && !qKey) { alert(L('En az bir API key girin.', 'Introduce al menos una clave API.')); return; } closeSettings(); }
         // AI Pool Modal
         function openAIPoolModal() {
             renderAIPoolList();
@@ -1317,18 +1335,18 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
                 const native = s.turkish || s.spanish || '';
                 const langTag = s.lang === 'es' ? 'ES' : (s.lang === 'tr' ? 'TR' : '—');
                 const srcTag = s.source === 'weakpoint' ? L('🎯 Zayıf', '🎯 Débil') : '🤖 AI';
-                const date = s.createdAt ? new Date(s.createdAt).toLocaleDateString('tr-TR', {day:'2-digit',month:'short'}) : '';
+                const date = s.createdAt ? new Date(s.createdAt).toLocaleDateString(S.lang === 'es' ? 'es-ES' : 'tr-TR', {day:'2-digit',month:'short'}) : '';
                 return `<div class="rounded-xl p-3" style="background:#1a1a1a;border:1px solid #2a2a2a">
                     <div class="flex justify-between items-start gap-2 mb-1.5">
                         <div class="flex gap-1.5 flex-wrap text-xs">
-                            <span class="px-1.5 py-0.5 rounded" style="background:#1e2a3a;color:#60a5fa">${s.topic || '—'}</span>
+                            <span class="px-1.5 py-0.5 rounded" style="background:#1e2a3a;color:#60a5fa">${escapeHtml(s.topic || '—')}</span>
                             <span class="px-1.5 py-0.5 rounded" style="background:#0c1929;color:#93c5fd">${srcTag}</span>
                             <span class="px-1.5 py-0.5 rounded text-gray-500" style="background:#0f0f0f">${langTag}${date ? ' · ' + date : ''}</span>
                         </div>
                         <button onclick="deleteAISentence('${s.id}')" class="text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="${L('Sil','Eliminar')}" aria-label="${L('Sil','Eliminar')}">🗑️</button>
                     </div>
-                    <p class="text-sm text-gray-200">${s.english || ''}</p>
-                    ${native ? '<p class="text-xs text-gray-500 mt-1">' + native + '</p>' : ''}
+                    <p class="text-sm text-gray-200">${escapeHtml(s.english || '')}</p>
+                    ${native ? '<p class="text-xs text-gray-500 mt-1">' + escapeHtml(native) + '</p>' : ''}
                 </div>`;
             }).join('');
         }
@@ -1683,12 +1701,14 @@ Write nothing else.`;
                 const badge = document.getElementById('userBadge');
                 badge.classList.remove('hidden');
                 badge.classList.add('flex');
-                document.getElementById('userEmail').textContent = user.email.split('@')[0];
+                document.getElementById('userEmail').textContent = (user.email || '').split('@')[0];
+                if (user.emailVerified) hideVerifyBanner(); else showVerifyBanner();
                 _setSyncState('idle');
                 syncFromCloud();
             } else {
                 CLOUD_SYNC_ACTIVE = false;
                 CLOUD_UID = null;
+                hideVerifyBanner();
                 document.getElementById('loginBtn').classList.remove('hidden');
                 const badge = document.getElementById('userBadge');
                 badge.classList.add('hidden');
@@ -1875,14 +1895,63 @@ Write nothing else.`;
             const btn = document.getElementById('authActionBtn');
             btn.textContent = t('pleaseWait'); btn.disabled = true;
             try {
-                if (loginMode) { await auth.signInWithEmailAndPassword(email, pass); } 
-                else { await auth.createUserWithEmailAndPassword(email, pass); }
+                if (loginMode) { await auth.signInWithEmailAndPassword(email, pass); }
+                else {
+                    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                    // Kayıt sonrası doğrulama e-postası gönder (güvenlik + profesyonellik).
+                    try { await cred.user.sendEmailVerification(); } catch (ve) { console.warn('verify mail:', ve); }
+                }
                 closeAuthModal();
             } catch (e) { errBox.textContent = e.message; errBox.classList.remove('hidden'); }
             btn.textContent = loginMode ? t('authLogin') : t('authSignup'); btn.disabled = false;
         }
 
+        // === E-POSTA DOĞRULAMA (paylaşım öncesi güvenlik — soft gate) ===
+        // Kayıtta doğrulama maili gider; doğrulanmamışsa üstte kalıcı bant gösterilir.
+        // Testi bloklamaz (AI engellenmez); App Check asıl abuse korumasıdır.
+        function showVerifyBanner() {
+            let b = document.getElementById('verifyBanner');
+            if (!b) {
+                b = document.createElement('div');
+                b.id = 'verifyBanner';
+                // Akış içinde (#app en üstü) — sabit değil, sticky header'ı örtmez.
+                b.style.cssText = 'padding:9px 14px;margin:8px 0 4px;border-radius:10px;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#33260c;color:#fcd34d;border:1px solid #fcd34d';
+                const app = document.getElementById('app');
+                if (app) app.insertBefore(b, app.firstChild); else document.body.appendChild(b);
+            }
+            b.innerHTML = '<span>' + L('📧 E-postanı doğrula — gelen kutunu kontrol et.', '📧 Verifica tu correo — revisa tu bandeja.') + '</span>'
+                + '<button onclick="resendVerification()" style="background:#fcd34d;color:#33260c;border:none;border-radius:8px;padding:4px 10px;font-size:.76rem;font-weight:700;cursor:pointer">' + L('Tekrar gönder', 'Reenviar') + '</button>'
+                + '<button onclick="recheckVerification()" style="background:none;border:1px solid #fcd34d;color:#fcd34d;border-radius:8px;padding:4px 10px;font-size:.76rem;font-weight:700;cursor:pointer">' + L('Doğruladım', 'Ya verifiqué') + '</button>';
+            b.classList.remove('hidden');
+        }
+        function hideVerifyBanner() { const b = document.getElementById('verifyBanner'); if (b) b.classList.add('hidden'); }
+        let _verifyCooldown = false;
+        async function resendVerification() {
+            const u = auth.currentUser; if (!u) return;
+            if (_verifyCooldown) { alert(L('Lütfen biraz bekle, e-posta yolda.', 'Espera un momento, el correo va en camino.')); return; }
+            try {
+                await u.sendEmailVerification();
+                _verifyCooldown = true; setTimeout(() => { _verifyCooldown = false; }, 30000);
+                alert(L('✉️ Doğrulama e-postası gönderildi. Spam klasörünü de kontrol et.', '✉️ Correo de verificación enviado. Revisa también spam.'));
+            } catch (e) { alert(L('Gönderilemedi: ', 'No se pudo enviar: ') + (e.message || '')); }
+        }
+        async function recheckVerification() {
+            const u = auth.currentUser; if (!u) return;
+            try {
+                await u.reload();
+                if (auth.currentUser && auth.currentUser.emailVerified) { hideVerifyBanner(); alert(L('✅ E-posta doğrulandı, teşekkürler!', '✅ Correo verificado, ¡gracias!')); }
+                else { alert(L('Henüz doğrulanmamış. E-postandaki linke tıkladıktan sonra tekrar dene.', 'Aún no verificado. Haz clic en el enlace del correo e inténtalo de nuevo.')); }
+            } catch (e) {}
+        }
+        // Kullanıcı maildeki linke tıklayıp sekmeye dönünce otomatik kontrol et.
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && auth.currentUser && !auth.currentUser.emailVerified) {
+                auth.currentUser.reload().then(() => { if (auth.currentUser && auth.currentUser.emailVerified) hideVerifyBanner(); }).catch(() => {});
+            }
+        });
+
         async function logout() {
+            hideVerifyBanner();
             await auth.signOut();
             // Cihaz tercihlerini koru (API key'leri, dil) — sadece kullanıcıya özel veriyi sil
             const keepKeys = ['gemini_api_key', 'groq_api_key', 'app_lang'];
