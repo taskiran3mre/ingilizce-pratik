@@ -96,7 +96,7 @@
 > Kullanıcı birkaç hafta kendi kullanırken iki kritik ihtiyaç tespit etti. **Monetizasyondan ÖNCE** —
 > çekirdek öğrenme deneyimi hâlâ şekilleniyor; şekillenmeden fiyatlanamaz/kapılanamaz.
 - [x] **Müfredat tasarımı + Increment 1 "Bugün" motoru (`837c679`):** Kullanıcı "birleşik" modeli seçti (CURRICULUM.md). Increment 1 KURULDU: yeni "Bugün" ekranı (ilk tab + varsayılan ana ekran) → uyarlanır günlük plan (🔁 tekrar SRS-vakti + 🌱 yeni + 🎯 zayıf + 🔤 fiil), tek "Başla" butonu, 🔥 seri + günlük hedef (15 soru) çubuğu. Mevcut akışlar yeniden kullanıldı, yeni veri minimum (daily_log). "Görülmemiş≠tekrar" düzeltmesi Bugün+Tekrar'a uygulandı. İnline JS 0 hata. **Kullanıcı testinde.**
-- [ ] **Increment 2 — Seviye Yolu:** yerleştirme + sıralı kilitli konu yolu (✓/▶/🔒) + ustalaşma kapısı (%80) → mevcut konu = Bugün'ün "yeni" kaynağı. (CURRICULUM.md'de tasarlı.)
+- [x] **Increment 2 — Yol Haritası KURULDU (`19e6a76`):** Kullanıcı netleştirdi — istediği uzun-soluklu "öğretmen/rehber" ("hangi sırayla, ne zaman, nereye kadar"), günlük taktik değil. Yeni "📚 Yol Haritası" ekranı+tab: sıralı müfredat (önce fiiller→Faz 1-5), hedef=**TEMPO** (🐢/⚡/🔥 = 2/4/7 konu/hafta) → "~X haftada biter" + "Bu/Gelecek hafta", her adım ✓/▶/○ (SRS %80 ustalaşma), "kaldığın yer"=currentStep. Bugün ile bağ: "Yeni" bloğu mevcut müfredat adımından gelir + rota hatırlatma kartı. Soft guidance (hard-lock yok). İnline JS 0 hata.
 - [ ] **Sesli dinleme / TTS (YÜKSEK):** Cümleleri **Amerikan aksanı, SADECE İngilizce** dinleme. Web Speech API (`speechSynthesis`, en-US ses) — ücretsiz, PWA'da çalışır; native'de Capacitor TTS. Cümle kartlarına 🔊 butonu.
 
 ### Faz 4 — Monetizasyon + Store hazırlığı
