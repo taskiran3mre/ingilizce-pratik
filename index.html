@@ -1691,7 +1691,7 @@ Write nothing else.`;
         // === APP CHECK (uygulama bütünlüğü — script/curl abuse'unu durdurur) ===
         // reCAPTCHA v3 site key (public, paylaşılabilir). BOŞKEN App Check devre dışı → app kırılmaz.
         // Backend enforce KAPALIyken token eklenir ama zorunlu değildir (güvenli geçiş).
-        const APPCHECK_SITE_KEY = ''; // <-- reCAPTCHA v3 site key buraya gelecek
+        const APPCHECK_SITE_KEY = '6LcGQjctAAAAE8B78w_LnVsA5nb4agYUI7M3BCU'; // reCAPTCHA v3 (public)
         try {
             if (APPCHECK_SITE_KEY && firebase.appCheck) {
                 firebase.appCheck().activate(new firebase.appCheck.ReCaptchaV3Provider(APPCHECK_SITE_KEY), true);
