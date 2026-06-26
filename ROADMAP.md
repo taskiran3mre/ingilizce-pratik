@@ -71,7 +71,7 @@
 - [x] **Manuel uçtan-uca test GEÇTİ:** girişle Groq'tan geçerli cümle üretiyor; loglar `auth: VALID`, sağlayıcı hatası yok.
 - [x] **🛡️🧪 CANLI SALDIRGAN GÜVENLİK DENETİMİ GEÇTİ (ampirik, canlı proxy'ye):** Auth zorunlu (401), girdi sınırları (3–4000, kotadan önce), çıktı maliyet tavanı (1024 token kesiyor), temperature clamp, grading prompt-injection tutmadı (NO), model küfür/jailbreak'i REDDETTİ, **kota 30/gün tam 31.'de durdu**, **25 eşzamanlı yarış 30'u AŞMADI** (atomik tx). Çıktı HTML-escape'li (XSS yok), anahtar sunucuda. Test scriptleri scratchpad'de (abuse/quota/race-test.js).
 - [ ] **BULGU F1 (App Check'i ZORUNLU yapar):** signUp e-posta DOĞRULAMASIZ açık → hesap-çiftçiliği (N hesap × 30 bedava çağrı). Halka açılmadan App Check + e-posta doğrulama şart. (Kapalı testte sömürülemez; her hesap 30 ile sınırlı.)
-- [ ] **BULGU F2 (düşük, kabul):** proxy herhangi promptu kabul eder (genel-LLM kullanımı mümkün) ama 30/gün + auth ile sınırlı; içerik güvenliğini sağlayıcı (Gemini/Llama) filtreliyor — denetimde reddetti.
+- [x] **BULGU F2 ÖNLENDİ (`900dd58`, proaktif):** sunucuya konu-kısıtı sistem talimatı (Gemini systemInstruction + Groq system msg) → off-topic/genel-LLM istekleri reddediliyor. Doğrulandı: off-topic "şiir yaz" reddedildi, meşru JSON + YES/NO grading bozulmadı. (Üstüne 30/gün + auth + sağlayıcı içerik-filtresi katmanlı.)
 - [ ] **(KALAN HIGH — lansman kapısı, F1 ZORUNLU kıldı) App Check + e-posta doğrulama:** reCAPTCHA console + istemci SDK + `enforceAppCheck:true`;
   + **e-posta doğrulaması zorunlu** (hesap-çiftçiliğini kır) + Anonim girişi kapat. Native'de (Faz 4) Play Integrity/App Attest farklı sağlayıcı.
 - [ ] (kalan, P2) Node 20 deprecation → Node 22 (Eki 2026'dan önce); `firebase-functions@latest`
@@ -91,6 +91,12 @@
 - [ ] (kalan, P2) Firebase auth hata kodlarının lokalize map'i (e.message hâlâ İngilizce)
 - [ ] (ertelendi) Dile-duyarlı SRS anahtarı refactor — düşük gerçek etki, Faz 2 veri modeliyle birlikte
 - **Bitti tanımı:** ES kullanıcı çekirdek akışta baştan sona kendi dilinde ✅; havuz tutarlı ✅; temel a11y kısmen.
+
+### Faz 3.5 — Öğrenme derinliği (kullanıcı testi geri bildirimi, 2026-06-26)
+> Kullanıcı birkaç hafta kendi kullanırken iki kritik ihtiyaç tespit etti. **Monetizasyondan ÖNCE** —
+> çekirdek öğrenme deneyimi hâlâ şekilleniyor; şekillenmeden fiyatlanamaz/kapılanamaz.
+- [ ] **Müfredat / çalışma düzeni (YÜKSEK — kullanıcı için "çok önemli"):** Faz/konu bölümleri var ama "nereden başla, düzenli tekrarla ne yap" belirsiz. Kullanıcının asıl sorunu: düzen oturtamamak. Seviyeye göre önerilen müfredat akışı + günlük plan + SRS-tabanlı tekrar ritmi. **Tasarım önce (kullanıcı onayıyla), sonra implementasyon.**
+- [ ] **Sesli dinleme / TTS (YÜKSEK):** Cümleleri **Amerikan aksanı, SADECE İngilizce** dinleme. Web Speech API (`speechSynthesis`, en-US ses) — ücretsiz, PWA'da çalışır; native'de Capacitor TTS. Cümle kartlarına 🔊 butonu.
 
 ### Faz 4 — Monetizasyon + Store hazırlığı
 - [ ] IAP: RevenueCat (Apple+Google makbuz/entitlement tek çatı altında)
