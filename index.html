@@ -18,6 +18,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-check-compat.js"></script>
 
     <style>
         * { font-family: 'Inter', sans-serif }
@@ -1687,6 +1688,16 @@ Write nothing else.`;
             measurementId: "G-Z61XK57XPD"
         };
         firebase.initializeApp(firebaseConfig);
+        // === APP CHECK (uygulama bütünlüğü — script/curl abuse'unu durdurur) ===
+        // reCAPTCHA v3 site key (public, paylaşılabilir). BOŞKEN App Check devre dışı → app kırılmaz.
+        // Backend enforce KAPALIyken token eklenir ama zorunlu değildir (güvenli geçiş).
+        const APPCHECK_SITE_KEY = ''; // <-- reCAPTCHA v3 site key buraya gelecek
+        try {
+            if (APPCHECK_SITE_KEY && firebase.appCheck) {
+                firebase.appCheck().activate(new firebase.appCheck.ReCaptchaV3Provider(APPCHECK_SITE_KEY), true);
+                console.log('✅ App Check aktif');
+            }
+        } catch (e) { console.warn('App Check init:', e); }
         const db = firebase.firestore();
         const auth = firebase.auth();
         
