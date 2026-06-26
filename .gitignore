@@ -15,6 +15,9 @@ node_modules/
 dist/
 build/
 
+# Firebase deploy önbelleği (yerel)
+.firebase/
+
 # Capacitor / native kabuk
 # (.gitignore satır-içi yorum desteklemez — açıklamalar ayrı satırda)
 # www/ = üretilen web derleme çıktısı (scripts/copy-web.mjs)
