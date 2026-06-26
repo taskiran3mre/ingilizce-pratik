@@ -473,10 +473,21 @@
         const getGeminiKey = () => { try { return localStorage.getItem('gemini_api_key') || ''; } catch { return ''; } };
         const getGroqKey = () => { try { return localStorage.getItem('groq_api_key') || ''; } catch { return ''; } };
         const getApiKey = () => getGroqKey() || getGeminiKey();
-        // AI kullanılabilir mi? Giriş yapmış (sunucu proxy) VEYA kendi anahtarını girmiş (BYOK) ise evet.
-        const canUseAI = () => !!getApiKey() || (CLOUD_SYNC_ACTIVE && !!CLOUD_UID);
-        // AI için giriş gerekiyor (anahtar da yok) → engelleyici alert yerine giriş modalını aç.
-        function aiGateAlert() { try { openAuthModal(); } catch (e) {} }
+        // E-posta doğrulandı mı? (AI özelliklerinin kapısı — doğrulamaya gerçek anlam verir)
+        const isVerified = () => { try { return !!(auth.currentUser && auth.currentUser.emailVerified); } catch (e) { return false; } };
+        // AI kullanılabilir mi? Giriş yapmış + e-postası DOĞRULANMIŞ ise (veya legacy BYOK anahtarı varsa).
+        const canUseAI = () => !!getApiKey() || (CLOUD_SYNC_ACTIVE && !!CLOUD_UID && isVerified());
+        // AI engellendiğinde: giriş yoksa giriş modalı; giriş var ama doğrulanmamışsa doğrulama uyarısı.
+        function aiGateAlert() {
+            try {
+                if (!getApiKey() && CLOUD_SYNC_ACTIVE && CLOUD_UID && !isVerified()) {
+                    showVerifyBanner();
+                    alert(L('🔒 AI özelliklerini açmak için e-postanı doğrula.\n\nE-postandaki bağlantıya tıkla, sonra üstteki "Doğruladım"a bas.', '🔒 Verifica tu correo para desbloquear la IA.\n\nHaz clic en el enlace del correo y pulsa "Ya verifiqué" arriba.'));
+                    return;
+                }
+                openAuthModal();
+            } catch (e) {}
+        }
         // AI/dış metni innerHTML'e basmadan önce kaçışla (XSS koruması).
         function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
         function aiHtml(txt) { return escapeHtml(txt).replace(/\n/g, '<br>'); }   // kaçışlı + satır-kırmalı AI metni
@@ -1021,7 +1032,7 @@
         function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); const _spd2=document.getElementById('subTopicPickerDiv'); if(_spd2)_spd2.classList.add('hidden'); document.getElementById('questionCard').classList.add('hidden'); let _cd=document.getElementById('completionDiv'); if(!_cd){_cd=document.createElement('div');_cd.id='completionDiv'; const _qcr=document.getElementById('questionCard'); _qcr.parentNode.insertBefore(_cd,_qcr);} _cd.classList.remove('hidden'); _cd.innerHTML='<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">'+t('allDone')+'</p></div>'; ['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
         function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox', 'softCheckBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
         function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = topicShort(q.topic); document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = escapeHtml(showText); if (kws) kws.forEach(kw => { const kwNative = getKw(kw); if (!kwNative || !kwNative.trim()) return; const kwEsc = escapeHtml(kwNative); const rx = new RegExp(kwEsc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwEsc}</u><span class="tip">${escapeHtml(kw.en)}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered + (isReverse ? ' ' + speakBtn(q.english) : ''); if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${escapeHtml(getKw(k))}</span> = ${escapeHtml(k.en)}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
-        function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
+        function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); document.getElementById('skipBtn').classList.add('hidden'); /* AI cümlesi atlanamaz → çeviri kilidi delinmez */ }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
         function handleCorrect() { setAiGenLocked(false); S.ok++; if (S.q.id) updateSRS(S.q.id, true); updateStreak(); updateGlobalStats(true); const fb = document.getElementById('feedbackBox'), ft = document.getElementById('feedbackText'); fb.classList.remove('hidden'); ft.innerHTML = escapeHtml(t('correct')) + (S.dir === 'tr2en' ? ' ' + speakBtn(S.q.english) : ''); fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; ft.style.color = '#4ade80'; document.getElementById('correctAnswerBox').classList.add('hidden'); document.getElementById('apiLoading').classList.add('hidden'); document.getElementById('apiFeedback').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#16a34a';['wrongButtons', 'answerInput', 'checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.add('hidden')); if (canUseAI()) { document.getElementById('aiExtras').classList.remove('hidden'); document.getElementById('variationsBtn').classList.remove('hidden'); document.getElementById('teachMeBtn').classList.add('hidden'); } updateProgress(); setTimeout(() => { if (!document.getElementById('aiVariationsBox').classList.contains('hidden')) return; S.aiQ = null; nextQuestion(); }, 2000); }
@@ -1691,7 +1702,7 @@ Write nothing else.`;
         // === APP CHECK (uygulama bütünlüğü — script/curl abuse'unu durdurur) ===
         // reCAPTCHA v3 site key (public, paylaşılabilir). BOŞKEN App Check devre dışı → app kırılmaz.
         // Backend enforce KAPALIyken token eklenir ama zorunlu değildir (güvenli geçiş).
-        const APPCHECK_SITE_KEY = '6LcGQjctAAAAE8B78w_LnVsA5nb4agYUI7M3BCU'; // reCAPTCHA v3 (public)
+        const APPCHECK_SITE_KEY = ''; // reCAPTCHA v3 (public) — TAM anahtar bekleniyor (önceki 39 krk eksikti)
         try {
             if (APPCHECK_SITE_KEY && firebase.appCheck) {
                 firebase.appCheck().activate(new firebase.appCheck.ReCaptchaV3Provider(APPCHECK_SITE_KEY), true);
@@ -1930,7 +1941,7 @@ Write nothing else.`;
                 const app = document.getElementById('app');
                 if (app) app.insertBefore(b, app.firstChild); else document.body.appendChild(b);
             }
-            b.innerHTML = '<span>' + L('📧 E-postanı doğrula — gelen kutunu kontrol et.', '📧 Verifica tu correo — revisa tu bandeja.') + '</span>'
+            b.innerHTML = '<span>' + L('📧 AI\'yı açmak için e-postanı doğrula — gelen kutunu kontrol et.', '📧 Verifica tu correo para activar la IA — revisa tu bandeja.') + '</span>'
                 + '<button onclick="resendVerification()" style="background:#fcd34d;color:#33260c;border:none;border-radius:8px;padding:4px 10px;font-size:.76rem;font-weight:700;cursor:pointer">' + L('Tekrar gönder', 'Reenviar') + '</button>'
                 + '<button onclick="recheckVerification()" style="background:none;border:1px solid #fcd34d;color:#fcd34d;border-radius:8px;padding:4px 10px;font-size:.76rem;font-weight:700;cursor:pointer">' + L('Doğruladım', 'Ya verifiqué') + '</button>';
             b.classList.remove('hidden');
