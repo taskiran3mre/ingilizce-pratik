@@ -36,9 +36,19 @@ spacing, large tap targets, accessible contrast.
 UI labels are in TURKISH by default (a Spanish variant exists). Use the Turkish labels given below.
 Leave room for longer Spanish strings (designs must not break with ~30% longer text).
 
-# NAVIGATION (bottom tab bar)
-Tabs: "Bugün" (home/today), "Pratik" (practice), "Tekrar" (review), "Fiiller" (verbs),
-"Ekstra" (extra modes), "İstatistik" (stats). Settings gear and language toggle in the header.
+# NAVIGATION (bottom tab bar — EXACTLY 4 hubs, grouped by function)
+Tabs: "📅 Bugün" (today/home), "📚 Öğren" (curriculum/roadmap — all learning UNITS live here),
+"🎮 Modlar" (practice modes: mixed drill, review, verbs, conversation modes),
+"📊 İlerleme" (stats). Settings gear + language toggle in the header.
+CRITICAL IA RULE: do NOT place topic units or activity types as top-level tabs. Topic units live
+INSIDE "Öğren"; activity types live INSIDE "Modlar". The top bar shows ONLY these 4 hubs.
+
+# UNIT NAMING (curriculum units — use these, NOT "Faz 1/2")
+Ordered learning path inside "Öğren": 🔤 Temel (irregular verbs) → A1 · Temeller (nouns/pronouns/to be)
+→ A2 · Zamanlar (tenses) → A2–B1 · Yardımcı Fiiller (modals) → B1 · Bağlantı & Karşılaştırma
+(comparatives/conjunctions/prepositions) → B2 · İleri Yapılar (passive/conditionals/reported speech).
+Each unit shows mastery progress (✓ done · ▶ now · ○ upcoming) and the user can tap to study it.
+"Öğren" also offers a pace selector (🐢 Rahat / ⚡ Normal / 🔥 Yoğun) → weekly plan ("Bu hafta / Gelecek hafta").
 
 # SCREENS (design all of these)
 
