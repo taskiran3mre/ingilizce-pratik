@@ -103,11 +103,16 @@ async function callGroq(prompt, temperature, wantJson) {
 }
 
 exports.ai = onCall(
-  { secrets: [GEMINI_KEY, GROQ_KEY], timeoutSeconds: 30, memory: '256MiB' },
+  // enforceAppCheck: App Check token'ı OLMAYAN istek (curl/script, uygulama dışı) otomatik reddedilir.
+  { secrets: [GEMINI_KEY, GROQ_KEY], timeoutSeconds: 30, memory: '256MiB', enforceAppCheck: true },
   async (request) => {
     // 1) Kimlik doğrulama zorunlu
     const uid = request.auth && request.auth.uid;
     if (!uid) throw new HttpsError('unauthenticated', 'Giriş gerekli.');
+    // 1b) E-posta DOĞRULANMIŞ olmalı — sahte/doğrulanmamış hesap AI kullanamaz (maliyet/abuse).
+    if (!request.auth.token || request.auth.token.email_verified !== true) {
+      throw new HttpsError('permission-denied', 'AI için e-posta doğrulaması gerekli.');
+    }
 
     // 2) Girdi doğrulama
     const data = request.data || {};
