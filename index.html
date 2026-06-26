@@ -482,7 +482,7 @@
             try {
                 if (!getApiKey() && CLOUD_SYNC_ACTIVE && CLOUD_UID && !isVerified()) {
                     showVerifyBanner();
-                    alert(L('🔒 AI özelliklerini açmak için e-postanı doğrula.\n\nE-postandaki bağlantıya tıkla, sonra üstteki "Doğruladım"a bas.', '🔒 Verifica tu correo para desbloquear la IA.\n\nHaz clic en el enlace del correo y pulsa "Ya verifiqué" arriba.'));
+                    alert(L('🔒 AI özelliklerini açmak için e-postanı doğrula.\n\nE-postandaki bağlantıya tıkla, sonra üstteki "Doğruladım"a bas.\n\nMail gelmediyse: spam / "Promosyonlar" klasörüne bak veya banttan "Tekrar gönder"e bas.', '🔒 Verifica tu correo para desbloquear la IA.\n\nHaz clic en el enlace del correo y pulsa "Ya verifiqué" arriba.\n\nSi no llega: revisa spam / "Promociones" o pulsa "Reenviar".'));
                     return;
                 }
                 openAuthModal();
@@ -1919,13 +1919,18 @@ Write nothing else.`;
             const btn = document.getElementById('authActionBtn');
             btn.textContent = t('pleaseWait'); btn.disabled = true;
             try {
+                let justSignedUp = false;
                 if (loginMode) { await auth.signInWithEmailAndPassword(email, pass); }
                 else {
                     const cred = await auth.createUserWithEmailAndPassword(email, pass);
                     // Kayıt sonrası doğrulama e-postası gönder (güvenlik + profesyonellik).
                     try { await cred.user.sendEmailVerification(); } catch (ve) { console.warn('verify mail:', ve); }
+                    justSignedUp = true;
                 }
                 closeAuthModal();
+                if (justSignedUp) {
+                    alert(L('✅ Hesap oluşturuldu!\n\n📧 AI özelliklerini açmak için doğrulama e-postanı onayla.\n\nGelen kutunu VE spam / "Promosyonlar" klasörünü kontrol et. Gelmezse üstteki sarı banttan "Tekrar gönder"e bas.', '✅ ¡Cuenta creada!\n\n📧 Verifica tu correo para activar la IA.\n\nRevisa tu bandeja Y la carpeta de spam / "Promociones". Si no llega, pulsa "Reenviar" en la barra amarilla de arriba.'));
+                }
             } catch (e) { errBox.textContent = e.message; errBox.classList.remove('hidden'); }
             btn.textContent = loginMode ? t('authLogin') : t('authSignup'); btn.disabled = false;
         }
