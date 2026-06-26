@@ -95,7 +95,8 @@
 ### Faz 3.5 — Öğrenme derinliği (kullanıcı testi geri bildirimi, 2026-06-26)
 > Kullanıcı birkaç hafta kendi kullanırken iki kritik ihtiyaç tespit etti. **Monetizasyondan ÖNCE** —
 > çekirdek öğrenme deneyimi hâlâ şekilleniyor; şekillenmeden fiyatlanamaz/kapılanamaz.
-- [ ] **Müfredat / çalışma düzeni (YÜKSEK — kullanıcı için "çok önemli"):** Faz/konu bölümleri var ama "nereden başla, düzenli tekrarla ne yap" belirsiz. Kullanıcının asıl sorunu: düzen oturtamamak. Seviyeye göre önerilen müfredat akışı + günlük plan + SRS-tabanlı tekrar ritmi. **Tasarım önce (kullanıcı onayıyla), sonra implementasyon.**
+- [x] **Müfredat tasarımı + Increment 1 "Bugün" motoru (`837c679`):** Kullanıcı "birleşik" modeli seçti (CURRICULUM.md). Increment 1 KURULDU: yeni "Bugün" ekranı (ilk tab + varsayılan ana ekran) → uyarlanır günlük plan (🔁 tekrar SRS-vakti + 🌱 yeni + 🎯 zayıf + 🔤 fiil), tek "Başla" butonu, 🔥 seri + günlük hedef (15 soru) çubuğu. Mevcut akışlar yeniden kullanıldı, yeni veri minimum (daily_log). "Görülmemiş≠tekrar" düzeltmesi Bugün+Tekrar'a uygulandı. İnline JS 0 hata. **Kullanıcı testinde.**
+- [ ] **Increment 2 — Seviye Yolu:** yerleştirme + sıralı kilitli konu yolu (✓/▶/🔒) + ustalaşma kapısı (%80) → mevcut konu = Bugün'ün "yeni" kaynağı. (CURRICULUM.md'de tasarlı.)
 - [ ] **Sesli dinleme / TTS (YÜKSEK):** Cümleleri **Amerikan aksanı, SADECE İngilizce** dinleme. Web Speech API (`speechSynthesis`, en-US ses) — ücretsiz, PWA'da çalışır; native'de Capacitor TTS. Cümle kartlarına 🔊 butonu.
 
 ### Faz 4 — Monetizasyon + Store hazırlığı
