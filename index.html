@@ -1008,9 +1008,9 @@
                 return;
             }
             const td = today();
-            const due = pool.filter(s => getSRS(s.id).nextReview <= td);
-            const rest = pool.filter(s => getSRS(s.id).nextReview > td);
-            shuffle(rest);
+            const due = pool.filter(s => getSRS(s.id).nextReview <= td);   // vakti gelmiş VEYA hiç çalışılmamış
+            const rest = pool.filter(s => getSRS(s.id).nextReview > td);   // ileri tarihe planlı
+            shuffle(due); shuffle(rest);   // due'yu da karıştır → her seferinde aynı "ilk cümle" gelmesin (çeşitlilik)
             S.queue = [...due, ...rest];
             S.done = 0; S.ok = 0; S.nok = 0;
             showScreen('practiceScreen');
@@ -1968,22 +1968,27 @@ Write nothing else.`;
             const u = auth.currentUser; if (!u) return;
             try {
                 await u.reload();
-                if (auth.currentUser && auth.currentUser.emailVerified) { hideVerifyBanner(); alert(L('✅ E-posta doğrulandı, teşekkürler!', '✅ Correo verificado, ¡gracias!')); }
+                await u.getIdToken(true);   // token'ı ZORLA tazele → email_verified hem istemciye hem SUNUCUYA yansısın (AI hemen açılsın)
+                if (auth.currentUser && auth.currentUser.emailVerified) { hideVerifyBanner(); alert(L('✅ E-posta doğrulandı! AI özellikleri açıldı.', '✅ ¡Correo verificado! Funciones de IA activadas.')); }
                 else { alert(L('Henüz doğrulanmamış. E-postandaki linke tıkladıktan sonra tekrar dene.', 'Aún no verificado. Haz clic en el enlace del correo e inténtalo de nuevo.')); }
             } catch (e) {}
         }
-        // Kullanıcı maildeki linke tıklayıp sekmeye dönünce otomatik kontrol et.
+        // Kullanıcı maildeki linke tıklayıp sekmeye dönünce otomatik kontrol et (token'ı tazeleyerek).
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && auth.currentUser && !auth.currentUser.emailVerified) {
-                auth.currentUser.reload().then(() => { if (auth.currentUser && auth.currentUser.emailVerified) hideVerifyBanner(); }).catch(() => {});
+                auth.currentUser.reload()
+                    .then(() => auth.currentUser.getIdToken(true))
+                    .then(() => { if (auth.currentUser && auth.currentUser.emailVerified) hideVerifyBanner(); })
+                    .catch(() => {});
             }
         });
 
         async function logout() {
             hideVerifyBanner();
             await auth.signOut();
-            // Cihaz tercihlerini koru (API key'leri, dil) — sadece kullanıcıya özel veriyi sil
-            const keepKeys = ['gemini_api_key', 'groq_api_key', 'app_lang'];
+            // Cihaz tercihlerini koru (dil, onboarding, odak, tempo) — sadece kullanıcıya özel ilerlemeyi sil.
+            // onboarding_done + user_focus korunmazsa her çıkışta dil/konu seçimi tekrar açılır (bug).
+            const keepKeys = ['gemini_api_key', 'groq_api_key', 'app_lang', 'onboarding_done', 'user_focus', 'curriculum_pace'];
             const preserved = {};
             keepKeys.forEach(k => { const v = localStorage.getItem(k); if (v !== null) preserved[k] = v; });
             localStorage.clear();
