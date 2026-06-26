@@ -1,0 +1,8 @@
+{
+  "appId": "com.enpratik.app",
+  "appName": "İngilizce Pratik",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

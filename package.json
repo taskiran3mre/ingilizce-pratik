@@ -1,0 +1,23 @@
+{
+  "name": "en-pratik",
+  "version": "1.0.0",
+  "private": true,
+  "description": "İngilizce/İspanyolca → İngilizce öğrenme uygulaması — PWA çekirdeği + Capacitor native kabuk (Android/iOS).",
+  "type": "module",
+  "scripts": {
+    "build:web": "node scripts/copy-web.mjs",
+    "cap:sync": "npm run build:web && cap sync",
+    "cap:add:android": "npm run build:web && cap add android",
+    "cap:add:ios": "npm run build:web && cap add ios",
+    "cap:open:android": "cap open android",
+    "cap:open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/ios": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}
