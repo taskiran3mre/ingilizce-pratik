@@ -102,7 +102,10 @@
 
 ### Faz 4 — Monetizasyon + Store hazırlığı
 - [ ] IAP: RevenueCat (Apple+Google makbuz/entitlement tek çatı altında)
-- [ ] Ücretsiz/premium özellik kapısı (kota + canlı AI)
+- [ ] Ücretsiz/premium özellik kapısı (freemium kaldıraçları): ücretsizdeki kısıtlar = premium açılışları.
+  - 🆓 Ücretsiz: 30/gün kota · "önce çevir" üretim kilidi · cihaz sesi (Web Speech)
+  - 💎 Premium: daha yüksek/sınırsız kota · **belli sayıda "geç" hakkı** (üretim kilidini atlama) · **premium neural ses** (bulut TTS — Yol B) · (ileride) reklamsız vb.
+  - Not: bu kısıtlar zaten kuruldu (kota+kilit+cihaz sesi) → premium sadece "gevşetir". Mimari hazır.
 - [x] Native kabuk **iskeleti** (Capacitor 6): package.json + capacitor.config + `www/` copy script + NATIVE.md runbook — `13e3286`. Kök yapı korundu (www/ ayrı derleme çıktısı). Doğrulandı: npm install OK, cap CLI 6.2.1.
 - [ ] Native kabuk **derleme**: `npx cap add android/ios` + Android Studio/Xcode'da build (build makinesi gerekir: JDK17+, SDK; iOS=Mac)
 - [ ] App Check (reCAPTCHA) + e-posta doğrulama (index.html:1513-1527, 1359-1370)
