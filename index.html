@@ -1706,9 +1706,11 @@ Write nothing else.`;
         try {
             if (APPCHECK_SITE_KEY && firebase.appCheck) {
                 firebase.appCheck().activate(new firebase.appCheck.ReCaptchaV3Provider(APPCHECK_SITE_KEY), true);
-                console.log('✅ App Check aktif');
+                console.log('✅ App Check aktif (key len=' + APPCHECK_SITE_KEY.length + ')');
+            } else {
+                console.log('ℹ️ App Check pasif — key boş veya SDK yüklenmedi (firebase.appCheck=' + (!!firebase.appCheck) + ')');
             }
-        } catch (e) { console.warn('App Check init:', e); }
+        } catch (e) { console.error('❌ App Check init hatası:', e); }
         const db = firebase.firestore();
         const auth = firebase.auth();
         
