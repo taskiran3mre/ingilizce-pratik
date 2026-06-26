@@ -3,13 +3,15 @@
 > Tek doğru kaynak. Karar/ilerleme değiştikçe burası güncellenir.
 > Roller: ⚖️ Hukuk · 🔬 Ar-Ge · 🏗️ CTO · 📈 Pazarlama · 🛡️ Veri Güvenliği · 🧪 Test
 
-## 📍 KALDIĞIMIZ YER (2026-06-23)
+## 📍 KALDIĞIMIZ YER (2026-06-26)
 - **Tamamlanan:** Faz 0 (AI güvenilirlik), Faz 1 (senkron dayanıklılığı), Faz 3 (tüm ES i18n + UX, canlı QA'lı), **Faz 2 backend + istemci DEPLOY EDİLDİ & CANLI**. Hepsi `main`'e commit'li.
 - **Faz 2 canlı altyapı:** Cloud Function `ai` (us-central1) · secret `GEMINI_KEY` (Secret Manager) · kota 30/gün (`usage/{uid}`) · Blaze + $10/ay bütçe · temizlik politikası 3 gün. firebase CLI girişi: **taskiran3mre@gmail.com**. Proje: **english-app-b012f** (760623606825).
 - **✅ PROXY DOĞRULANDI (loglarla):** Fonksiyon logları `auth: VALID` + `Callable request verification passed` gösterdi → anahtarsız+girişle çağrı sunucuya ulaşıyor, kimlik doğrulanıyor, anahtar sunucuda. Mimari testi GEÇTİ. Tek "hata" `Gemini HTTP 429` = Gemini **ücretsiz katman** kotası dar (~250/gün toplam, $0 harcama; tavan dolunca durur). Kod 429'u zaten zarif yönetiyor + kotayı iade ediyor.
 - **✅ Groq YEDEK eklendi + DEPLOY EDİLDİ (`0ff340d`):** Sunucu proxy artık çift-sağlayıcı. `PRIMARY` sabiti sırayı belirler — **test boyunca `'groq'`** (ücretsiz, bol kota, Gemini free kotasını korur), diğeri her durumda yedek. 429/5xx/ağ/boş'ta otomatik geçiş. Kota-bypass koruması korundu (iade SADECE hiçbir sağlayıcı HTTP 200 dönmediyse). `GROQ_KEY` Secret Manager'da. **Lansman: `PRIMARY='gemini'` (tek satır).** Groq modeli: `llama-3.3-70b-versatile`.
 - **⏳ ŞU AN:** Manuel uçtan-uca test (localhost:8088): giriş yap → 🤖 → Groq'tan cümle gelmeli. Ben loglardan sağlayıcıyı doğrularım.
-- **SIRADAKİ (test geçerse):** Faz 2 kapanır. Tek kalan HIGH = **App Check** (lansman kapısı). Sonra Faz 4 (ödeme/IAP, Capacitor native kabuk, 1 MB alt-koleksiyon migration'ı).
+- **Faz 2 KAPANDI** (proxy doğrulandı + güvenlik denetimi geçti), **Faz 3 KAPANDI** (i18n wave-5, ES tam).
+- **Faz 4 SÜRÜYOR — Capacitor native iskeleti KURULDU (`13e3286`):** package.json + capacitor.config (appId placeholder!) + `www/` copy script (test edildi) + NATIVE.md runbook. npm install OK (cap CLI 6.2.1). Native proje üretimi/derleme build makinesinde (JDK17+, Android Studio; iOS=Mac).
+- **SIRADAKİ (Faz 4):** monetizasyon mimarisi (RevenueCat/IAP + freemium kapısı) · hukuki metinler (ToS/KVKK/gizlilik) · appId kesinleştir. **App Check + e-posta doğrulama = EN SON lansman kapısı (F1 zorunlu kıldı).**
 - **Açık işler:** GitHub'a push YOK (yerel, remote yok; sır taraması temiz — tek "anahtar" public Firebase web key; `gh` hazır). Yerel test sunucusu: `C:\Users\ETaskiran\AppData\Local\Temp\enpratik_devserver.js` → `node` ile çalıştır, localhost:8088.
 - **i18n (devam ediyor):** 2-ajanlı kapsamlı denetim ES modunda **53 TR sızıntısı** buldu. Yüksek-görünürlük olanlar düzeltildi (`f68387b` wave-3 statik HTML + altyapı: `L(tr,es)` helper + `data-i18n-title`; `c0de7c1` wave-4 dinamik: alert'ler, banner'lar, filtre-boş, konu özeti, getAIExample). **KALAN ~25 düşük-trafik sızıntı** (audit çıktısında satır satır belgeli): batch üretim modalı (1067-1093), teach/variations etiketleri (1098/1100), checkRev review geri bildirimi (1113), istatistik zayıf-alan raporu (1116), havuz "🎯 Zayıf"/"Sil" (1146/1155), yaratıcı mod iç metinleri (1289-1366) + CREATIVE_DATA ES hint'leri (veri değişikliği gerek), alt-konu seçici (690-702), sync-dot tooltip'leri (1612). **wave-5 ile BİTİRİLDİ (`7a671ec`):** tümü `L()`/koşul/`data-i18n` ile iki-dilli — batch modal, teach/variations, checkRev, istatistik zayıf-alan etiketleri, havuz, alt-konu seçici, sync-dot tooltip'leri; **yaratıcı mod geri bildirim prompt'ları dil-duyarlı + CREATIVE_DATA ipuçları iki-dilli (`hintEs`)**. Inline JS derleme 0 hata. **ES ürünü artık çekirdek+ikincil+ekstra modlarda baştan sona kendi dilinde.**
 - **Güvenlik notu:** Sunucu Gemini anahtarı SADECE Secret Manager'da — koda/git'e/sohbete asla girmedi.
@@ -93,7 +95,8 @@
 ### Faz 4 — Monetizasyon + Store hazırlığı
 - [ ] IAP: RevenueCat (Apple+Google makbuz/entitlement tek çatı altında)
 - [ ] Ücretsiz/premium özellik kapısı (kota + canlı AI)
-- [ ] Native kabuk: Capacitor (mevcut PWA'yı sarar, native IAP erişimi)
+- [x] Native kabuk **iskeleti** (Capacitor 6): package.json + capacitor.config + `www/` copy script + NATIVE.md runbook — `13e3286`. Kök yapı korundu (www/ ayrı derleme çıktısı). Doğrulandı: npm install OK, cap CLI 6.2.1.
+- [ ] Native kabuk **derleme**: `npx cap add android/ios` + Android Studio/Xcode'da build (build makinesi gerekir: JDK17+, SDK; iOS=Mac)
 - [ ] App Check (reCAPTCHA) + e-posta doğrulama (index.html:1513-1527, 1359-1370)
 - [ ] ⚖️ ToS + Kabul Edilebilir Kullanım + KVKK aydınlatma + Gizlilik (lansman öncesi hukukçu kontrolü)
 - [ ] 📈 Store görselleri/ASO (TR + ES), ikon/manifest cila (manifest.json: `id`, maskable ikon)
