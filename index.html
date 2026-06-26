@@ -769,7 +769,6 @@
                 html += '<div style="display:flex;gap:8px">';
                 html += '<button onclick="buildQueue(\'' + safe + '\')" style="flex:1;text-align:left;padding:12px 16px;border-radius:12px;font-weight:500;font-size:.875rem;background:#1a1a1a;border:1px solid #2a2a2a;color:#e5e5e5;cursor:pointer">' + short + '</button>';
                 html += '<button onclick="showTopicSummary(\'' + safe + '\')" style="padding:12px 16px;border-radius:12px;font-size:.875rem;background:#1a1a1a;border:1px solid #1e3a5f;color:#60a5fa;cursor:pointer" title="' + L('Konu Özeti', 'Resumen del tema') + '">📖</button>';
-                html += '<button onclick="generateBatchForTopic(\'' + safe + '\', 10)" style="padding:12px 16px;border-radius:12px;font-size:.875rem;background:#0c2a1e;border:1px solid #166534;color:#4ade80;cursor:pointer" title="' + L('Bu konuya 10 AI cümlesi ekle', 'Añade 10 frases de IA a este tema') + '">🌱</button>';
                 html += '</div>';
             });
             html += '</div></div>';
@@ -860,7 +859,6 @@
         function topicShort(topic) { return topic && topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic; }
         function stepDisplay(st) { return st.type === 'verbs' ? st.label : (phaseName(_phaseNum(st.key)) + ' — ' + topicShort(st.key)); }
         function topicSummaryByIndex(i) { const st = buildSyllabus()[i]; if (st && st.type === 'topic') showTopicSummary(st.key); }
-        function generateByIndex(i) { const st = buildSyllabus()[i]; if (st && st.type === 'topic') generateBatchForTopic(st.key, 10); }
         // Modlar hub'ı: aktivite türleri ("nasıl çalışacağın")
         function showModes() { showScreen('modesScreen'); renderModes(); }
         function renderModes() {
@@ -949,7 +947,6 @@
                 const name = st.type === 'verbs' ? st.label : topicShort(st.key);
                 const tools = st.type === 'topic'
                     ? '<button onclick="event.stopPropagation();topicSummaryByIndex(' + i + ')" class="px-2 py-1 rounded-lg text-xs flex-shrink-0" style="background:#1a1a1a;border:1px solid #1e3a5f;color:#60a5fa" title="' + L('Konu Özeti', 'Resumen') + '">📖</button>'
-                        + '<button onclick="event.stopPropagation();generateByIndex(' + i + ')" class="px-2 py-1 rounded-lg text-xs flex-shrink-0 ml-1" style="background:#0c2a1e;border:1px solid #166534;color:#4ade80" title="' + L('10 AI cümlesi ekle', 'Añadir 10 frases IA') + '">🌱</button>'
                     : '';
                 listHtml += '<div onclick="studyStepByIndex(' + i + ')" class="rounded-xl p-3 mb-2 flex items-center justify-between gap-2" style="background:#161616;border:1px solid ' + (isCur ? '#3B82F6' : '#2a2a2a') + ';cursor:pointer">'
                     + '<div class="flex items-center gap-3 min-w-0"><span style="color:' + color + ';font-size:1.1rem;width:1.2rem;text-align:center;flex-shrink:0">' + icon + '</span>'
@@ -1268,97 +1265,6 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme
             try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
             resetUI(); showAIQuestion(S.aiQ); setAiGenLocked(true);
-        }
-        // === BATCH AI GENERATION (per topic) ===
-        let _batchCancelled = false;
-        async function generateBatchForTopic(topic, count) {
-            if (!canUseAI()) { aiGateAlert(); return; }
-            count = count || 10;
-            _batchCancelled = false;
-            _showBatchModal(topic, count);
-            const grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
-            const isES = S.lang === 'es';
-            let generated = 0;
-            let failed = 0;
-            const existingEnglish = new Set(getCurSentences().map(s => (s.english || '').toLowerCase().trim()));
-            const recentSentences = []; // bu turda üretilenler — prompt'a "bunları tekrarlama" diye gider
-            for (let i = 0; i < count; i++) {
-                if (_batchCancelled) break;
-                _updateBatchProgress(generated, count, 'Üretiliyor...');
-                const prompt = buildSentenceGenPrompt(grammarTopic, { avoid: recentSentences.slice(-5) });
-                try {
-                    const v = await genValidatedSentence(prompt);
-                    if (!v) { failed++; continue; }
-                    // Tekrar eden cümleleri atla
-                    if (existingEnglish.has(v.english.toLowerCase())) { failed++; continue; }
-                    existingEnglish.add(v.english.toLowerCase());
-                    recentSentences.push(v.english);
-                    const sentence = {
-                        topic,
-                        level: 'AI',
-                        turkish: isES ? '' : v.native,
-                        spanish: isES ? v.native : '',
-                        english: v.english,
-                        keywords: v.keywords,
-                        id: 'ai_batch_' + Date.now() + '_' + i,
-                        lang: S.lang,
-                        source: 'batch',
-                        focus: getUserFocus().id,
-                        createdAt: Date.now()
-                    };
-                    const ca = getAISentences();
-                    ca.push(sentence);
-                    LS.set('custom_sentences', ca);
-                    generated++;
-                    updateAIPoolUI();
-                    _updateBatchProgress(generated, count, '');
-                } catch (e) {
-                    console.error('Batch err:', e);
-                    failed++;
-                }
-            }
-            _showBatchDone(generated, failed, _batchCancelled);
-        }
-
-        function _showBatchModal(topic, total) {
-            let m = document.getElementById('batchModal');
-            if (!m) {
-                m = document.createElement('div');
-                m.id = 'batchModal';
-                m.style.cssText = 'position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.85)';
-                document.body.appendChild(m);
-            }
-            m.style.display = 'flex';
-            m.innerHTML = `<div class="rounded-2xl p-6 w-full max-w-sm text-center" style="background:#161616;border:1px solid #2a2a2a">
-                <p class="text-3xl mb-2">🌱</p>
-                <p class="font-bold text-base mb-1">${L('Cümleler üretiliyor', 'Generando oraciones')}</p>
-                <p class="text-xs text-gray-500 mb-4 truncate">${topic}</p>
-                <div class="rounded-full h-2 mb-2" style="background:#0f0f0f"><div id="batchBar" class="h-2 rounded-full transition-all" style="background:#3B82F6;width:0%"></div></div>
-                <p id="batchText" class="text-sm text-gray-300 mb-1">0 / ${total}</p>
-                <p id="batchSub" class="text-xs text-gray-500 mb-4">${L('Her cümle için ~3 saniye (rate limit)', '~3 s por oración (rate limit)')}</p>
-                <button onclick="_batchCancelled=true" class="px-4 py-2 rounded-xl text-sm font-medium" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${L('İptal', 'Cancelar')}</button>
-            </div>`;
-        }
-        function _updateBatchProgress(done, total, sub) {
-            const bar = document.getElementById('batchBar');
-            const text = document.getElementById('batchText');
-            const subEl = document.getElementById('batchSub');
-            if (bar) bar.style.width = Math.round(done / total * 100) + '%';
-            if (text) text.textContent = `${done} / ${total}`;
-            if (subEl && sub) subEl.textContent = sub;
-        }
-        function _showBatchDone(generated, failed, cancelled) {
-            const m = document.getElementById('batchModal');
-            if (!m) return;
-            const status = cancelled ? L('⏸️ İptal edildi', '⏸️ Cancelado') : (failed > 0 ? L('✅ Tamamlandı (kısmen)', '✅ Completado (parcial)') : L('✅ Tamamlandı', '✅ Completado'));
-            const failMsg = failed > 0 ? `<p class="text-xs text-gray-500 mt-1">${L(failed + ' cümle üretilemedi veya tekrar eden çıktı', failed + ' oraciones no se generaron o se repitieron')}</p>` : '';
-            m.innerHTML = `<div class="rounded-2xl p-6 w-full max-w-sm text-center" style="background:#161616;border:1px solid #2a2a2a">
-                <p class="text-3xl mb-2">${cancelled ? '⏸️' : '✅'}</p>
-                <p class="font-bold text-base mb-1">${status}</p>
-                <p class="text-sm text-gray-300 mb-1">${L(generated + ' yeni cümle havuza eklendi', generated + ' oraciones nuevas añadidas')}</p>
-                ${failMsg}
-                <button onclick="document.getElementById('batchModal').remove()" class="w-full py-2.5 rounded-xl text-sm font-semibold mt-4" style="background:#3B82F6;color:white">${L('Tamam', 'Hecho')}</button>
-            </div>`;
         }
 
         async function askTeachMe() {
