@@ -105,6 +105,13 @@
             <div id="syllabusList"></div>
         </div>
 
+        <!-- Modlar / Modes Screen -->
+        <div id="modesScreen" class="hidden fade-in">
+            <h2 class="text-lg font-bold text-gray-100 mb-1" id="modesTitle">🎮 Pratik Modları</h2>
+            <p class="text-xs text-gray-500 mb-4" id="modesSubtitle"></p>
+            <div id="modesList"></div>
+        </div>
+
         <!-- Practice Screen -->
         <div id="practiceScreen">
             <div class="flex items-center justify-between mb-4 px-1" id="directionToggle">
@@ -439,7 +446,7 @@
 
         // === STATE ===
         let S = { tab: 'all', q: null, queue: [], done: 0, ok: 0, nok: 0, answered: false, rQueue: [], rIdx: 0, rSel: [], filterTag: null, aiQ: null, verbIdx: 0, verbList: [], dir: 'tr2en', lang: localStorage.getItem('app_lang') || 'tr' };
-        function switchLang() { S.lang = S.lang === 'tr' ? 'es' : 'tr'; localStorage.setItem('app_lang', S.lang); S.dir = 'tr2en'; updateLangUI(); updateStreakUI(); updateAIPoolUI(); renderTabs(); selectTab('all'); }
+        function switchLang() { S.lang = S.lang === 'tr' ? 'es' : 'tr'; localStorage.setItem('app_lang', S.lang); S.dir = 'tr2en'; updateLangUI(); updateStreakUI(); updateAIPoolUI(); renderTabs(); selectTab('today'); }
         function updateLangUI() {
             const btn = document.getElementById('langToggle'); btn.textContent = S.lang === 'tr' ? 'ES' : 'TR'; btn.style.background = S.lang === 'es' ? '#1e3a1a' : '#1a1a1a'; btn.style.color = S.lang === 'es' ? '#4ade80' : '#e5e5e5';
             document.querySelector('#app .text-xl').textContent = t('appTitle');
@@ -689,12 +696,14 @@
         // TABS
         function renderTabs() { 
             const topics = getCurTopics(); 
-            const tabs = ['today', 'roadmap', 'all', ...topics, 'review', 'verbs', 'creative'];
+            const tabs = ['today', 'roadmap', 'modes', 'stats'];
             
             document.getElementById('tabContainer').innerHTML = tabs.map(tb => {
                 let label = tb;
                 if (tb === 'today') label = S.lang === 'es' ? '📅 Hoy' : '📅 Bugün';
-                if (tb === 'roadmap') label = S.lang === 'es' ? '📚 Ruta' : '📚 Yol Haritası';
+                if (tb === 'roadmap') label = S.lang === 'es' ? '📚 Aprender' : '📚 Öğren';
+                if (tb === 'modes') label = S.lang === 'es' ? '🎮 Modos' : '🎮 Modlar';
+                if (tb === 'stats') label = S.lang === 'es' ? '📊 Progreso' : '📊 İlerleme';
                 if (tb === 'all') label = S.lang === 'es' ? '🎲 Aleatorio' : '🎲 Karışık';
                 if (tb === 'review') label = S.lang === 'es' ? '⏰ Repaso' : '⏰ Tekrar';
                 if (tb === 'verbs') label = S.lang === 'es' ? '📝 Verbos' : '📝 Fiiller';
@@ -702,7 +711,7 @@
                 return `<button class="tab-btn flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all" data-tab="${tb}" onclick="selectTab('${tb}')">${label}</button>`;
             }).join(''); 
         }
-        function selectTab(tb) { S.tab = tb; S.subtab = null; S.aiQ = null; document.querySelectorAll('.tab-btn').forEach(b => { const a = b.dataset.tab === tb; b.style.background = a ? '#3B82F6' : '#161616'; b.style.color = a ? 'white' : '#9ca3af'; b.style.border = a ? 'none' : '1px solid #2a2a2a'; }); hideAll(); if (tb === 'today') showToday(); else if (tb === 'roadmap') showRoadmap(); else if (tb === 'review') showReview(); else if (tb === 'stats') showStats(); else if (tb === 'verbs') showVerbs(); else if (tb === 'creative') showCreative(); else if (tb === 'all') buildQueue('all'); else showSubTopicPicker(tb); }
+        function selectTab(tb) { S.tab = tb; S.subtab = null; S.aiQ = null; const _hub = ({ all: 'modes', review: 'modes', verbs: 'modes', creative: 'modes' })[tb] || tb; document.querySelectorAll('.tab-btn').forEach(b => { const a = b.dataset.tab === _hub; b.style.background = a ? '#3B82F6' : '#161616'; b.style.color = a ? 'white' : '#9ca3af'; b.style.border = a ? 'none' : '1px solid #2a2a2a'; }); hideAll(); if (tb === 'today') showToday(); else if (tb === 'roadmap') showRoadmap(); else if (tb === 'modes') showModes(); else if (tb === 'review') showReview(); else if (tb === 'stats') showStats(); else if (tb === 'verbs') showVerbs(); else if (tb === 'creative') showCreative(); else if (tb === 'all') buildQueue('all'); else showSubTopicPicker(tb); }
         function showSubTopicPicker(main) {
             const SS = getCurSentences();
             const subs = [...new Set(SS.filter(s => s.topic.startsWith(main + ':')).map(s => s.topic))].sort();
@@ -733,7 +742,7 @@
             pd.innerHTML = html;
             document.getElementById('progressText').textContent = subs.length + L(' konu', ' temas');
         }
-        function hideAll() { ['todayScreen', 'roadmapScreen', 'practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen', 'creativeScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
+        function hideAll() { ['todayScreen', 'roadmapScreen', 'modesScreen', 'practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen', 'creativeScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
         function showScreen(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
         // === TODAY / GÜNÜN PLANI (Faz 3.5) ===
         const DAILY_GOAL = 15;   // günlük hedef (cevaplanan soru); Bugün ilerleme çubuğu bununla.
@@ -790,7 +799,7 @@
                 true, "selectTab('verbs')", false));
             const cur = currentStep();
             const reminder = '<div onclick="selectTab(\'roadmap\')" class="rounded-2xl p-3 mb-3 flex items-center justify-between transition hover:opacity-90" style="background:#0c1929;border:1px solid #1e3a5f;cursor:pointer">'
-                + '<div class="flex items-center gap-2"><span style="font-size:1.15rem">📚</span><div><p class="text-xs text-gray-500">' + L('Yol haritası — sıradaki', 'Ruta — siguiente') + '</p><p class="text-sm font-semibold text-blue-300">' + escapeHtml(cur.label) + '</p></div></div>'
+                + '<div class="flex items-center gap-2"><span style="font-size:1.15rem">📚</span><div><p class="text-xs text-gray-500">' + L('Yol haritası — sıradaki', 'Ruta — siguiente') + '</p><p class="text-sm font-semibold text-blue-300">' + escapeHtml(stepDisplay(cur)) + '</p></div></div>'
                 + '<span style="color:#3B82F6;font-size:1.1rem">&rsaquo;</span></div>';
             document.getElementById('todayPlan').innerHTML = reminder + blocks.join('');
             document.getElementById('todayStartBtn').textContent = doneCount > 0 ? L('▶ Çalışmaya devam et', '▶ Seguir practicando') : L('▶ Bugüne başla', '▶ Empezar hoy');
@@ -805,6 +814,37 @@
         function getPace() { const p = LS.get('curriculum_pace', 'normal'); return PACE[p] ? p : 'normal'; }
         function setPace(p) { LS.set('curriculum_pace', p); renderRoadmap(); }
         function _phaseNum(tp) { const m = tp.match(/Fa[sz]e?\s*(\d+)/i); return m ? +m[1] : 99; }
+        // Faz → seviye/tema görünen-isim katmanı (veri "Faz 1: ..." kalır; SRS/ilerleme bozulmaz).
+        const PHASE_NAMES = {
+            1: { tr: 'A1 · Temeller', es: 'A1 · Fundamentos' },
+            2: { tr: 'A2 · Zamanlar', es: 'A2 · Tiempos' },
+            3: { tr: 'A2–B1 · Yardımcı Fiiller', es: 'A2–B1 · Verbos modales' },
+            4: { tr: 'B1 · Bağlantı & Karşılaştırma', es: 'B1 · Conectores y comparación' },
+            5: { tr: 'B2 · İleri Yapılar', es: 'B2 · Estructuras avanzadas' }
+        };
+        function phaseName(n) { const p = PHASE_NAMES[n]; return p ? (S.lang === 'es' ? p.es : p.tr) : ('Faz ' + n); }
+        function topicShort(topic) { return topic && topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic; }
+        function stepDisplay(st) { return st.type === 'verbs' ? st.label : (phaseName(_phaseNum(st.key)) + ' — ' + topicShort(st.key)); }
+        function topicSummaryByIndex(i) { const st = buildSyllabus()[i]; if (st && st.type === 'topic') showTopicSummary(st.key); }
+        function generateByIndex(i) { const st = buildSyllabus()[i]; if (st && st.type === 'topic') generateBatchForTopic(st.key, 10); }
+        // Modlar hub'ı: aktivite türleri ("nasıl çalışacağın")
+        function showModes() { showScreen('modesScreen'); renderModes(); }
+        function renderModes() {
+            document.getElementById('modesTitle').textContent = L('🎮 Pratik Modları', '🎮 Modos de práctica');
+            document.getElementById('modesSubtitle').textContent = L('Nasıl çalışmak istersin?', '¿Cómo quieres practicar?');
+            const modes = [
+                ['🎲', L('Karışık Pratik', 'Práctica mixta'), L('Tüm konulardan karışık çeviri', 'Traducción mixta de todos los temas'), "selectTab('all')"],
+                ['🔁', L('Tekrar (SRS)', 'Repaso (SRS)'), L('Vakti gelen cümleleri tekrarla', 'Repasa las frases pendientes'), "selectTab('review')"],
+                ['🔤', L('Düzensiz Fiiller', 'Verbos irregulares'), L('V1 / V2 / V3 pratiği', 'Práctica V1 / V2 / V3'), "selectTab('verbs')"],
+                ['🗣️', L('Konuşma Modları', 'Modos de conversación'), L('Senaryo · Tabu · Hikaye · Çağrışım (AI)', 'Escenario · Tabú · Historia · Asociación (IA)'), "selectTab('creative')"]
+            ];
+            document.getElementById('modesList').innerHTML = modes.map(function (m) {
+                return '<div onclick="' + m[3] + '" class="rounded-2xl p-4 flex items-center gap-3 mb-3 transition hover:opacity-90" style="background:#161616;border:1px solid #2a2a2a;cursor:pointer">'
+                    + '<span style="font-size:1.6rem">' + m[0] + '</span>'
+                    + '<div class="flex-1"><p class="font-semibold text-sm text-gray-100">' + m[1] + '</p><p class="text-xs text-gray-500">' + m[2] + '</p></div>'
+                    + '<span style="color:#3B82F6;font-size:1.25rem">&rsaquo;</span></div>';
+            }).join('');
+        }
         // Sıralı müfredat: önce fiiller (temel), sonra Faz sırasına göre konular.
         function buildSyllabus() {
             const SS = getCurSentences();
@@ -855,23 +895,36 @@
             if (remaining.length) {
                 const thisWeek = remaining.slice(0, perWeek), nextWeek = remaining.slice(perWeek, perWeek * 2);
                 wk += '<div class="rounded-2xl p-4 mb-3" style="background:#0c1929;border:1px solid #1e3a5f"><p class="text-sm font-bold text-blue-300 mb-2">📅 ' + L('Bu hafta', 'Esta semana') + '</p>'
-                    + thisWeek.map(function (st) { return '<p class="text-sm text-gray-200 mb-1">• ' + escapeHtml(st.label) + '</p>'; }).join('') + '</div>';
+                    + thisWeek.map(function (st) { return '<p class="text-sm text-gray-200 mb-1">• ' + escapeHtml(stepDisplay(st)) + '</p>'; }).join('') + '</div>';
                 if (nextWeek.length) {
                     wk += '<div class="rounded-2xl p-4" style="background:#161616;border:1px solid #2a2a2a"><p class="text-sm font-semibold text-gray-400 mb-2">📅 ' + L('Gelecek hafta', 'Próxima semana') + '</p>'
-                        + nextWeek.map(function (st) { return '<p class="text-sm text-gray-500 mb-1">• ' + escapeHtml(st.label) + '</p>'; }).join('') + '</div>';
+                        + nextWeek.map(function (st) { return '<p class="text-sm text-gray-500 mb-1">• ' + escapeHtml(stepDisplay(st)) + '</p>'; }).join('') + '</div>';
                 }
             }
             document.getElementById('weeklyPlan').innerHTML = wk;
-            document.getElementById('syllabusList').innerHTML = '<p class="text-xs text-gray-500 mb-2 mt-2">' + L('Tüm yol (dokun → çalış)', 'Ruta completa (toca → practica)') + '</p>' + syl.map(function (st, i) {
+            let listHtml = '<p class="text-xs text-gray-500 mb-2 mt-2">' + L('Tüm yol (dokun → çalış)', 'Ruta completa (toca → practica)') + '</p>';
+            let lastPhase = null;
+            syl.forEach(function (st, i) {
+                const ph = st.type === 'verbs' ? 0 : _phaseNum(st.key);
+                if (ph !== lastPhase) {
+                    lastPhase = ph;
+                    listHtml += '<p class="text-xs font-bold mt-3 mb-1 px-1" style="color:#6b7280">' + escapeHtml(ph === 0 ? L('🔤 Temel', '🔤 Base') : phaseName(ph)) + '</p>';
+                }
                 const p = stepProgress(st), done = p >= 0.8, isCur = st.key === cur.key;
                 const icon = done ? '✓' : (isCur ? '▶' : '○'), color = done ? '#22c55e' : (isCur ? '#3B82F6' : '#4b5563');
-                return '<div onclick="studyStepByIndex(' + i + ')" class="rounded-xl p-3 mb-2 flex items-center justify-between" style="background:#161616;border:1px solid ' + (isCur ? '#3B82F6' : '#2a2a2a') + ';cursor:pointer">'
-                    + '<div class="flex items-center gap-3"><span style="color:' + color + ';font-size:1.1rem;width:1.2rem;text-align:center;flex-shrink:0">' + icon + '</span>'
-                    + '<div><p class="text-sm ' + (isCur ? 'font-bold text-blue-300' : 'font-medium text-gray-200') + '">' + escapeHtml(st.label) + '</p>'
+                const name = st.type === 'verbs' ? st.label : topicShort(st.key);
+                const tools = st.type === 'topic'
+                    ? '<button onclick="event.stopPropagation();topicSummaryByIndex(' + i + ')" class="px-2 py-1 rounded-lg text-xs flex-shrink-0" style="background:#1a1a1a;border:1px solid #1e3a5f;color:#60a5fa" title="' + L('Konu Özeti', 'Resumen') + '">📖</button>'
+                        + '<button onclick="event.stopPropagation();generateByIndex(' + i + ')" class="px-2 py-1 rounded-lg text-xs flex-shrink-0 ml-1" style="background:#0c2a1e;border:1px solid #166534;color:#4ade80" title="' + L('10 AI cümlesi ekle', 'Añadir 10 frases IA') + '">🌱</button>'
+                    : '';
+                listHtml += '<div onclick="studyStepByIndex(' + i + ')" class="rounded-xl p-3 mb-2 flex items-center justify-between gap-2" style="background:#161616;border:1px solid ' + (isCur ? '#3B82F6' : '#2a2a2a') + ';cursor:pointer">'
+                    + '<div class="flex items-center gap-3 min-w-0"><span style="color:' + color + ';font-size:1.1rem;width:1.2rem;text-align:center;flex-shrink:0">' + icon + '</span>'
+                    + '<div class="min-w-0"><p class="text-sm truncate ' + (isCur ? 'font-bold text-blue-300' : 'font-medium text-gray-200') + '">' + escapeHtml(name) + '</p>'
                     + '<p class="text-xs text-gray-500">' + (done ? L('tamamlandı', 'completado') : '%' + Math.round(p * 100)) + '</p></div></div>'
-                    + (isCur ? '<span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style="background:#1e2a3a;color:#60a5fa">' + L('şimdi', 'ahora') + '</span>' : '')
+                    + '<div class="flex items-center flex-shrink-0">' + tools + (isCur ? '<span class="text-xs px-2 py-0.5 rounded-full ml-1" style="background:#1e2a3a;color:#60a5fa">' + L('şimdi', 'ahora') + '</span>' : '') + '</div>'
                     + '</div>';
-            }).join('');
+            });
+            document.getElementById('syllabusList').innerHTML = listHtml;
         }
         function toggleDirection() { S.dir = S.dir === 'tr2en' ? 'en2tr' : 'tr2en'; document.getElementById('dirLabel').textContent = S.dir === 'tr2en' ? t('dirLabel') : t('dirLabelRev'); document.getElementById('dirToggleBtn').style.background = S.dir === 'en2tr' ? '#1e2a3a' : '#1a1a1a'; document.getElementById('dirToggleBtn').style.borderColor = S.dir === 'en2tr' ? '#3B82F6' : '#2a2a2a'; if (S.tab !== 'review' && S.tab !== 'stats' && S.tab !== 'verbs') buildQueue(S.tab); }
         // QUEUE
@@ -917,7 +970,7 @@
         }
         function nextQuestion() { if (S.aiQ) { showAIQuestion(S.aiQ); return; } if (!S.queue.length) { showScreen('practiceScreen'); const _spd2=document.getElementById('subTopicPickerDiv'); if(_spd2)_spd2.classList.add('hidden'); document.getElementById('questionCard').classList.add('hidden'); let _cd=document.getElementById('completionDiv'); if(!_cd){_cd=document.createElement('div');_cd.id='completionDiv'; const _qcr=document.getElementById('questionCard'); _qcr.parentNode.insertBefore(_cd,_qcr);} _cd.classList.remove('hidden'); _cd.innerHTML='<div class="rounded-2xl p-8 text-center fade-in" style="background:#161616;border:1px solid #222"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">'+t('allDone')+'</p></div>'; ['answerInput', 'mainButtons', 'wrongButtons', 'hintBox', 'feedbackBox'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }); return; } S.answered = false; S.q = S.queue.shift(); resetUI(); renderQuestion(S.q, false); }
         function resetUI() { ['feedbackBox', 'wrongButtons', 'hintBox', 'aiExtras', 'aiTeachBox', 'aiVariationsBox', 'softCheckBox'].forEach(id => document.getElementById(id).classList.add('hidden')); const inp = document.getElementById('answerInput'); inp.value = ''; inp.style.borderColor = '#2a2a2a'; inp.classList.remove('hidden'); inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev');['checkBtn', 'hintBtn', 'skipBtn', 'mainButtons'].forEach(id => document.getElementById(id).classList.remove('hidden')); document.getElementById('aiGenBadge').classList.add('hidden'); }
-        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = q.topic; document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); if (!kwNative || !kwNative.trim()) return; const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
+        function renderQuestion(q, isAI) { document.getElementById('questionTopic').textContent = topicShort(q.topic); document.getElementById('questionLevel').textContent = q.level; document.getElementById('questionNum').textContent = isAI ? 'AI' : '#' + q.id; if (isAI) document.getElementById('aiGenBadge').classList.remove('hidden'); const isReverse = S.dir === 'en2tr'; const nativeText = getNative(q); const showText = isReverse ? q.english : nativeText; const kws = isReverse ? null : q.keywords; let rendered = showText; if (kws) kws.forEach(kw => { const kwNative = getKw(kw); if (!kwNative || !kwNative.trim()) return; const rx = new RegExp(kwNative.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'); rendered = rendered.replace(rx, `<span class="tooltip kw" onclick="this.classList.toggle('active')"><u>${kwNative}</u><span class="tip">${kw.en}</span></span>`); }); document.getElementById('turkishSentence').innerHTML = rendered; if (isReverse) { document.getElementById('keywordsLine').innerHTML = ''; } else { document.getElementById('keywordsLine').innerHTML = q.keywords ? q.keywords.map(k => `<span class="text-blue-400">${getKw(k)}</span> = ${k.en}`).join(' • ') : ''; } updateProgress(); document.getElementById('answerInput').focus(); }
         function showAIQuestion(q) { const _cd3=document.getElementById('completionDiv'); if(_cd3)_cd3.classList.add('hidden'); const _spd3=document.getElementById('subTopicPickerDiv'); if(_spd3)_spd3.classList.add('hidden'); const _qc2=document.getElementById('questionCard'); if(_qc2)_qc2.classList.remove('hidden'); S.q = q; S.answered = false; resetUI(); renderQuestion(q, true); }
         function updateProgress() { const total = S.queue.length + S.done + 1, pct = total > 0 ? Math.round(S.done / total * 100) : 0; document.getElementById('progressBar').style.width = pct + '%'; document.getElementById('progressText').textContent = S.done + '/' + total; document.getElementById('scoreCorrect').textContent = S.ok; document.getElementById('scoreWrong').textContent = S.nok; }
         // CHECK
@@ -1283,7 +1336,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
         function checkRev() { const q = S.rQueue[S.rIdx], built = S.rSel.map(x => x.word).join(' '), fb = document.getElementById('rFb'); fb.classList.remove('hidden'); bumpDaily(); if (norm(built) === norm(q.english)) { fb.style.background = '#0f2a1a'; fb.style.border = '1px solid #16a34a'; fb.style.color = '#4ade80'; fb.textContent = L('✅ Doğru!', '✅ ¡Correcto!'); updateSRS(q.id, true); setTimeout(nextRev, 1500); } else { fb.style.background = '#2a0f0f'; fb.style.border = '1px solid #dc2626'; fb.style.color = '#f87171'; fb.innerHTML = L('❌ Doğru: ', '❌ Correcto: ') + `<strong>${q.english}</strong>`; updateSRS(q.id, false); } }
         function nextRev() { S.rIdx++; showReviewQ(); }
         // STATS
-        function showStats() { showScreen('statsScreen'); const SS = getCurSentences(); const TT = getCurTopics(); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SS.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SS.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); const _aiAll = getAISentences(); const _aiInLang = _aiAll.filter(s => !s.lang || s.lang === S.lang).length; const _baseLen = (S.lang === 'es' ? SENTENCES_ES : SENTENCES).length; document.getElementById('poolBase').textContent = _baseLen; document.getElementById('poolAI').textContent = _aiInLang; document.getElementById('poolTotal').textContent = _baseLen + _aiInLang; document.getElementById('topicStats').innerHTML = TT.map(tp => { const ss = SS.filter(s => s.topic === tp), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${tp}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SS.forEach(s => getSRS(s.id).errorTags.forEach(tg => { tf[tg] = (tf[tg] || 0) + 1; })); const tl = { preposition: L('Edat Kullanımı (to/for/from)', 'Preposiciones (to/for/from)'), past_tense: L('Geçmiş Zaman', 'Pasado'), present_perfect: 'Present Perfect', article: L('Article (a/an/the)', 'Artículo (a/an/the)'), word_order: L('Kelime Sırası', 'Orden de palabras'), vocabulary: L('Kelime Bilgisi', 'Vocabulario'), spelling: L('Yazım Hatası', 'Ortografía'), other: L('Diğer', 'Otro') }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${L(cnt + ' hata', cnt + ' errores')}</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">${L('Odaklan', 'Enfocar')}</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">' + L('Henüz hata kaydı yok.', 'Aún no hay registro de errores.') + '</p>'; }
+        function showStats() { showScreen('statsScreen'); const SS = getCurSentences(); const TT = getCurTopics(); const gs = getGS(), total = (gs.totalCorrect || 0) + (gs.totalWrong || 0), acc = total > 0 ? Math.round(gs.totalCorrect / total * 100) : 0; const learned = SS.filter(s => getSRS(s.id).correctStreak >= 2).length; document.getElementById('statTotal').textContent = total; document.getElementById('statAccuracy').textContent = acc + '%'; document.getElementById('statLearned').textContent = learned + ' / ' + SS.length; document.getElementById('statStreak').textContent = '🔥 ' + (gs.streak || 0); const _aiAll = getAISentences(); const _aiInLang = _aiAll.filter(s => !s.lang || s.lang === S.lang).length; const _baseLen = (S.lang === 'es' ? SENTENCES_ES : SENTENCES).length; document.getElementById('poolBase').textContent = _baseLen; document.getElementById('poolAI').textContent = _aiInLang; document.getElementById('poolTotal').textContent = _baseLen + _aiInLang; document.getElementById('topicStats').innerHTML = TT.map(tp => { const ss = SS.filter(s => s.topic === tp), tc = ss.reduce((a, s) => a + getSRS(s.id).correctStreak, 0), tt = ss.reduce((a, s) => a + getSRS(s.id).correctStreak + getSRS(s.id).wrongCount, 0), p = tt > 0 ? Math.round(tc / tt * 100) : 0; return `<div><div class="flex justify-between text-sm mb-1"><span class="text-gray-300">${escapeHtml(_phaseNum(tp) < 99 ? phaseName(_phaseNum(tp)) : tp)}</span><span class="text-gray-500">${p}%</span></div><div class="rounded-full h-1.5" style="background:#1a1a1a"><div class="progress-bar-fill h-1.5 rounded-full" style="background:#3B82F6;width:${p}%"></div></div></div>`; }).join(''); const tf = {}; SS.forEach(s => getSRS(s.id).errorTags.forEach(tg => { tf[tg] = (tf[tg] || 0) + 1; })); const tl = { preposition: L('Edat Kullanımı (to/for/from)', 'Preposiciones (to/for/from)'), past_tense: L('Geçmiş Zaman', 'Pasado'), present_perfect: 'Present Perfect', article: L('Article (a/an/the)', 'Artículo (a/an/the)'), word_order: L('Kelime Sırası', 'Orden de palabras'), vocabulary: L('Kelime Bilgisi', 'Vocabulario'), spelling: L('Yazım Hatası', 'Ortografía'), other: L('Diğer', 'Otro') }; const sorted = Object.entries(tf).sort((a, b) => b[1] - a[1]).slice(0, 3); const cols = ['text-red-400', 'text-orange-400', 'text-yellow-400'], icons = ['🔴', '🟠', '🟡']; document.getElementById('weakAreas').innerHTML = sorted.length ? sorted.map(([tag, cnt], i) => `<div class="flex items-center justify-between p-3 rounded-xl" style="background:#1a1a1a;border:1px solid #2a2a2a"><div><p class="font-medium text-sm ${cols[i]}">${icons[i]} ${i + 1}. ${tl[tag] || tag}</p><p class="text-xs text-gray-500">${L(cnt + ' hata', cnt + ' errores')}</p></div><button onclick="S.filterTag='${tag}';selectTab('all')" class="text-xs px-3 py-1.5 rounded-lg font-medium" style="background:#3B82F6;color:white">${L('Odaklan', 'Enfocar')}</button></div>`).join('') : '<p class="text-gray-500 text-sm text-center py-4">' + L('Henüz hata kaydı yok.', 'Aún no hay registro de errores.') + '</p>'; }
         // VERBS (getVerbSRS/saveVerbSRS defined above in STATE section)
         function showVerbs() { showScreen('verbScreen'); const VV = getCurVerbs(); const td = today(); const due = VV.filter(v => getVerbSRS(v.v1).nextReview <= td); const notStarted = VV.filter(v => { const e = getVerbSRS(v.v1); return e.streak === 0 && e.wrong === 0; }); const learned = VV.filter(v => getVerbSRS(v.v1).streak >= 3).length; document.getElementById('verbProgress').textContent = learned + '/' + VV.length; let daily = [...due]; if (daily.length < 5) { const extra = notStarted.filter(v => !daily.find(d => d.v1 === v.v1)).slice(0, 5 - daily.length); daily = [...daily, ...extra]; } daily = daily.slice(0, 5); if (!daily.length) { document.getElementById('verbDailyArea').innerHTML = `<p class="text-center text-gray-400 py-12">${t('verbDone')}</p>`; return; } S.verbIdx = 0; S.verbList = daily; showVerbCard(); }
         function showVerbCard() { if (S.verbIdx >= S.verbList.length) { document.getElementById('verbDailyArea').innerHTML = `<div class="text-center py-12 fade-in"><p class="text-2xl mb-2">🎉</p><p class="text-gray-300 font-medium">${t('verbDone')}</p></div>`; return; } const v = S.verbList[S.verbIdx]; const nv = getVerbNative(v); document.getElementById('verbDailyArea').innerHTML = `<div class="verb-card rounded-2xl p-5 mb-4 fade-in" style="background:#161616;border:1px solid #222"><div class="flex justify-between mb-4"><span class="text-blue-400 text-sm font-medium">${S.verbIdx + 1} / ${S.verbList.length}</span><span class="text-xs text-gray-600">${nv}</span></div><p class="text-center text-2xl font-bold mb-1 text-white">${v.v1}</p><p class="text-center text-sm text-gray-500 mb-6">${t('verbV2label')} + ${t('verbV3label')}</p><div class="grid grid-cols-2 gap-3 mb-4"><div><label class="block text-xs text-gray-500 mb-1">${t('verbV2label')}</label><input type="text" id="v2Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')document.getElementById('v3Input').focus()"></div><div><label class="block text-xs text-gray-500 mb-1">${t('verbV3label')}</label><input type="text" id="v3Input" placeholder="${v.v1}..." class="w-full rounded-xl px-3 py-3 text-sm font-medium" style="background:#0f0f0f;border:1px solid #2a2a2a;color:#f5f5f5" onkeydown="if(event.key==='Enter')checkVerb()"></div></div><div id="verbFb" class="hidden rounded-xl p-3 mb-4 text-sm"></div><div class="flex gap-3"><button onclick="checkVerb()" id="verbCheckBtn" class="flex-1 py-2.5 rounded-xl font-semibold text-sm" style="background:#3B82F6;color:white">${t('checkBtn')}</button><button onclick="S.verbIdx++;showVerbCard()" class="px-4 py-2.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa">${t('skip')}</button></div></div>`; document.getElementById('v2Input').focus(); }
@@ -1369,7 +1422,7 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             ['srs', 'gstats', 'verb_srs', 'srs_es', 'gstats_es', 'verb_srs_es', 'custom_sentences', 'topics_tr', 'topics_es'].forEach(k => localStorage.removeItem(k));
             // Buluttaki kopyayı da boş veriyle ez — yoksa sonraki açılışta eski veri geri yüklenir
             triggerCloudSync();
-            closeResetModal(); updateAIPoolUI(); updateStreakUI(); selectTab('all');
+            closeResetModal(); updateAIPoolUI(); updateStreakUI(); selectTab('today');
         }
 
 // =====================
