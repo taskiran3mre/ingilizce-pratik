@@ -165,7 +165,6 @@
                     <option value="A1">A1</option><option value="A2">A2</option><option value="B1" selected>B1</option><option value="B2">B2</option><option value="C1">C1</option>
                 </select>
                 <button onclick="generateAISentence()" id="aiGenBtn" class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90" style="background:#0c1929;border:1px solid #1e3a5f;color:#60a5fa"><span id="aiGenLabel">🤖 AI ile Yeni Cümle</span></button>
-                <button onclick="practiceWeakPoint()" id="weakBtn" class="flex-1 py-3 rounded-xl font-semibold text-sm transition-all hover:opacity-90" style="background:#1a0f0f;border:1px solid #5f1e1e;color:#f87171"><span id="weakBtnLabel">🎯 Zayıf Noktam</span></button>
             </div>
             
             <div id="wrongButtons" class="hidden flex gap-3">
@@ -458,7 +457,7 @@
             const btn = document.getElementById('langToggle'); btn.textContent = S.lang === 'tr' ? 'ES' : 'TR'; btn.style.background = S.lang === 'es' ? '#1e3a1a' : '#1a1a1a'; btn.style.color = S.lang === 'es' ? '#4ade80' : '#e5e5e5';
             document.querySelector('#app .text-xl').textContent = t('appTitle');
             document.getElementById('dirLabel').textContent = S.lang === 'es' ? 'ES → 🇺🇸' : '🇹🇷 → 🇺🇸';
-            const mapping = { loginBtn: 'login', sessionLabel: 'session', dirText: 'dirText', correctAnswerLabel: 'correctAnswer', teachMeLabel: 'teach', variationsLabel: 'variations', softTitle: 'softTitle', softRetryBtn: 'softRetry', softForceBtn: 'softForce', checkBtnLabel: 'checkBtn', hintBtnLabel: 'hint', skipBtnLabel: 'skip', aiGenLabel: 'aiGen', weakBtnLabel: 'weakPoint', retryBtn: 'retry', nextBtn: 'next', reviewTitle: 'reviewTitle', statTotalLabel: 'statTotalLabel', statAccLabel: 'statAccLabel', statLearnedLabel: 'statLearnedLabel', statStreakLabel: 'statStreakLabel', topicPerfLabel: 'topicPerfLabel', weakReportLabel: 'weakReportLabel', weakReportDesc: 'weakReportDesc', resetBtn: 'resetBtn', verbTitle: 'verbTitle', verbSubtitle: 'verbSubtitle' };
+            const mapping = { loginBtn: 'login', sessionLabel: 'session', dirText: 'dirText', correctAnswerLabel: 'correctAnswer', teachMeLabel: 'teach', variationsLabel: 'variations', softTitle: 'softTitle', softRetryBtn: 'softRetry', softForceBtn: 'softForce', checkBtnLabel: 'checkBtn', hintBtnLabel: 'hint', skipBtnLabel: 'skip', aiGenLabel: 'aiGen', retryBtn: 'retry', nextBtn: 'next', reviewTitle: 'reviewTitle', statTotalLabel: 'statTotalLabel', statAccLabel: 'statAccLabel', statLearnedLabel: 'statLearnedLabel', statStreakLabel: 'statStreakLabel', topicPerfLabel: 'topicPerfLabel', weakReportLabel: 'weakReportLabel', weakReportDesc: 'weakReportDesc', resetBtn: 'resetBtn', verbTitle: 'verbTitle', verbSubtitle: 'verbSubtitle' };
             Object.entries(mapping).forEach(([id, key]) => { const el = document.getElementById(id); if (el) el.textContent = t(key); });
             const inp = document.getElementById('answerInput'); if (inp) inp.placeholder = S.dir === 'tr2en' ? t('inputPh') : t('inputPhRev'); applyStaticI18n();
         }
@@ -857,9 +856,6 @@
             blocks.push(todayBlock('🌱', L('Yeni cümle', 'Frases nuevas'),
                 L('~' + plan.newTarget + ' yeni cümle (sıradaki konu)', '~' + plan.newTarget + ' frases nuevas (tema actual)'),
                 true, "studyCurrentStep()", false));
-            if (plan.weakCount > 0) blocks.push(todayBlock('🎯', L('Zayıf nokta', 'Puntos débiles'),
-                L(plan.weakCount + ' zorlandığın cümle', plan.weakCount + ' frases difíciles'),
-                true, "practiceWeakPoint()", false));
             blocks.push(todayBlock('🔤', L('Fiiller', 'Verbos'),
                 plan.verbsDue > 0 ? L(plan.verbsDue + ' fiil tekrarı', plan.verbsDue + ' verbos para repasar') : L('Günlük fiil pratiği', 'Práctica diaria de verbos'),
                 true, "selectTab('verbs')", false));
@@ -1230,6 +1226,9 @@ Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); 
             p += `Rules:\n`;
             p += `- The ${nativeLang} translation must be fluent, natural ${nativeLang} — NOT a word-for-word literal translation.\n`;
             p += `- Both sentences must be complete, meaningful and self-contained.\n`;
+            // Özne çeşitliliği: her üretimde rastgele bir özne odağı ver → hep "I" ile başlamasın, 3. tekil (-s) de pratiği yapılsın.
+            const _subjFoci = ['first person (I / we)', 'second person (you)', 'third person singular (he / she / it) — use the correct -s verb ending', 'third person plural (they) or a noun as the subject'];
+            p += `- Subject: make the subject ${_subjFoci[Math.floor(Math.random() * _subjFoci.length)]}. Do NOT always start with "I"; vary the subject.\n`;
             p += `- Pick exactly 2 useful vocabulary words from the sentence as keywords.\n`;
             if (opts.avoid && opts.avoid.length) {
                 p += `- Do NOT repeat or closely paraphrase any of these sentences: ${opts.avoid.map(s => '"' + s + '"').join(', ')}.\n`;
@@ -1280,28 +1279,6 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
             if (!v) { alert(L('AI geçerli bir cümle üretemedi, tekrar dene.', 'La IA no pudo generar una frase válida, inténtalo de nuevo.')); return; }
             S.aiQ = { topic, level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_' + Date.now(), lang: S.lang, createdAt: Date.now() };
             // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme (havuz şişmesini önler)
-            try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
-            resetUI(); showAIQuestion(S.aiQ); setAiGenLocked(true);
-        }
-        async function practiceWeakPoint() {
-            if (!canUseAI()) { aiGateAlert(); return; }
-            const SS = getCurSentences(); const tags = {};
-            SS.forEach(s => { getSRS(s.id).errorTags.forEach(tg => { tags[tg] = (tags[tg] || 0) + 1; }); });
-            const sorted = Object.entries(tags).sort((a, b) => b[1] - a[1]);
-            if (!sorted.length) { alert(L('Henüz hata kaydınız yok. Biraz pratik yapın!', 'Aún no tienes registros de errores. ¡Practica un poco!')); return; }
-            const weakTag = sorted[0][0];
-            const btn = document.getElementById('weakBtn'); const lbl = document.getElementById('weakBtnLabel'); if (lbl) lbl.textContent = t('weakGenerating'); btn.disabled = true;
-            const tl = S.lang === 'es'
-                ? { preposition: 'preposiciones', past_tense: 'pasado simple', present_perfect: 'present perfect', article: 'artículos', word_order: 'orden de palabras', vocabulary: 'vocabulario', spelling: 'ortografía', other: 'general' }
-                : { preposition: 'edat', past_tense: 'geçmiş zaman', present_perfect: 'present perfect', article: 'article', word_order: 'kelime sırası', vocabulary: 'kelime', spelling: 'yazım', other: 'genel' };
-            // Prompt'a gramer konusunun İngilizce adı gider; ekran etiketi Türkçe kalır
-            const tlEn = { preposition: 'prepositions (in/on/at/to/for)', past_tense: 'past simple tense', present_perfect: 'present perfect tense', article: 'articles (a/an/the)', word_order: 'English word order', vocabulary: 'common vocabulary usage', spelling: 'commonly misspelled words', other: 'general grammar' };
-            const prompt = buildSentenceGenPrompt(tlEn[weakTag] || weakTag);
-            const v = await genValidatedSentence(prompt);
-            if (lbl) lbl.textContent = t('weakPoint'); btn.disabled = false;
-            if (!v) { alert(L('AI geçerli bir cümle üretemedi, tekrar dene.', 'La IA no pudo generar una frase válida, inténtalo de nuevo.')); return; }
-            S.aiQ = { topic: '🎯 ' + (tl[weakTag] || weakTag), level: 'AI', turkish: S.lang === 'es' ? '' : v.native, spanish: S.lang === 'es' ? v.native : '', english: v.english, keywords: v.keywords, id: 'ai_wp_' + Date.now(), lang: S.lang, source: 'weakpoint', tag: weakTag, createdAt: Date.now() };
-            // Dedupe: aynı İngilizce cümle havuzda varsa tekrar ekleme
             try { const dupe = getCurAISentences().some(s => (s.english || '').toLowerCase() === v.english.toLowerCase()); if (!dupe) { const ca = getAISentences(); ca.push({ ...S.aiQ }); LS.set('custom_sentences', ca); updateAIPoolUI(); } } catch (e) {}
             resetUI(); showAIQuestion(S.aiQ); setAiGenLocked(true);
         }
