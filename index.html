@@ -225,6 +225,23 @@
         </div>
         
         <!-- Creative Modes Screen -->
+        <!-- Sesli Sohbet (turn-based: AI başlatır, kullanıcı sesle cevaplar, sonunda değerlendirir) -->
+        <div id="voiceChatScreen" class="hidden fade-in">
+            <button onclick="selectTab('modes')" class="mb-3 text-xs text-gray-500 hover:text-white flex items-center gap-1">← <span data-i18n="backToModes2">Modlar</span></button>
+            <div class="rounded-2xl p-4 mb-3" style="background:#161616;border:1px solid #222">
+                <h2 class="text-lg font-bold mb-1">🎙️ <span id="vcTitle">Sesli Sohbet</span></h2>
+                <p class="text-xs text-gray-500" id="vcSubtitle">AI İngilizce sohbet başlatır; sen sesle cevap ver.</p>
+            </div>
+            <div id="vcLog" class="space-y-3 mb-3"></div>
+            <div id="vcStatus" class="text-xs text-gray-500 text-center mb-2 min-h-[1rem]"></div>
+            <div class="flex gap-3 mb-3">
+                <button onclick="vcMic()" id="vcMicBtn" class="flex-1 py-3.5 rounded-xl font-bold text-sm transition" style="background:#3B82F6;color:white">🎤 <span id="vcMicLabel">Konuş</span></button>
+                <button onclick="vcReplay()" id="vcReplayBtn" class="px-4 py-3.5 rounded-xl text-sm" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa" title="Son AI cümlesini tekrar dinle">🔊</button>
+            </div>
+            <button onclick="vcEvaluate()" id="vcEvalBtn" class="w-full py-3 rounded-xl font-semibold text-sm" style="background:#0c2a1e;border:1px solid #166534;color:#4ade80">✅ <span id="vcEvalLabel">Bitir & Değerlendir</span></button>
+            <div id="vcFeedback" class="hidden ai-box mt-3 text-sm text-gray-300 leading-relaxed"></div>
+        </div>
+
         <div id="creativeScreen" class="hidden fade-in">
             <!-- Mod Seçici -->
             <div id="creativePicker">
@@ -809,7 +826,7 @@
             pd.innerHTML = html;
             document.getElementById('progressText').textContent = subs.length + L(' konu', ' temas');
         }
-        function hideAll() { ['todayScreen', 'roadmapScreen', 'modesScreen', 'practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen', 'creativeScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
+        function hideAll() { ['todayScreen', 'roadmapScreen', 'modesScreen', 'practiceScreen', 'reviewScreen', 'statsScreen', 'verbScreen', 'creativeScreen', 'voiceChatScreen'].forEach(id => document.getElementById(id).classList.add('hidden')); }
         function showScreen(id) { hideAll(); document.getElementById(id).classList.remove('hidden'); }
         // === TODAY / GÜNÜN PLANI (Faz 3.5) ===
         const DAILY_GOAL = 15;   // günlük hedef (cevaplanan soru); Bugün ilerleme çubuğu bununla.
@@ -899,7 +916,8 @@
                 ['🎲', L('Karışık Pratik', 'Práctica mixta'), L('Tüm konulardan karışık çeviri', 'Traducción mixta de todos los temas'), "selectTab('all')"],
                 ['🔁', L('Tekrar (SRS)', 'Repaso (SRS)'), L('Vakti gelen cümleleri tekrarla', 'Repasa las frases pendientes'), "selectTab('review')"],
                 ['🔤', L('Düzensiz Fiiller', 'Verbos irregulares'), L('V1 / V2 / V3 pratiği', 'Práctica V1 / V2 / V3'), "selectTab('verbs')"],
-                ['🗣️', L('Konuşma Modları', 'Modos de conversación'), L('Senaryo · Tabu · Hikaye · Çağrışım (AI)', 'Escenario · Tabú · Historia · Asociación (IA)'), "selectTab('creative')"]
+                ['🗣️', L('Konuşma Modları', 'Modos de conversación'), L('Senaryo · Tabu · Hikaye · Çağrışım (AI)', 'Escenario · Tabú · Historia · Asociación (IA)'), "selectTab('creative')"],
+                ['🎙️', L('Sesli Sohbet', 'Conversación por voz'), L('AI ile İngilizce sesli sohbet + hata analizi · YENİ', 'Charla en inglés por voz con IA + análisis · NUEVO'), "showVoiceChat()"]
             ];
             document.getElementById('modesList').innerHTML = modes.map(function (m) {
                 return '<div onclick="' + m[3] + '" class="rounded-2xl p-4 flex items-center gap-3 mb-3 transition hover:opacity-90" style="background:#161616;border:1px solid #2a2a2a;cursor:pointer">'
@@ -907,6 +925,82 @@
                     + '<div class="flex-1"><p class="font-semibold text-sm text-gray-100">' + m[1] + '</p><p class="text-xs text-gray-500">' + m[2] + '</p></div>'
                     + '<span style="color:#3B82F6;font-size:1.25rem">&rsaquo;</span></div>';
             }).join('');
+        }
+        // === SESLİ SOHBET (turn-based; AI başlatır → kullanıcı mikrofonla cevaplar → sonunda değerlendirir) ===
+        const _SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let VC = { history: [], recording: false, busy: false, rec: null, lastAI: '' };
+        function vcStatus(s) { const el = document.getElementById('vcStatus'); if (el) el.textContent = s || ''; }
+        function showVoiceChat() {
+            showScreen('voiceChatScreen');
+            document.getElementById('vcTitle').textContent = L('Sesli Sohbet', 'Conversación por voz');
+            document.getElementById('vcSubtitle').textContent = L('AI İngilizce sohbet başlatır; mikrofonla cevap ver. Sonunda hatalarını değerlendirir.', 'La IA inicia una charla en inglés; responde con el micrófono. Al final evalúa tus errores.');
+            document.getElementById('vcMicLabel').textContent = L('Konuş', 'Hablar');
+            document.getElementById('vcEvalLabel').textContent = L('Bitir & Değerlendir', 'Terminar y evaluar');
+            VC = { history: [], recording: false, busy: false, rec: null, lastAI: '' };
+            document.getElementById('vcLog').innerHTML = '';
+            document.getElementById('vcFeedback').classList.add('hidden');
+            if (!canUseAI()) { aiGateAlert(); return; }
+            if (!_SR) { vcStatus(L('⚠️ Tarayıcın sesli girişi desteklemiyor — Chrome / Android Chrome öner.', '⚠️ Tu navegador no soporta voz — usa Chrome / Android.')); }
+            vcStart();
+        }
+        async function vcStart() {
+            vcStatus(L('🤖 Sohbet başlatılıyor...', '🤖 Iniciando...'));
+            const prompt = 'You are a warm, friendly English conversation partner for an English learner. Start a casual conversation: ask ONE simple, friendly opening question about their day, work, or feelings (for example: "Hi! Did anything interesting happen at work today?"). English only, ONE short sentence, just the question.';
+            const txt = await geminiCall(prompt, { model: 'gemini', temperature: 0.85 });
+            vcStatus('');
+            vcAddTurn('ai', txt || 'Hi! How are you feeling today?');
+            speak(VC.lastAI);
+        }
+        function vcAddTurn(role, text) { VC.history.push({ role: role, text: text }); if (role === 'ai') VC.lastAI = text; vcRender(); }
+        function vcRender() {
+            const log = document.getElementById('vcLog'); if (!log) return;
+            log.innerHTML = VC.history.map(function (t) {
+                return t.role === 'ai'
+                    ? '<div class="rounded-2xl p-3" style="background:#0c1929;border:1px solid #1e3a5f"><p class="text-xs text-blue-300 mb-1">🤖 AI</p><p class="text-sm text-gray-100">' + escapeHtml(t.text) + ' ' + speakBtn(t.text) + '</p></div>'
+                    : '<div class="rounded-2xl p-3 ml-6" style="background:#161616;border:1px solid #2a2a2a"><p class="text-xs text-gray-500 mb-1">🗣️ ' + L('Sen', 'Tú') + '</p><p class="text-sm text-gray-200">' + escapeHtml(t.text) + '</p></div>';
+            }).join('');
+            const last = log.lastElementChild; if (last) last.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+        function vcMicUI() {
+            const btn = document.getElementById('vcMicBtn'); const lbl = document.getElementById('vcMicLabel');
+            if (lbl) lbl.textContent = VC.recording ? L('Durdur', 'Parar') : L('Konuş', 'Hablar');
+            if (btn) btn.style.background = VC.recording ? '#dc2626' : '#3B82F6';
+        }
+        function vcMic() {
+            if (VC.busy) return;
+            if (!_SR) { alert(L('Tarayıcın sesli girişi desteklemiyor. Chrome / Android dene.', 'Tu navegador no soporta voz. Usa Chrome / Android.')); return; }
+            if (VC.recording) { try { VC.rec && VC.rec.stop(); } catch (e) {} return; }
+            try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}   // AI konuşurken mikrofon açılırsa sustur
+            let rec; try { rec = new _SR(); } catch (e) { return; }
+            VC.rec = rec; rec.lang = 'en-US'; rec.interimResults = false; rec.maxAlternatives = 1;
+            rec.onresult = function (e) { const t = (e.results[0][0].transcript || '').trim(); if (t) vcUserSaid(t); };
+            rec.onerror = function (e) { vcStatus((e && e.error === 'not-allowed') ? L('🎤 Mikrofon izni gerekli.', '🎤 Permiso de micrófono necesario.') : L('🎤 Ses alınamadı, tekrar dene.', '🎤 No se captó, reintenta.')); };
+            rec.onend = function () { VC.recording = false; vcMicUI(); };
+            VC.recording = true; vcMicUI(); vcStatus(L('🎤 Dinliyorum... İngilizce konuş.', '🎤 Escuchando... habla en inglés.'));
+            try { rec.start(); } catch (e) { VC.recording = false; vcMicUI(); }
+        }
+        async function vcUserSaid(text) { vcAddTurn('user', text); vcStatus(''); await vcRespond(); }
+        async function vcRespond() {
+            VC.busy = true; vcStatus(L('🤖 Düşünüyor...', '🤖 Pensando...'));
+            const convo = VC.history.map(function (t) { return (t.role === 'ai' ? 'AI: ' : 'User: ') + t.text; }).join('\n');
+            const prompt = 'You are a warm, friendly English conversation partner for an English learner. Keep the chat natural and casual. Reply with ONE short, natural English response (1-2 sentences) and end with a friendly follow-up question to keep the conversation going. Do NOT correct the user\'s mistakes now (feedback comes later). English only.\n\nConversation so far:\n' + convo + '\n\nYour reply (English, 1-2 sentences + a question):';
+            const txt = await geminiCall(prompt, { model: 'gemini', temperature: 0.85 });
+            VC.busy = false; vcStatus('');
+            if (!txt) { vcStatus(L('Bağlantı hatası, tekrar dene.', 'Error de conexión, reintenta.')); return; }
+            vcAddTurn('ai', txt); speak(txt);
+        }
+        function vcReplay() { if (VC.lastAI) speak(VC.lastAI); }
+        async function vcEvaluate() {
+            const userTurns = VC.history.filter(function (t) { return t.role === 'user'; });
+            if (!userTurns.length) { alert(L('Önce biraz konuş 🙂', 'Habla un poco primero 🙂')); return; }
+            const box = document.getElementById('vcFeedback'); box.classList.remove('hidden');
+            box.innerHTML = '<p class="animate-pulse">📝 ' + L('Değerlendiriliyor...', 'Evaluando...') + '</p>';
+            const convo = VC.history.map(function (t) { return (t.role === 'ai' ? 'AI: ' : 'User: ') + t.text; }).join('\n');
+            const fbLang = S.lang === 'es' ? 'Spanish' : 'Turkish';
+            const prompt = 'You are a supportive English teacher. Below is a conversation; the USER is the learner. Review ONLY the user\'s English (grammar, word choice, naturalness). Write the feedback in ' + fbLang + '. Format: (1) one short encouraging sentence; (2) 2-4 key mistakes as bullets, each "what they said -> better version" with a tiny explanation; (3) one short tip. Be kind and concise. Plain text.\n\nConversation:\n' + convo;
+            const txt = await geminiCall(prompt, { model: 'gemini', temperature: 0.4 });
+            box.innerHTML = txt ? '<p class="text-green-300 font-medium mb-2">📝 ' + L('Değerlendirme', 'Evaluación') + '</p><p>' + aiHtml(txt) + '</p>' : '<p class="text-gray-500">' + L('Yüklenemedi.', 'No se pudo cargar.') + '</p>';
+            const fb = document.getElementById('vcFeedback'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
         // Sıralı müfredat: önce fiiller (temel), sonra Faz sırasına göre konular.
         function buildSyllabus() {
@@ -1151,7 +1245,7 @@ ${!isReverse ? 'When used as the SUBJECT, the English pronouns he, she and it ar
         // Sunucu proxy çağrısı — anahtar sunucuda, kota sunucuda. Giriş yapan kullanıcılar bunu kullanır.
         async function callProxy(prompt, opts = {}) {
             const callable = firebase.functions().httpsCallable('ai');
-            const res = await callable({ prompt, json: !!opts.json, temperature: opts.temperature });
+            const res = await callable({ prompt, json: !!opts.json, temperature: opts.temperature, model: opts.model });
             return (res && res.data && res.data.text) || null;
         }
         async function geminiCall(prompt, opts = {}) {

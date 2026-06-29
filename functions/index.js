@@ -160,8 +160,11 @@ exports.ai = onCall(
 
     const callGeminiP = () => callGemini(prompt, gc);
     const callGroqP = () => callGroq(prompt, temperature, wantJson);
-    const primary = PRIMARY === 'groq' ? callGroqP : callGeminiP;
-    const backup = PRIMARY === 'groq' ? callGeminiP : callGroqP;
+    // İstek bazında model tercihi: data.model==='gemini' → Gemini ÖNCE (sesli sohbet kalite için).
+    // Diğer durumda PRIMARY sabiti geçerli. Her hâlükârda diğeri yedek (429/5xx'te düşmek için).
+    const geminiFirst = (data.model === 'gemini') || (PRIMARY !== 'groq');
+    const primary = geminiFirst ? callGeminiP : callGroqP;
+    const backup = geminiFirst ? callGroqP : callGeminiP;
 
     let anyBilled = false;
 
