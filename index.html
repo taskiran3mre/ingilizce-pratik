@@ -584,6 +584,9 @@
             const seen = new Set();
             const clean = all.filter(s => {
                 if (!s || typeof s !== 'object') return false;
+                // id güvenlik kontrolü: yalnızca uygulamanın ürettiği biçim (ai_<sayı>, harf/rakam/_/-).
+                // Buluttaki dokümanına Firebase SDK ile elle id:"x');payload//" yazan biri DOM'a JS sokamasın diye.
+                if (typeof s.id !== 'string' || !/^[A-Za-z0-9_-]+$/.test(s.id)) return false;
                 if (!s.topic || typeof s.topic !== 'string') return false;
                 const en = (s.english || '').trim();
                 const nv = ((s.turkish || '') + (s.spanish || '')).trim();
@@ -1462,12 +1465,14 @@ Write nothing else.`; const txt = await geminiCall(prompt); document.getElementB
                             <span class="px-1.5 py-0.5 rounded" style="background:#0c1929;color:#93c5fd">${srcTag}</span>
                             <span class="px-1.5 py-0.5 rounded text-gray-500" style="background:#0f0f0f">${langTag}${date ? ' · ' + date : ''}</span>
                         </div>
-                        <button onclick="deleteAISentence('${s.id}')" class="text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="${L('Sil','Eliminar')}" aria-label="${L('Sil','Eliminar')}">🗑️</button>
+                        <button data-del-id="${escapeHtml(String(s.id || ''))}" class="aiDelBtn text-gray-500 hover:text-red-400 text-base flex-shrink-0" title="${L('Sil','Eliminar')}" aria-label="${L('Sil','Eliminar')}">🗑️</button>
                     </div>
                     <p class="text-sm text-gray-200">${escapeHtml(s.english || '')}</p>
                     ${native ? '<p class="text-xs text-gray-500 mt-1">' + escapeHtml(native) + '</p>' : ''}
                 </div>`;
             }).join('');
+            // Sil butonları: inline onclick yerine güvenli delegated listener (id enjeksiyonu imkânsız).
+            list.querySelectorAll('.aiDelBtn').forEach(b => b.addEventListener('click', () => deleteAISentence(b.dataset.delId)));
         }
         function deleteAISentence(id) {
             const all = getAISentences();
@@ -1730,7 +1735,7 @@ function showTopicSummary(topic) {
     modal.innerHTML = `
         <div style="background:#161616;border:1px solid #2a2a2a;border-radius:20px;padding:24px;width:100%;max-width:600px;max-height:80vh;overflow-y:auto">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-                <h3 style="font-weight:700;font-size:1rem;color:#60a5fa">📖 ${topic}</h3>
+                <h3 style="font-weight:700;font-size:1rem;color:#60a5fa">📖 ${String(topic).replace(/[&<>"']/g, '')}</h3>
                 <button onclick="closeTopicSummary()" style="color:#6b7280;font-size:1.2rem;background:none;border:none;cursor:pointer">✕</button>
             </div>
             <pre style="white-space:pre-wrap;font-family:Inter,sans-serif;font-size:.85rem;line-height:1.7;color:#e5e5e5;margin-bottom:16px">${content}</pre>
@@ -2042,8 +2047,29 @@ Write nothing else.`;
                 if (justSignedUp) {
                     alert(L('✅ Hesap oluşturuldu!\n\n📧 AI özelliklerini açmak için doğrulama e-postanı onayla.\n\nGelen kutunu VE spam / "Promosyonlar" klasörünü kontrol et. Gelmezse üstteki sarı banttan "Tekrar gönder"e bas.', '✅ ¡Cuenta creada!\n\n📧 Verifica tu correo para activar la IA.\n\nRevisa tu bandeja Y la carpeta de spam / "Promociones". Si no llega, pulsa "Reenviar" en la barra amarilla de arriba.'));
                 }
-            } catch (e) { errBox.textContent = e.message; errBox.classList.remove('hidden'); }
+            } catch (e) { errBox.textContent = _authErrMsg(e); errBox.classList.remove('hidden'); }
             btn.textContent = loginMode ? t('authLogin') : t('authSignup'); btn.disabled = false;
+        }
+        // Ham Firebase hatasını (e.message) DOĞRUDAN gösterme: hem iç ayrıntı sızdırır hem de
+        // user-not-found/wrong-password ayrımı e-posta enumeration'a yol açar. Kod-eşlemeli, generic.
+        function _authErrMsg(e) {
+            const es = S.lang === 'es';
+            switch (e && e.code) {
+                case 'auth/invalid-email':
+                    return es ? 'Correo electrónico no válido.' : 'Geçersiz e-posta adresi.';
+                case 'auth/weak-password':
+                case 'auth/missing-password':
+                    return es ? 'La contraseña debe tener al menos 6 caracteres.' : 'Şifre en az 6 karakter olmalı.';
+                case 'auth/email-already-in-use':
+                    return es ? 'Este correo ya está registrado. Inicia sesión.' : 'Bu e-posta zaten kayıtlı. Giriş yapın.';
+                case 'auth/too-many-requests':
+                    return es ? 'Demasiados intentos. Inténtalo más tarde.' : 'Çok fazla deneme. Biraz sonra tekrar deneyin.';
+                case 'auth/network-request-failed':
+                    return es ? 'Error de conexión. Revisa tu internet.' : 'Bağlantı hatası. İnternetini kontrol et.';
+                // user-not-found / wrong-password / invalid-credential → KASITLI tek generic mesaj (enumeration koruması)
+                default:
+                    return es ? 'Correo o contraseña incorrectos.' : 'E-posta veya şifre hatalı.';
+            }
         }
 
         // === E-POSTA DOĞRULAMA (paylaşım öncesi güvenlik — soft gate) ===
