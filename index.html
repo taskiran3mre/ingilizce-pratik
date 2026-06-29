@@ -524,9 +524,15 @@
             const enUS = voices.filter(v => /en[-_]US/i.test(v.lang || ''));
             const pool = enUS.length ? enUS : voices.filter(v => /^en/i.test(v.lang || ''));
             if (!pool.length) return null;
-            const prefer = ['Google US English', 'Samantha', 'Aria', 'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Guy', 'Microsoft Zira', 'Alex', 'Daniel'];
-            for (const name of prefer) { const v = pool.find(x => x.name && x.name.includes(name)); if (v) return v; }
-            return pool[0];
+            // 1) NEURAL/NATURAL sesler — ücretsiz ama çok daha doğal (Edge: "...Online (Natural)", Android: Google neural)
+            let v = pool.find(x => /natural|neural/i.test(x.name || ''));
+            if (v) return v;
+            // 2) Bilinen yüksek-kalite isimler (Google/Apple/Microsoft neural)
+            const prefer = ['Google US English', 'Samantha', 'Aria', 'Jenny', 'Ava', 'Emma', 'Michelle', 'Andrew', 'Microsoft Aria', 'Microsoft Jenny', 'Microsoft Guy', 'Alex'];
+            for (const name of prefer) { v = pool.find(x => x.name && x.name.includes(name)); if (v) return v; }
+            // 3) "Google" içeren herhangi bir en sesi (genelde robotik olmayan)
+            v = pool.find(x => /google/i.test(x.name || '')); if (v) return v;
+            return pool[0];   // son çare: cihazın ilk en sesi
         }
         if (TTS_OK) {
             _enVoice = _pickEnVoice();

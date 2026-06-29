@@ -24,6 +24,7 @@ const GEMINI_KEY = defineSecret('GEMINI_KEY');
 const GROQ_KEY = defineSecret('GROQ_KEY');
 
 const DAILY_LIMIT = 30;          // kullanıcı başına günlük AI isteği
+const GLOBAL_DAILY_LIMIT = 500;  // TÜM kullanıcılar TOPLAM günlük AI isteği — SERT maliyet tavanı / devre kesici (istediğin an düşür/yükselt)
 const MAX_PROMPT_CHARS = 4000;   // maliyet / DoS koruması
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
@@ -125,17 +126,30 @@ exports.ai = onCall(
 
     // 3) Kota — atomik rezervasyon (önce ayır, sonra çağır)
     const usageRef = db.collection('usage').doc(uid);
+    const globalRef = db.collection('usage').doc('__global__');   // tüm kullanıcılar toplam sayaç (sert tavan)
     const today = todayStr();
     await db.runTransaction(async (tx) => {
       const snap = await tx.get(usageRef);
+      const gsnap = await tx.get(globalRef);                       // okumalar yazımlardan ÖNCE
       const d = snap.exists ? snap.data() : {};
       const count = d.date === today ? (d.count || 0) : 0;
       if (count >= DAILY_LIMIT) {
         throw new HttpsError('resource-exhausted', 'Günlük AI limitine ulaştın. Yarın tekrar dene.');
       }
+      // SERT GLOBAL TAVAN: tüm kullanıcılar toplam günlük sınır → para harcama ihtimaline karşı devre kesici.
+      const gd = gsnap.exists ? gsnap.data() : {};
+      const gcount = gd.date === today ? (gd.count || 0) : 0;
+      if (gcount >= GLOBAL_DAILY_LIMIT) {
+        throw new HttpsError('resource-exhausted', 'Sistem günlük AI sınırına ulaştı. Lütfen yarın tekrar dene.');
+      }
       tx.set(usageRef, {
         date: today,
         count: count + 1,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      tx.set(globalRef, {
+        date: today,
+        count: gcount + 1,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       }, { merge: true });
     });
@@ -147,9 +161,9 @@ exports.ai = onCall(
       try {
         await db.runTransaction(async (tx) => {
           const snap = await tx.get(usageRef);
-          if (!snap.exists) return;
-          const d = snap.data();
-          if (d.date === today && (d.count || 0) > 0) tx.update(usageRef, { count: d.count - 1 });
+          const gsnap = await tx.get(globalRef);
+          if (snap.exists) { const d = snap.data(); if (d.date === today && (d.count || 0) > 0) tx.update(usageRef, { count: d.count - 1 }); }
+          if (gsnap.exists) { const gd = gsnap.data(); if (gd.date === today && (gd.count || 0) > 0) tx.update(globalRef, { count: gd.count - 1 }); }
         });
       } catch (_) { /* iade best-effort */ }
     };
