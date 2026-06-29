@@ -1090,14 +1090,17 @@
             if (extra.length > 0) { if (hint) hint += isEs ? '. Además, ' : '. Ayrıca '; hint += extra.map(w => isEs ? `sobra <strong>"${w}"</strong> (${wordTypes[w] || wGeneric})` : `<strong>"${w}"</strong> (${wordTypes[w] || wGeneric}) fazla olabilir`).join(isEs ? ' y ' : ' ve '); }
             return hint + '.';
         }
-        function retrySoft() { S.answered = false; S.done--; document.getElementById('softCheckBox').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#d97706'; document.getElementById('answerInput').focus();['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.remove('hidden')); }
+        function retrySoft() { S.answered = false; if (S.done > 0) S.done--; document.getElementById('softCheckBox').classList.add('hidden'); document.getElementById('answerInput').style.borderColor = '#d97706'; document.getElementById('answerInput').focus();['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.remove('hidden')); }
         // Soft kutusunda "Yine de gönder": soft'u atla, gerçek değerlendirmeyi (AI/handleWrong/handleAccepted) yap.
-        function forceGrade() { S.softTries = 99; S.answered = false; S.done--; document.getElementById('softCheckBox').classList.add('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.remove('hidden')); checkAnswer(); }
+        function forceGrade() { S.softTries = 99; S.answered = false; if (S.done > 0) S.done--; document.getElementById('softCheckBox').classList.add('hidden');['checkBtn', 'hintBtn', 'skipBtn'].forEach(id => document.getElementById(id).classList.remove('hidden')); checkAnswer(); }
         async function checkAnswer() {
             if (S.answered || !S.q) return; const input = document.getElementById('answerInput').value; if (!input.trim()) return; S.answered = true; S.done++; const isReverse = S.dir === 'en2tr'; const correctText = isReverse ? getNative(S.q) : S.q.english; const exactOk = norm(correctText) === norm(input); if (exactOk) { handleCorrect(); return; }
-            // Özne zamiri esnekliği: kaynak "o" (TR) cinsiyetsiz → he/she/it birbirinin yerine DOĞRU kabul edilir.
-            const _pronEq = s => norm(s).replace(/\b(he|she|it)\b/g, 'he');
-            if (_pronEq(correctText) === _pronEq(input)) { handleAccepted(input); return; }
+            // Özne zamiri esnekliği: SADECE tr2en (cevap İngilizce) + CÜMLE BAŞI özne konumunda — kaynak "o" cinsiyetsiz.
+            // Sınırlı tutulur: nesne konumunda yanlış grameri kabul etmemek (örn. "I like she") + ES "he" yardımcı fiili çakışmasını önlemek.
+            if (!isReverse) {
+                const _pronEq = s => norm(s).replace(/^(he|she|it)\b/, 'he');
+                if (_pronEq(correctText) === _pronEq(input)) { handleAccepted(input); return; }
+            }
             // Soft Check - detect 1-2 small word differences locally
             // Soft "neredeyse kusursuz" en fazla 2 kez; 3. denemede gerçek değerlendirmeye düş (sonsuz döngü olmasın).
             const softHint = (S.softTries || 0) < 2 ? softCheck(input, correctText) : null;
@@ -1108,8 +1111,7 @@ Reference answer: "${correctText}"
 Student answer: "${input}"
 The student answer MUST be written in the SAME language as the reference answer. If it is in a different language, reply NO.
 Otherwise, does the student answer express the same meaning as the reference, with acceptable grammar? Minor word-choice or word-order differences are OK; grammar errors or meaning changes are NOT.
-The subject pronouns he, she and it are INTERCHANGEABLE here (the source-language subject is often gender-neutral) — accept any of them as correct.
-Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); if (txt && /^\s*YES\b/i.test(txt.trim())) { handleAccepted(input); return; } fb.classList.add('hidden'); handleWrong(input);
+${!isReverse ? 'When used as the SUBJECT, the English pronouns he, she and it are interchangeable (the source subject is often gender-neutral) — accept any of them; do NOT apply this to object pronouns.\n' : ''}Reply with exactly one word: YES or NO.`; const txt = await geminiCall(prompt); if (txt && /^\s*YES\b/i.test(txt.trim())) { handleAccepted(input); return; } fb.classList.add('hidden'); handleWrong(input);
             } else { handleWrong(input); }
         }
         // Yanlış sonrası "Tekrar Dene": AYNI cümleyi yeniden gösterir. S.done++ (checkAnswer'da) geri alınır,
