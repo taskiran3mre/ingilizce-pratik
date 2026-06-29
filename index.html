@@ -991,7 +991,7 @@
         async function vcRespond() {
             VC.busy = true; vcStatus(L('🤖 Düşünüyor...', '🤖 Pensando...'));
             const convo = VC.history.map(function (t) { return (t.role === 'ai' ? 'AI: ' : 'User: ') + t.text; }).join('\n');
-            const prompt = 'You are a warm, friendly English conversation partner for an English learner. Keep the chat natural and casual. Reply with ONE short, natural English response (1-2 sentences) and end with a friendly follow-up question to keep the conversation going. Do NOT correct the user\'s mistakes now (feedback comes later). English only.\n\nConversation so far:\n' + convo + '\n\nYour reply (English, 1-2 sentences + a question):';
+            const prompt = 'You are a warm, friendly English conversation partner for an English learner. This is a SPOKEN conversation: the user\'s messages come from speech-to-text, so they have NO punctuation or capitalization — that is completely normal, NEVER mention or comment on punctuation/capitalization/spelling. Keep the chat natural and casual. Reply with ONE short, natural English response (1-2 sentences) and end with a friendly follow-up question to keep the conversation going. Do NOT correct the user\'s mistakes now (feedback comes later). English only.\n\nConversation so far:\n' + convo + '\n\nYour reply (English, 1-2 sentences + a question):';
             const txt = await geminiCall(prompt, { model: 'gemini', temperature: 0.85 });
             VC.busy = false; vcStatus('');
             if (!txt) { vcStatus(vcErr()); return; }
@@ -1005,7 +1005,7 @@
             box.innerHTML = '<p class="animate-pulse">📝 ' + L('Değerlendiriliyor...', 'Evaluando...') + '</p>';
             const convo = VC.history.map(function (t) { return (t.role === 'ai' ? 'AI: ' : 'User: ') + t.text; }).join('\n');
             const fbLang = S.lang === 'es' ? 'Spanish' : 'Turkish';
-            const prompt = 'You are a supportive English teacher. Below is a conversation; the USER is the learner. Review ONLY the user\'s English (grammar, word choice, naturalness). Write the feedback in ' + fbLang + '. Format: (1) one short encouraging sentence; (2) 2-4 key mistakes as bullets, each "what they said -> better version" with a tiny explanation; (3) one short tip. Be kind and concise. Plain text.\n\nConversation:\n' + convo;
+            const prompt = 'You are a supportive English teacher reviewing a SPOKEN conversation; the USER is the learner. CRITICAL: the user SPOKE their answers and the text is a speech-to-text transcript, so IGNORE punctuation, capitalization and spelling completely — those are transcription artifacts, NOT the user\'s mistakes. Never suggest commas, periods or capital letters. Evaluate ONLY spoken English: grammar, verb tenses, word choice, sentence structure and naturalness/fluency. Write the feedback in ' + fbLang + '. Format: (1) one short encouraging sentence; (2) 2-4 key spoken-language mistakes as bullets, each "what they said -> more natural version" with a tiny explanation; (3) one short tip. Be kind and concise. Plain text.\n\nConversation:\n' + convo;
             const txt = await geminiCall(prompt, { model: 'gemini', temperature: 0.4 });
             box.innerHTML = txt ? '<p class="text-green-300 font-medium mb-2">📝 ' + L('Değerlendirme', 'Evaluación') + '</p><p>' + aiHtml(txt) + '</p>' : '<p class="text-gray-500">' + vcErr() + '</p>';
             const fb = document.getElementById('vcFeedback'); if (fb) fb.scrollIntoView({ behavior: 'smooth', block: 'end' });
