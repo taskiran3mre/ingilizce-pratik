@@ -132,7 +132,10 @@ exports.ai = onCall(
 
     // 3) Kota — atomik rezervasyon (önce ayır, sonra çağır)
     const usageRef = db.collection('usage').doc(uid);
-    const globalRef = db.collection('usage').doc('__global__');   // tüm kullanıcılar toplam sayaç (sert tavan)
+    // Tüm kullanıcılar toplam sayaç (sert tavan). Ayrı koleksiyonda: '__global__' gibi __x__ biçimli
+    // doc id'ler Firestore'da REZERVE (INVALID_ARGUMENT → her AI isteği çöküyordu). İstemciye kapalı
+    // (firestore.rules catch-all deny); yalnızca Admin SDK erişir.
+    const globalRef = db.collection('usageGlobal').doc('daily');
     const today = todayStr();
     await db.runTransaction(async (tx) => {
       const snap = await tx.get(usageRef);
