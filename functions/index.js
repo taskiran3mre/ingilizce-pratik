@@ -26,8 +26,10 @@ const GROQ_KEY = defineSecret('GROQ_KEY');
 const DAILY_LIMIT = 30;          // kullanıcı başına günlük AI isteği
 const GLOBAL_DAILY_LIMIT = 500;  // TÜM kullanıcılar TOPLAM günlük AI isteği — SERT maliyet tavanı / devre kesici (istediğin an düşür/yükselt)
 const MAX_PROMPT_CHARS = 4000;   // maliyet / DoS koruması
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
+// 2026-11: gemini-2.5-flash yeni kullanıcılara kapandı; llama-3.3-70b-versatile Groq free/dev
+// katmanında 16.08.2026'da kapatıldı (404). Groq'un önerdiği yerine geçen: openai/gpt-oss-120b.
+const GEMINI_MODEL = 'gemini-3.6-flash';
+const GROQ_MODEL = 'openai/gpt-oss-120b';
 
 // Konu-kısıtı (F2 önlemi): modeli yalnızca İngilizce-öğrenme görevlerine bağlar.
 // Meşru app prompt'ları zaten öğrenme görevi → etkilenmez; "şiir yaz / ödev yap" gibi
@@ -79,7 +81,11 @@ async function callGroq(prompt, temperature, wantJson) {
     model: GROQ_MODEL,
     messages: [{ role: 'system', content: SYSTEM_SCOPE }, { role: 'user', content: prompt }],
     temperature,
-    max_tokens: 1024
+    max_tokens: 1024,
+    // gpt-oss bir akıl yürütme modeli: düşük çaba = hızlı yanıt ve düşünme token'ları
+    // 1024'lük tavanı yemez; düşünme metni yanıta karışmaz.
+    reasoning_effort: 'low',
+    include_reasoning: false
   };
   if (wantJson) body.response_format = { type: 'json_object' };  // prompt zaten "JSON" diyor
   let resp;

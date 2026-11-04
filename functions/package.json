@@ -2,7 +2,7 @@
   "name": "enpratik-functions",
   "description": "EN Pratik — sunucu taraflı AI proxy (Faz 2)",
   "engines": {
-    "node": "20"
+    "node": "24"
   },
   "main": "index.js",
   "dependencies": {
