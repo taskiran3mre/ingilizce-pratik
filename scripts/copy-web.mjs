@@ -9,7 +9,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const www = join(root, 'www');
 
 // Native kabuğa girmesi gereken tüm statik varlıklar:
-const ASSETS = ['index.html', 'data.js', 'sw.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
+const ASSETS = ['index.html', 'data.js', 'learn-data.js', 'learn.js', 'sw.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 if (existsSync(www)) rmSync(www, { recursive: true, force: true });
 mkdirSync(www, { recursive: true });
