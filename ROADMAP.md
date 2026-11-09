@@ -12,6 +12,12 @@
 - **Düzensiz fiiller v2:** yeni fiiller sıklık sırasıyla (önce be/go/make; overdraw/foresee en sona), önce **öğrenme kartı** (3 hâl + Türkçe anlamlar + İngilizce tanım + 2 örnek + kalıp ailesi), sonra test (anlam + tanım görünür, 👀 Göster), yanlış fiil oturum sonunda tekrar; 📋 kalıp ailelerine göre gruplu, aranabilir liste.
 - **🧩 Phrasal Verbs modülü:** edat mantığına göre gruplar (UP = tamamen/artış…), öğrenme kartları, 3 tür test (anlam / ters / eksik edat; çeldiriciler aynı fiilin diğer edatları), aralıklı tekrar 1-3-7-14-30 gün, buluta senkron (`pv_srs`). Modlar + Bugün + Öğren'e bağlı.
 - **Diğer:** yön değiştirince Bugün/Öğren'den açılan konu anında "bitti" oluyordu (S.tab ile yeniden kuruluyordu) → aynı kaynakla yeniden kuruluyor. AI cümlesi artık atlanabilir; yanlış cevaptan sonra yeni cümle istenebilir. Veri düzeltmeleri: TR 112/316/417/420, ES 203/253.
+- **Gerçek hesapla canlı test (2026-11-09, Chrome):** üretim/hata açıklaması/YES-NO kontrolü/sesli sohbet (Gemini→Groq) çalışıyor, cümle 3–8 sn. Bulunan ve düzeltilenler:
+  - 🔴 **Senkron tamamen duruyordu:** gloss `[[a,b]]` = Firestore'da "dizi içinde dizi" → `set()` `invalid-argument`. Buluta `{native,en}` nesneleri yazılıyor, okurken çiftlere çevriliyor (`_sentencesToCloud/_sentencesFromCloud`; `getGloss` iki biçimi de okur). Not: `set(merge:true)` haritaları DERİN birleştirir — yerelde silinen alan/anahtar bulutta kalır.
+  - 🔴 **Güncellemeler bir saate kadar gecikiyordu / eski-yeni dosya karışıyordu:** `no-cache` başlığı yalnız `/index.html`'deydi; `/` ve JS'ler `max-age=3600` geliyordu, SW'nin `fetch()`'i de HTTP önbelleğinden bayat kopya alıyordu. firebase.json: `/` + index/data/learn/learn-data/manifest → `no-cache`; sw.js v26: aynı kökenli istekler `{cache:'no-cache'}`, kurulum `{cache:'reload'}`.
+  - Hata/doğrulama bantları hiç kapanmıyordu (satır içi `display:flex` > `.hidden`) → stil ile aç/kapat.
+  - Fiiller: seri 0 (hiç doğru bilinmemiş) tekrar fiili teste girmeden **🔁 Hatırlayalım** kartıyla yeniden öğretiliyor.
+  - AI prompt: gloss parçaları mümkün olan en küçük (ideal: tek kelime); TR koşul cümlelerinde gerçek dışı koşul için -sa/-se kipi ("kazanırsan … gezerdin" hatası). AI konusu `S.tab` bir konu değilse ekrandaki sorunun konusu. Seviye filtresi değişince kuyruk `S.tab` yerine aynı kaynaktan kuruluyor (`rebuildPracticeQueue`).
 
 ## 📍 KALDIĞIMIZ YER (2026-06-29)
 - **Tamamlanan:** Faz 0 (AI güvenilirlik), Faz 1 (senkron dayanıklılığı), Faz 3 (tüm ES i18n + UX, canlı QA'lı), **Faz 2 backend + istemci DEPLOY EDİLDİ & CANLI**. Hepsi `main`'e commit'li.

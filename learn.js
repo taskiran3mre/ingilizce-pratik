@@ -43,7 +43,7 @@ function _gCacheSet(q, pairs) {
 
 function getGloss(q) {
     if (!q) return null;
-    if (Array.isArray(q.gloss) && q.gloss.length) return q.gloss;
+    if (Array.isArray(q.gloss) && q.gloss.length) return Array.isArray(q.gloss[0]) ? q.gloss : cleanGloss(q.gloss);   // buluttan {native,en} biçiminde gelmiş olabilir
     try {
         const m = (typeof SENTENCE_GLOSS !== 'undefined') && SENTENCE_GLOSS[_gLang()];
         const st = m && m[q.id];
@@ -312,7 +312,8 @@ function showVerbs(moreNew) {
     if (moreNew) list = fresh.slice(0, 5).map(v => ({ v, learn: true }));
     else {
         const d = due.slice(0, 10);
-        list = d.map(v => ({ v, learn: false })).concat(fresh.slice(0, d.length >= 8 ? 2 : 5).map(v => ({ v, learn: true })));
+        // Hiç doğru bilinmemiş (seri 0) fiil teste girmeden önce kartla yeniden öğretilir — "bilmediğim fiil direkt soruluyor".
+        list = d.map(v => { const re = !(getVerbSRS(v.v1).streak > 0); return { v, learn: re, relearn: re }; }).concat(fresh.slice(0, d.length >= 8 ? 2 : 5).map(v => ({ v, learn: true })));
     }
     S.verbList = list; S.verbIdx = 0; S.vReq = {};
     showVerbCard();
@@ -337,8 +338,12 @@ function showVerbCard() {
 }
 function verbLearnCard(v, mode) {
     const i = vInfo(v), fi = vFamInfo(vFam(v));
+    const cur = (mode === 'session' && S.verbList && S.verbList[S.verbIdx]) || {};
+    const tag = cur.relearn
+        ? '<span class="text-xs px-2 py-0.5 rounded-full" style="background:#2a1a0a;color:#fbbf24">🔁 ' + _esc(L('Hatırlayalım', 'Repasemos')) + '</span>'
+        : '<span class="text-xs px-2 py-0.5 rounded-full" style="background:#1e2a3a;color:#60a5fa">✨ ' + _esc(L('Yeni fiil', 'Verbo nuevo')) + '</span>';
     const top = mode === 'session'
-        ? '<span class="text-blue-400 text-sm font-medium">' + (S.verbIdx + 1) + ' / ' + S.verbList.length + '</span><span class="text-xs px-2 py-0.5 rounded-full" style="background:#1e2a3a;color:#60a5fa">✨ ' + _esc(L('Yeni fiil', 'Verbo nuevo')) + '</span>'
+        ? '<span class="text-blue-400 text-sm font-medium">' + (S.verbIdx + 1) + ' / ' + S.verbList.length + '</span>' + tag
         : '<button onclick="showVerbList()" class="text-xs text-gray-400 hover:text-white">← ' + _esc(L('Liste', 'Lista')) + '</button><span class="text-xs text-gray-500">' + _esc(fi ? L(fi.tr, fi.es) : '') + '</span>';
     const btn = mode === 'session'
         ? '<button onclick="verbLearnDone()" id="verbLearnBtn" class="w-full py-3 rounded-xl font-semibold text-sm mt-4" style="background:#3B82F6;color:white">' + _esc(L('Öğrendim, test et →', 'Aprendido, ¡a practicar! →')) + '</button>'

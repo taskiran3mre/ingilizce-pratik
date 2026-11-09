@@ -19,7 +19,8 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [
       { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }] },
-      { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "/@(index.html|data.js|learn.js|learn-data.js|manifest.json)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
       {
         "source": "**",
         "headers": [

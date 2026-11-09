@@ -657,13 +657,20 @@
             renderLevelChips();
             updateLevelFilterBadge();
             // Aktif tab queue'sunu yenile (review/verb/creative dışında)
-            if (S.tab && !['review', 'verbs', 'creative', 'stats'].includes(S.tab)) buildQueue(S.tab);
+            rebuildPracticeQueue();
+        }
+        // Açık alıştırmayı AYNI kaynaktan yeniden kur (seviye filtresi / yön değişince).
+        // Eskiden buildQueue(S.tab): Öğren/Bugün'den açılan konuda S.tab='roadmap'/'today' → boş havuz;
+        // Phrasal Verbs ekranındayken de alıştırma ekranı açılıyordu.
+        function rebuildPracticeQueue() {
+            const ps = document.getElementById('practiceScreen');
+            if (ps && !ps.classList.contains('hidden') && S.qKey) { S.filterTag = S.qFilterTag || null; buildQueue(S.qKey); }
         }
         function resetLevelFilter() {
             saveLevelFilter([...ALL_LEVELS]);
             renderLevelChips();
             updateLevelFilterBadge();
-            if (S.tab && !['review', 'verbs', 'creative', 'stats'].includes(S.tab)) buildQueue(S.tab);
+            rebuildPracticeQueue();
         }
         function renderLevelChips() {
             const cur = getLevelFilter();
@@ -1122,7 +1129,7 @@
             });
             document.getElementById('syllabusList').innerHTML = listHtml;
         }
-        function toggleDirection() { S.dir = S.dir === 'tr2en' ? 'en2tr' : 'tr2en'; document.getElementById('dirLabel').textContent = S.dir === 'tr2en' ? t('dirLabel') : t('dirLabelRev'); document.getElementById('dirToggleBtn').style.background = S.dir === 'en2tr' ? '#1e2a3a' : '#1a1a1a'; document.getElementById('dirToggleBtn').style.borderColor = S.dir === 'en2tr' ? '#3B82F6' : '#2a2a2a'; /* Eskiden buildQueue(S.tab): Bugün/Öğren'den açılan konuda S.tab='today'/'roadmap' → boş havuz → anında "Tüm sorular tamamlandı". */ if (!document.getElementById('practiceScreen').classList.contains('hidden') && S.qKey) { S.filterTag = S.qFilterTag || null; buildQueue(S.qKey); } }
+        function toggleDirection() { S.dir = S.dir === 'tr2en' ? 'en2tr' : 'tr2en'; document.getElementById('dirLabel').textContent = S.dir === 'tr2en' ? t('dirLabel') : t('dirLabelRev'); document.getElementById('dirToggleBtn').style.background = S.dir === 'en2tr' ? '#1e2a3a' : '#1a1a1a'; document.getElementById('dirToggleBtn').style.borderColor = S.dir === 'en2tr' ? '#3B82F6' : '#2a2a2a'; /* Eskiden buildQueue(S.tab): Bugün/Öğren'den açılan konuda S.tab='today'/'roadmap' → boş havuz → anında "Tüm sorular tamamlandı". */ rebuildPracticeQueue(); }
         // QUEUE
         function buildQueue(tab) { setAiGenLocked(false); S.qKey = tab; S.qFilterTag = S.filterTag || null;   /* yön değişince AYNI kaynaktan yeniden kurmak için */
             const _spd=document.getElementById('subTopicPickerDiv'); if(_spd)_spd.classList.add('hidden');
@@ -1417,7 +1424,9 @@ ${!isReverse ? 'When used as the SUBJECT, the English pronouns he, she and it ar
             p += `- LANGUAGE PURITY: the English sentence is 100% English; the ${NL} sentence is 100% ${NL} — never put English words (like "the", "is", "and") inside it.\n`;
             p += `- Preferred subject: ${subj} (choose another one if it sounds unnatural).\n`;
             p += `- keywords: the 2 most useful vocabulary items of the sentence.\n`;
-            p += `- gloss: split the pair into aligned chunks so the learner can tap any ${NL} word and see its English meaning. Each chunk is ["${NL} part", "English part"]: the ${NL} part copied EXACTLY from the ${NL} sentence, in order, together covering EVERY ${NL} word; the English part copied EXACTLY from the English sentence (attach small words like the/a/to/did to it). Keep idioms, phrasal verbs and verb groups together. Usually 1–3 words per chunk.\n`;
+            p += `- gloss: split the pair into aligned chunks so the learner can tap any ${NL} word and see its English meaning. Each chunk is ["${NL} part", "English part"]: the ${NL} part copied EXACTLY from the ${NL} sentence, in order, together covering EVERY ${NL} word; the English part copied EXACTLY from the English sentence (attach small words like the/a/to/did to it). Make chunks as SMALL as possible — ideally ONE ${NL} word each; keep words together only when they translate as one unit (a verb with its auxiliary or negation, an idiom, a phrasal verb, a fixed expression).\n`;
+            // Gerçek modelle görüldü: ikinci tip koşulda "kazanırsan … gezerdin" gibi karışık Türkçe kip üretiyor.
+            if (!isES && /\bif\b|koşul|conditional|wish/i.test(grammarTopic)) p += `- Turkish conditionals: for unreal or hypothetical conditions (second, third or mixed conditional) use the -sa/-se form ("Piyangoyu kazansan dünyayı gezerdin.", "Erken kalksaydım treni kaçırmazdım."); use -(I)rsa/-(I)rse only for real, likely conditions ("Yağmur yağarsa evde kalırım.").\n`;
             p += `- CHECK before answering: the English sentence is 100% grammatically correct (for example, never use the present perfect with a finished past time such as yesterday, last year or "when I was young").\n`;
             if (opts.avoid && opts.avoid.length) {
                 p += `- Do NOT repeat or closely paraphrase any of these sentences: ${opts.avoid.map(x => '"' + x + '"').join(', ')}.\n`;
@@ -1460,7 +1469,14 @@ Write nothing else.`; const txt = await geminiCall(prompt, { quality: 'high' });
             let topic;
             if (S.subtab && S.subtab.includes(':')) { topic = S.subtab; }
             else if (S.tab === 'all') { topic = _allSubs[Math.floor(Math.random() * _allSubs.length)] || 'Faz 1: To Be (Am/Is/Are)'; }
-            else { const _subs = _allSubs.filter(t => t.startsWith(S.tab + ':')); topic = _subs.length ? _subs[Math.floor(Math.random() * _subs.length)] : S.tab; }
+            else {
+                const _subs = _allSubs.filter(t => t.startsWith(S.tab + ':'));
+                // S.tab bir konu değilse ('roadmap', 'today', 'stats'...) AI'ya "today" gibi anlamsız bir konu gitmesin:
+                // ekrandaki sorunun konusu, o da yoksa rastgele bir konu.
+                topic = _subs.length ? _subs[Math.floor(Math.random() * _subs.length)]
+                    : (S.q && typeof S.q.topic === 'string' && S.q.topic.includes(':')) ? S.q.topic
+                    : (_allSubs[Math.floor(Math.random() * _allSubs.length)] || 'Faz 1: To Be (Am/Is/Are)');
+            }
             const _grammarTopic = topic.includes(':') ? topic.split(':').slice(1).join(':').trim() : topic;
             // Tekrarı önle: aynı konudaki son cümleler + son üretilenler "bunları tekrarlama" diye verilir; yakın kopya gelirse yeniden üretilir.
             const _pool = getCurAISentences();
@@ -1955,12 +1971,12 @@ Write nothing else.`;
             if (!b) {
                 b = document.createElement('div');
                 b.id = 'appBanner';
-                b.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:90;padding:10px 14px;font-size:.82rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:12px';
+                b.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:90;padding:10px 14px;font-size:.82rem;font-weight:600;text-align:center;align-items:center;justify-content:center;gap:12px';
                 const txt = document.createElement('span'); txt.id = 'appBannerText'; txt.style.flex = '1';
                 const x = document.createElement('button'); x.textContent = '✕';
                 x.style.cssText = 'background:none;border:none;color:inherit;cursor:pointer;font-size:1rem;line-height:1';
                 x.setAttribute('aria-label', 'Kapat');
-                x.onclick = () => b.classList.add('hidden');
+                x.onclick = hideAppBanner;
                 b.appendChild(txt); b.appendChild(x);
                 document.body.appendChild(b);
             }
@@ -1968,10 +1984,27 @@ Write nothing else.`;
             const [bg, fg] = palette[kind] || palette.info;
             b.style.background = bg; b.style.color = fg; b.style.borderBottom = '1px solid ' + fg;
             document.getElementById('appBannerText').textContent = msg;
-            b.classList.remove('hidden');
+            b.style.display = 'flex';   // satır içi display: 'hidden' sınıfı satır içi stili ezemiyordu → bant hiç kapanmıyordu
         }
-        function hideAppBanner() { const b = document.getElementById('appBanner'); if (b) b.classList.add('hidden'); }
+        function hideAppBanner() { const b = document.getElementById('appBanner'); if (b) b.style.display = 'none'; }
         function showStorageWarning() { showAppBanner(L('⚠️ Cihaz depolaması dolu — yeni veriler kaydedilemiyor. Havuzdan bazı AI cümlelerini silmeyi dene.', '⚠️ El almacenamiento del dispositivo está lleno — no se pueden guardar nuevos datos. Intenta borrar algunas frases de IA del banco.'), 'warn'); }
+
+        // Firestore "dizi içinde dizi" kabul etmez → set() "invalid-argument" ile reddedilir ve TÜM senkron durur.
+        // Kelime anlamı (gloss) yerelde [[ana dil, İngilizce], ...] tutulur; buluta {native, en} nesneleri olarak
+        // yazılır, buluttan okunurken yeniden çiftlere çevrilir.
+        function _sentencesToCloud(list) {
+            return (Array.isArray(list) ? list : []).map(s => (s && Array.isArray(s.gloss))
+                ? { ...s, gloss: s.gloss.filter(p => p && typeof p === 'object').map(p => Array.isArray(p) ? { native: String(p[0] == null ? '' : p[0]), en: String(p[1] == null ? '' : p[1]) } : p) }
+                : s);
+        }
+        function _sentencesFromCloud(list) {
+            return (Array.isArray(list) ? list : []).map(s => {
+                if (!s || !Array.isArray(s.gloss)) return s;
+                const o = { ...s }, g = (typeof cleanGloss === 'function') ? cleanGloss(s.gloss) : null;
+                if (g) o.gloss = g; else delete o.gloss;
+                return o;
+            });
+        }
 
         function triggerCloudSync() {
             if (!CLOUD_SYNC_ACTIVE || !CLOUD_UID) return;
@@ -2000,7 +2033,7 @@ Write nothing else.`;
                     gstats_es: LS.get('gstats_es', {}),
                     verb_srs_es: LS.get('verb_srs_es', {}),
                     pv_srs: LS.get('pv_srs', {}),
-                    custom_sentences: LS.get('custom_sentences', []),
+                    custom_sentences: _sentencesToCloud(LS.get('custom_sentences', [])),
                     lastSync: firebase.firestore.FieldValue.serverTimestamp()
                 };
                 await db.collection('users').doc(CLOUD_UID).set(payload, { merge: true });
@@ -2079,7 +2112,7 @@ Write nothing else.`;
                     if (data.gstats_es) localStorage.setItem('gstats_es', JSON.stringify(data.gstats_es));
                     if (data.verb_srs_es) localStorage.setItem('verb_srs_es', JSON.stringify(data.verb_srs_es));
                     if (data.pv_srs) localStorage.setItem('pv_srs', JSON.stringify(data.pv_srs));
-                    if (data.custom_sentences) localStorage.setItem('custom_sentences', JSON.stringify(data.custom_sentences));
+                    if (data.custom_sentences) localStorage.setItem('custom_sentences', JSON.stringify(_sentencesFromCloud(data.custom_sentences)));
                     sanitizeAISentences(); // buluttan gelen bozuk/eksik AI cümlelerini ayıkla
                     console.log('Cloud Data Loaded');
                     const curTab = S.tab;
@@ -2159,16 +2192,16 @@ Write nothing else.`;
                 b = document.createElement('div');
                 b.id = 'verifyBanner';
                 // Akış içinde (#app en üstü) — sabit değil, sticky header'ı örtmez.
-                b.style.cssText = 'padding:9px 14px;margin:8px 0 4px;border-radius:10px;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#33260c;color:#fcd34d;border:1px solid #fcd34d';
+                b.style.cssText = 'padding:9px 14px;margin:8px 0 4px;border-radius:10px;font-size:.8rem;font-weight:600;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#33260c;color:#fcd34d;border:1px solid #fcd34d';
                 const app = document.getElementById('app');
                 if (app) app.insertBefore(b, app.firstChild); else document.body.appendChild(b);
             }
             b.innerHTML = '<span>' + L('📧 AI\'yı açmak için e-postanı doğrula — gelen kutunu kontrol et.', '📧 Verifica tu correo para activar la IA — revisa tu bandeja.') + '</span>'
                 + '<button onclick="resendVerification()" style="background:#fcd34d;color:#33260c;border:none;border-radius:8px;padding:4px 10px;font-size:.76rem;font-weight:700;cursor:pointer">' + L('Tekrar gönder', 'Reenviar') + '</button>'
                 + '<button onclick="recheckVerification()" style="background:none;border:1px solid #fcd34d;color:#fcd34d;border-radius:8px;padding:4px 10px;font-size:.76rem;font-weight:700;cursor:pointer">' + L('Doğruladım', 'Ya verifiqué') + '</button>';
-            b.classList.remove('hidden');
+            b.style.display = 'flex';   // 'hidden' sınıfı satır içi display'i ezemez → stil ile aç/kapat
         }
-        function hideVerifyBanner() { const b = document.getElementById('verifyBanner'); if (b) b.classList.add('hidden'); }
+        function hideVerifyBanner() { const b = document.getElementById('verifyBanner'); if (b) b.style.display = 'none'; }
         let _verifyCooldown = false;
         async function resendVerification() {
             const u = auth.currentUser; if (!u) return;
